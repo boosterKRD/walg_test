@@ -46,7 +46,7 @@ jobs:
           dpkg-deb --build wal-g-deb wal-g_${GITHUB_REF#refs/tags/v}_amd64.deb
 
       - name: Upload DEB package as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: wal-g-deb-amd64
           path: wal-g_${GITHUB_REF#refs/tags/v}_amd64.deb
