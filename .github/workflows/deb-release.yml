@@ -1,0 +1,92 @@
+name: Build and Publish DEB Packages to GitHub Pages
+
+on:
+  push:
+    tags:
+      - 'v*'  # Запуск на новые версии (например, v3.0.2)
+
+env:
+  GO_VERSION: "1.22"
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [ amd64, arm64, i386 ]
+        os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04 ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install dependencies
+        run: sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential
+
+      - name: Build WAL-G
+        run: |
+          make pg_build
+          mv main/pg/wal-g wal-g-${{ matrix.arch }}
+
+      - name: Create DEB package
+        run: |
+          mkdir -p wal-g-deb/DEBIAN
+          mkdir -p wal-g-deb/usr/bin/
+          cp wal-g-${{ matrix.arch }} wal-g-deb/usr/bin/wal-g
+          chmod 755 wal-g-deb/usr/bin/wal-g
+          cat <<EOF > wal-g-deb/DEBIAN/control
+          Package: wal-g
+          Version: ${GITHUB_REF#refs/tags/v}
+          Section: utils
+          Priority: optional
+          Architecture: ${{ matrix.arch }}
+          Maintainer: Your Name <your@email.com>
+          Description: WAL-G backup tool for PostgreSQL
+          EOF
+          dpkg-deb --build wal-g-deb wal-g_${GITHUB_REF#refs/tags/v}_${{ matrix.arch }}.deb
+
+      - name: Upload DEB package as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: wal-g-deb-${{ matrix.arch }}
+          path: wal-g_${GITHUB_REF#refs/tags/v}_${{ matrix.arch }}.deb
+
+  publish-apt:
+    needs: build-deb
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub Pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Download built DEB packages
+        uses: actions/download-artifact@v3
+        with:
+          path: debs
+
+      - name: Prepare APT repository
+        run: |
+          mkdir -p apt/dists/stable/main/binary-amd64
+          mkdir -p apt/dists/stable/main/binary-arm64
+          mkdir -p apt/dists/stable/main/binary-i386
+          
+          mv debs/wal-g-deb-amd64/wal-g_*.deb apt/dists/stable/main/binary-amd64/
+          mv debs/wal-g-deb-arm64/wal-g_*.deb apt/dists/stable/main/binary-arm64/
+          mv debs/wal-g-deb-i386/wal-g_*.deb apt/dists/stable/main/binary-i386/
+          
+          dpkg-scanpackages apt/dists/stable/main/binary-amd64 /dev/null | gzip -9c > apt/dists/stable/main/binary-amd64/Packages.gz
+          dpkg-scanpackages apt/dists/stable/main/binary-arm64 /dev/null | gzip -9c > apt/dists/stable/main/binary-arm64/Packages.gz
+          dpkg-scanpackages apt/dists/stable/main/binary-i386 /dev/null | gzip -9c > apt/dists/stable/main/binary-i386/Packages.gz
+
+      - name: Commit and push APT repository
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add apt/
+          git commit -m "Update APT repository for ${GITHUB_REF#refs/tags/v}"
+          git push origin gh-pages
