@@ -1,4 +1,4 @@
-name: Build and Publish DEB Package to GitHub Pages
+name: Build and Publish DEB Packages to GitHub Pages
 
 on:
   push:
@@ -10,7 +10,11 @@ env:
 
 jobs:
   build-deb:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [ amd64 ]
+        os: [ ubuntu-22.04 ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,57 +27,33 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential
 
+      - name: Make deps  # <--- Добавил шаг загрузки зависимостей
+        run: make deps
+
       - name: Build WAL-G
         run: |
           make pg_build
-          mv main/pg/wal-g wal-g-amd64
+          mv main/pg/wal-g wal-g-${{ matrix.arch }}
 
       - name: Create DEB package
         run: |
           mkdir -p wal-g-deb/DEBIAN
           mkdir -p wal-g-deb/usr/bin/
-          cp wal-g-amd64 wal-g-deb/usr/bin/wal-g
+          cp wal-g-${{ matrix.arch }} wal-g-deb/usr/bin/wal-g
           chmod 755 wal-g-deb/usr/bin/wal-g
           cat <<EOF > wal-g-deb/DEBIAN/control
           Package: wal-g
           Version: ${GITHUB_REF#refs/tags/v}
           Section: utils
           Priority: optional
-          Architecture: amd64
+          Architecture: ${{ matrix.arch }}
           Maintainer: Your Name <your@email.com>
           Description: WAL-G backup tool for PostgreSQL
           EOF
-          dpkg-deb --build wal-g-deb wal-g_${GITHUB_REF#refs/tags/v}_amd64.deb
+          dpkg-deb --build wal-g-deb wal-g_${GITHUB_REF#refs/tags/v}_${{ matrix.arch }}.deb
 
       - name: Upload DEB package as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wal-g-deb-amd64
-          path: wal-g_${GITHUB_REF#refs/tags/v}_amd64.deb
-
-  publish-apt:
-    needs: build-deb
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout GitHub Pages branch
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-
-      - name: Download built DEB package
-        uses: actions/download-artifact@v3
-        with:
-          name: wal-g-deb-amd64
-          path: apt/dists/stable/main/binary-amd64/
-
-      - name: Prepare APT repository
-        run: |
-          dpkg-scanpackages apt/dists/stable/main/binary-amd64 /dev/null | gzip -9c > apt/dists/stable/main/binary-amd64/Packages.gz
-
-      - name: Commit and push APT repository
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add apt/
-          git commit -m "Update APT repository for ${GITHUB_REF#refs/tags/v}"
-          git push origin gh-pages
+          name: wal-g-deb-${{ matrix.arch }}
+          path: wal-g_${GITHUB_REF#refs/tags/v}_${{ matrix.arch }}.deb
