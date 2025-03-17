@@ -1,115 +1,119 @@
-  name: Build and Publish DEB Package to GitHub Pages
+name: Build and Publish DEB Package to GitHub Pages
 
-  on:
-    push:
-      tags:
-        - 'v*'  # Запуск при пуше нового тега (например, v3.0.2)
+on:
+  push:
+    tags:
+      - 'v*'  # Запуск при пуше нового тега (например, v3.0.2)
 
-  permissions:
-    contents: write
+permissions:
+  contents: write
 
-  env:
-    GO_VERSION: "1.22"
+env:
+  GO_VERSION: "1.22"
 
-  jobs:
-    build-and-deploy:
-      runs-on: ubuntu-latest
-      strategy:
-        matrix:
-          arch: [ amd64, arm64 ]  # Две архитектуры
-          os: [ ubuntu-22.04 ]
-      steps:
-        # 1. Клонируем репозиторий
-        - name: Checkout code
-          uses: actions/checkout@v4
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [ amd64, arm64 ]  # Две архитектуры
+        os: [ ubuntu-22.04 ]
+    steps:
+      # 1. Клонируем репозиторий
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        # 2. Устанавливаем Go
-        - name: Set up Go
-          uses: actions/setup-go@v5
-          with:
-            go-version: ${{ env.GO_VERSION }}
+      # 2. Устанавливаем Go
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
 
-        # 3. Устанавливаем необходимые пакетные зависимости для сборки
-        - name: Install dependencies
-          # run: sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential
-          run: sudo apt-get update && sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential apt-utils
+      # 3. Устанавливаем необходимые пакетные зависимости для сборки (добавляем apt-utils)
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential apt-utils
 
+      # 4. make deps (если нужно подтянуть go-модули и т.п.)
+      - name: Make deps
+        run: make deps
 
-        # 4. make deps (если нужно подтянуть go-модули и т.п.)
-        - name: Make deps
-          run: make deps
+      # 5. Сборка WAL-G под соответствующую архитектуру
+      - name: Build WAL-G
+        run: |
+          export GOOS=linux
+          export GOARCH=${{ matrix.arch }}
+          make pg_build
+          mv main/pg/wal-g wal-g-${{ matrix.arch }}
 
-        # 5. Сборка WAL-G под соответствующую архитектуру
-        - name: Build WAL-G
-          run: |
-            # Экспортируем переменные для кросс-компиляции:
-            # (если Makefile это поддерживает автоматически)
-            export GOOS=linux
-            export GOARCH=${{ matrix.arch }}
-            make pg_build
-            
-            # Переименовываем бинарник в wal-g-<arch>
-            mv main/pg/wal-g wal-g-${{ matrix.arch }}
+      # 6. Отладочная информация о бинарнике
+      - name: Debug WAL-G binary
+        run: |
+          ls -lh
+          file wal-g-${{ matrix.arch }}
 
-        # 6. Отладочная информация о бинарнике
-        - name: Debug WAL-G binary
-          run: |
-            ls -lh
-            file wal-g-${{ matrix.arch }}
+      # 7. Выделяем версию из тега
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
-        # 7. Выделяем версию из тега
-        - name: Extract version
-          run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      # 8. Формируем DEB-пакет
+      - name: Create DEB package
+        run: |
+          mkdir -p wal-g-deb/DEBIAN
+          mkdir -p wal-g-deb/usr/bin/
+          cp wal-g-${{ matrix.arch }} wal-g-deb/usr/bin/wal-g
+          chmod 755 wal-g-deb/usr/bin/wal-g
+          cat <<EOF > wal-g-deb/DEBIAN/control
+          Package: wal-g
+          Version: ${VERSION}
+          Section: utils
+          Priority: optional
+          Architecture: ${{ matrix.arch }}
+          Maintainer: You <you@example.com>
+          Description: WAL-G backup tool for PostgreSQL
+          EOF
+          dpkg-deb --build wal-g-deb wal-g_${VERSION}_${{ matrix.arch }}.deb
 
-        # 8. Формируем DEB-пакет
-        - name: Create DEB package
-          run: |
-            mkdir -p wal-g-deb/DEBIAN
-            mkdir -p wal-g-deb/usr/bin/
-            cp wal-g-${{ matrix.arch }} wal-g-deb/usr/bin/wal-g
-            chmod 755 wal-g-deb/usr/bin/wal-g
-            cat <<EOF > wal-g-deb/DEBIAN/control
-            Package: wal-g
-            Version: ${VERSION}
-            Section: utils
-            Priority: optional
-            Architecture: ${{ matrix.arch }}
-            Maintainer: You <you@example.com>
-            Description: WAL-G backup tool for PostgreSQL
-            EOF
-            dpkg-deb --build wal-g-deb wal-g_${VERSION}_${{ matrix.arch }}.deb
+      # 9. Дополнительная отладка: ищем файл wal-g_*.deb
+      - name: Debug file location
+        run: find . -name "wal-g_*.deb"
 
-        # 9. Дополнительная отладка: ищем файл wal-g_*.deb
-        - name: Debug file location
-          run: find . -name "wal-g_*.deb"
+      # 10. Публикуем в gh-pages
+      - name: Deploy to GitHub Pages
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
 
-        # 10. Публикуем в gh-pages
-        - name: Deploy to GitHub Pages
-          run: |
-            # Настраиваем git
-            git config --global user.name "github-actions"
-            git config --global user.email "github-actions@github.com"
+          git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
+          cd repo-pages
+          git pull --rebase
 
-            # Клонируем ветку gh-pages
-            git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
-            cd repo-pages
+          # Создаём папку под конкретную архитектуру, копируем .deb
+          mkdir -p dists/stable/main/binary-${{ matrix.arch }}
+          cp ../wal-g_${VERSION}_${{ matrix.arch }}.deb dists/stable/main/binary-${{ matrix.arch }}/
 
-            # Обновляем, если кто-то уже запушил другой архитектурный пакет:
-            git pull --rebase
+          # Создаём конфиг apt-ftparchive
+          cat <<CONF > ../aptftparchive.conf
+          Dir {
+            ArchiveDir "dists/stable";
+          }
+          APT::FTPArchive::Release {
+            Origin "WAL-G Repo";
+            Label "WAL-G APT Repository";
+            Suite "stable";
+            Codename "stable";
+            Architectures "amd64 arm64";
+            Components "main";
+          }
+          CONF
 
-            # Создаём папку под конкретную архитектуру, копируем .deb
-            mkdir -p dists/stable/main/binary-${{ matrix.arch }}
-            cp ../wal-g_${VERSION}_${{ matrix.arch }}.deb dists/stable/main/binary-${{ matrix.arch }}/
+          # Генерируем Packages и Packages.gz
+          apt-ftparchive -c ../aptftparchive.conf packages dists/stable/main/binary-${{ matrix.arch }} > dists/stable/main/binary-${{ matrix.arch }}/Packages
+          gzip -kf dists/stable/main/binary-${{ matrix.arch }}/Packages
 
-            # Генерируем Packages/Packages.gz
-            apt-ftparchive packages dists/stable/main/binary-${{ matrix.arch }} > dists/stable/main/binary-${{ matrix.arch }}/Packages
-            gzip -kf dists/stable/main/binary-${{ matrix.arch }}/Packages
+          # Генерируем Release с хэшами и нужными полями
+          apt-ftparchive -c ../aptftparchive.conf release dists/stable > dists/stable/Release
 
-            # Генерируем полноценный Release с хэшами
-            apt-ftparchive release dists/stable > dists/stable/Release
-
-            # Коммит и пуш
-            git add .
-            git commit -m "Add WAL-G package ${VERSION} [${{ matrix.arch }}]"
-            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-            git push origin gh-pages
+          git add .
+          git commit -m "Add WAL-G package ${VERSION} [${{ matrix.arch }}]"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin gh-pages
