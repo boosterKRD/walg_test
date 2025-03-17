@@ -1,0 +1,13 @@
+Package: wal-g
+Version: 1.0.13
+Architecture: amd64
+Maintainer: Your Name <your@email.com>
+Filename: dists/stable/main/binary-amd64/wal-g_1.0.13_amd64.deb
+Size: 12591816
+MD5sum: 7ac6c46000ccfa319ec8b7517b2b287a
+SHA1: e9eac542a4ea031aebffeb7bb56a317c7673b02d
+SHA256: 7ec1c03f2aa794d74f707db646bfd99c168dd6a85b58dd2842dbf0c71f40c42a
+Section: utils
+Priority: optional
+Description: WAL-G backup tool for PostgreSQL
+
