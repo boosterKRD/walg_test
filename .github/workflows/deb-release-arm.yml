@@ -16,36 +16,47 @@ env:
 
 jobs:
   build-deb-arm64:
-    runs-on: ubuntu-latest  # AMD64, но внутри эмулируется ARM64
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        db: [ pg ]
+        include:
+          - arch: aarch64
+            distro: ubuntu20.04
+            label: ubuntu-20.04
+      fail-fast: false
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build and package WAL-G on ARM64
+      - name: Build on ARM64
         uses: uraimo/run-on-arch-action@v3
         with:
-          arch: aarch64
-          distro: ubuntu20.04
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          env: |
+            USE_BROTLI: ${{ env.USE_BROTLI }}
+            USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
+            USE_LZO: ${{ env.USE_LZO }}
           shell: /bin/bash
           run: |
-            # Устанавливаем зависимости
             apt-get update
-            apt-get install -y build-essential curl git cmake \
-                              brotli libsodium-dev liblzo2-dev \
-                              devscripts debhelper dh-make dpkg-dev
+            apt-get install -y build-essential curl git cmake liblzo2-dev brotli libsodium-dev \
+                               devscripts debhelper dh-make dpkg-dev
 
-            # Устанавливаем Go для ARM64
             curl -LO https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz
             tar -C /usr/local -xzf go${GO_VERSION}.linux-arm64.tar.gz
             export GOROOT=/usr/local/go
-            export GOPATH=$HOME/go
+            export GOPATH=$HOME/go          
             export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-
-            # Сборка WAL-G
+            
+            go get -v -t -d ./...
+            
+            git config --global --add safe.directory /home/runner/work/wal-g/wal-g
+            git config --global --add safe.directory /home/runner/work/wal-g/wal-g/submodules/brotli
+            
             make deps
-            export GOOS=linux
-            export GOARCH=arm64
-            export CGO_ENABLED=1
             make pg_build
             mv main/pg/wal-g wal-g-arm64
 
