@@ -36,9 +36,9 @@ jobs:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
           env: |
-            USE_BROTLI=${{ env.USE_BROTLI }}
-            USE_LIBSODIUM=${{ env.USE_LIBSODIUM }}
-            USE_LZO=${{ env.USE_LZO }}
+            USE_BROTLI: ${{ env.USE_BROTLI }}
+            USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
+            USE_LZO: ${{ env.USE_LZO }}
           shell: /bin/bash
           run: |
             apt-get update
