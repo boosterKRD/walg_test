@@ -34,12 +34,8 @@ jobs:
         uses: uraimo/run-on-arch-action@v3
         with:
           arch: ${{ matrix.arch }}
-          distro: ${{ matrix.distro }}
-          env: |
-            GO_VERSION=${{ env.GO_VERSION }}
-            USE_BROTLI=${{ env.USE_BROTLI }}
-            USE_LIBSODIUM=${{ env.USE_LIBSODIUM }}
-            USE_LZO=${{ env.USE_LZO }}
+          distro: ${{ matrix.distro }}          
+          env: GO_VERSION=${{ env.GO_VERSION }} USE_BROTLI=${{ env.USE_BROTLI }} USE_LIBSODIUM=${{ env.USE_LIBSODIUM }} USE_LZO=${{ env.USE_LZO }}
           shell: /bin/bash
           run: |
             # Устанавливаем зависимости внутри ARM64-контейнера
