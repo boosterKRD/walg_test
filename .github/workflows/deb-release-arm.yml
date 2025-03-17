@@ -30,18 +30,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Создаем ARM64 эмуляцию через QEMU
+      # Запускаем эмуляцию ARM64 через QEMU
       - name: Setup ARM64 Emulation
         uses: uraimo/run-on-arch-action@v3
         with:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
-          env:
-            GO_VERSION: ${{ env.GO_VERSION }}
-            USE_BROTLI: ${{ env.USE_BROTLI }}
-            USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
-            USE_LZO: ${{ env.USE_LZO }}
-        shell: /bin/bash
+          env: |
+            GO_VERSION=${{ env.GO_VERSION }}
+            USE_BROTLI=${{ env.USE_BROTLI }}
+            USE_LIBSODIUM=${{ env.USE_LIBSODIUM }}
+            USE_LZO=${{ env.USE_LZO }}
 
       - name: Build and package WAL-G on ARM64
         run: |
@@ -49,7 +48,7 @@ jobs:
           apt-get install -y build-essential curl git cmake liblzo2-dev brotli libsodium-dev \
                              devscripts debhelper dh-make dpkg-dev
 
-          # Устанавливаем Go вручную
+          # Устанавливаем Go вручную (setup-go не работает в эмулированной среде)
           curl -LO https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz
           tar -C /usr/local -xzf go${GO_VERSION}.linux-arm64.tar.gz
           export GOROOT=/usr/local/go
