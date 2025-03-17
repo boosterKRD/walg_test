@@ -59,6 +59,8 @@ jobs:
           Description: WAL-G backup tool for PostgreSQL
           EOF
           dpkg-deb --build wal-g-deb wal-g_${VERSION}_${{ matrix.arch }}.deb
+      - name: Debug file location
+        run: find . -name "wal-g_*.deb"
 
       - name: Debug DEB package
         run: |
