@@ -18,7 +18,6 @@ jobs:
       matrix:
         arch: [ amd64, arm64 ]  # Две архитектуры
         os: [ ubuntu-22.04 ]
-
     steps:
       # 1. Клонируем репозиторий
       - name: Checkout code
@@ -30,15 +29,9 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      # 3. Устанавливаем необходимые пакетные зависимости для сборки
+      # 3. Устанавливаем необходимые пакетные зависимости для сборки (добавляем apt-utils)
       - name: Install dependencies
-        run: |
-          sudo dpkg --add-architecture arm64
-          sudo apt-get update
-          sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential apt-utils \
-                                  brotli libsodium-dev liblzo2-dev \
-                                  gcc-aarch64-linux-gnu \
-                                  libsodium-dev:arm64 brotli:arm64 liblzo2-dev:arm64
+        run: sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential apt-utils brotli libsodium-dev liblzo2-dev gcc-aarch64-linux-gnu
 
       # 4. make deps (если нужно подтянуть go-модули и т.п.)
       - name: Make deps
@@ -54,8 +47,8 @@ jobs:
           export USE_LIBSODIUM=1
           export USE_LZO=1  
 
-          # Определяем компилятор в зависимости от архитектуры (sh-совместимый синтаксис)
-          if [ "${{ matrix.arch }}" = "arm64" ]; then
+          # Определяем компилятор в зависимости от архитектуры
+          if [[ "${{ matrix.arch }}" == "arm64" ]]; then
             export CC=aarch64-linux-gnu-gcc
           fi
 
