@@ -16,35 +16,44 @@ env:
 
 jobs:
   build-deb-arm64:
-    runs-on: ubuntu-22.04-arm64  # Используем нативный ARM64 runner
+    runs-on: ubuntu-latest  # AMD64, но внутри эмулируется ARM64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential curl git cmake \
-                                  brotli libsodium-dev liblzo2-dev \
-                                  devscripts debhelper dh-make dpkg-dev
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Build on arm64
+        uses: uraimo/run-on-arch-action@v3
         with:
-          go-version: ${{ env.GO_VERSION }}
+          arch: aarch64
+          distro: ubuntu20.04
+          env: GO_VERSION=${{ env.GO_VERSION }},USE_BROTLI=1,USE_LIBSODIUM=1,USE_LZO=1
+          shell: /bin/bash
+          run: |
+            # Устанавливаем зависимости
+            apt-get update
+            apt-get install -y build-essential curl git cmake \
+                               brotli libsodium-dev liblzo2-dev \
+                               devscripts debhelper dh-make dpkg-dev
 
-      - name: Build WAL-G
+            # Устанавливаем Go для ARM64
+            curl -LO https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz
+            tar -C /usr/local -xzf go${GO_VERSION}.linux-arm64.tar.gz
+            export GOROOT=/usr/local/go
+            export GOPATH=$HOME/go
+            export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
+            # Сборка WAL-G
+            make deps
+            export GOOS=linux
+            export GOARCH=arm64
+            export CGO_ENABLED=1
+            make pg_build
+            mv main/pg/wal-g wal-g-arm64
+
+      - name: Debug WAL-G binary
         run: |
-          export GOOS=linux
-          export GOARCH=arm64
-          export CGO_ENABLED=1
-          export USE_BROTLI=1
-          export USE_LIBSODIUM=1
-          export USE_LZO=1
-          
-          make deps
-          make pg_build
-          mv main/pg/wal-g wal-g-arm64
+          ls -lh
+          file wal-g-arm64
 
       - name: Create DEB package
         run: |
