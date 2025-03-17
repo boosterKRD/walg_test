@@ -3,7 +3,7 @@ name: Build and Publish DEB Package for ARM64
 on:
   push:
     tags:
-      - 'v*'  # Запуск при пуше нового тега (например, v3.0.2)
+      - 'v*'
 
 permissions:
   contents: write
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        db: [ pg ]
+        db: [pg]
         include:
           - arch: aarch64
             distro: ubuntu20.04
@@ -30,8 +30,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Запускаем эмуляцию ARM64 через QEMU
-      - name: Setup ARM64 Emulation
+      - name: Build and package WAL-G inside ARM64 container
         uses: uraimo/run-on-arch-action@v3
         with:
           arch: ${{ matrix.arch }}
@@ -41,48 +40,55 @@ jobs:
             USE_BROTLI=${{ env.USE_BROTLI }}
             USE_LIBSODIUM=${{ env.USE_LIBSODIUM }}
             USE_LZO=${{ env.USE_LZO }}
+          shell: /bin/bash
+          run: |
+            # Устанавливаем зависимости внутри ARM64-контейнера
+            apt-get update
+            apt-get install -y build-essential curl git cmake liblzo2-dev brotli libsodium-dev \
+                               devscripts debhelper dh-make dpkg-dev
 
-      - name: Build and package WAL-G on ARM64
-        run: |
-          apt-get update
-          apt-get install -y build-essential curl git cmake liblzo2-dev brotli libsodium-dev \
-                             devscripts debhelper dh-make dpkg-dev
+            # Устанавливаем Go вручную (setup-go не работает в эмуляции)
+            curl -LO https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz
+            tar -C /usr/local -xzf go${GO_VERSION}.linux-arm64.tar.gz
+            export GOROOT=/usr/local/go
+            export GOPATH=$HOME/go
+            export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-          # Устанавливаем Go вручную (setup-go не работает в эмулированной среде)
-          curl -LO https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz
-          tar -C /usr/local -xzf go${GO_VERSION}.linux-arm64.tar.gz
-          export GOROOT=/usr/local/go
-          export GOPATH=$HOME/go
-          export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+            git config --global --add safe.directory /home/runner/work/wal-g/wal-g
+            git config --global --add safe.directory /home/runner/work/wal-g/wal-g/submodules/brotli
+            
+            make deps
+            export GOOS=linux
+            export GOARCH=arm64
+            export CGO_ENABLED=1
+            make pg_build
+            mv main/pg/wal-g wal-g-arm64
 
-          git config --global --add safe.directory /home/runner/work/wal-g/wal-g
-          git config --global --add safe.directory /home/runner/work/wal-g/wal-g/submodules/brotli
-          
-          make deps
-          make pg_build
-          mv main/pg/wal-g wal-g-arm64
+            # Создание DEB пакета (в контейнере!)
+            mkdir -p wal-g-deb/DEBIAN
+            mkdir -p wal-g-deb/usr/bin/
+            cp wal-g-arm64 wal-g-deb/usr/bin/wal-g
+            chmod 755 wal-g-deb/usr/bin/wal-g
+            cat <<EOF > wal-g-deb/DEBIAN/control
+            Package: wal-g
+            Version: ${GITHUB_REF#refs/tags/v}
+            Section: utils
+            Priority: optional
+            Architecture: arm64
+            Maintainer: You <you@example.com>
+            Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
+            EOF
+            dpkg-deb --build wal-g-deb wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb
 
-          # Создание DEB пакета
-          mkdir -p wal-g-deb/DEBIAN
-          mkdir -p wal-g-deb/usr/bin/
-          cp wal-g-arm64 wal-g-deb/usr/bin/wal-g
-          chmod 755 wal-g-deb/usr/bin/wal-g
-          cat <<EOF > wal-g-deb/DEBIAN/control
-          Package: wal-g
-          Version: ${GITHUB_REF#refs/tags/v}
-          Section: utils
-          Priority: optional
-          Architecture: arm64
-          Maintainer: You <you@example.com>
-          Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
-          EOF
-          dpkg-deb --build wal-g-deb wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb
+            # Перемещаем deb-файл на хост-машину для следующих шагов
+            cp wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb /artifacts/
 
+      # Загружаем файл из контейнера ARM64 на машину AMD64
       - name: Upload DEB package
         uses: actions/upload-artifact@v4
         with:
           name: wal-g-arm64
-          path: wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb
+          path: artifacts/wal-g_${{ github.ref_name }}_arm64.deb
 
       - name: Deploy to GitHub Pages
         run: |
@@ -93,11 +99,10 @@ jobs:
           cd repo-pages
           git pull --rebase
 
-          # Копируем .deb в ARM64 репозиторий
+          # Копируем deb-пакет из артефактов в репозиторий
           mkdir -p dists/stable/main/binary-arm64
-          cp ../wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb dists/stable/main/binary-arm64/
+          cp ../artifacts/wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb dists/stable/main/binary-arm64/
 
-          # Создаём конфиг apt-ftparchive
           cat <<CONF > ../aptftparchive.conf
           Dir {
             ArchiveDir "dists/stable";
@@ -112,11 +117,8 @@ jobs:
           }
           CONF
 
-          # Генерируем Packages и Packages.gz
           apt-ftparchive -c ../aptftparchive.conf packages dists/stable/main/binary-arm64 > dists/stable/main/binary-arm64/Packages
           gzip -kf dists/stable/main/binary-arm64/Packages
-
-          # Генерируем Release с хэшами и нужными полями
           apt-ftparchive -c ../aptftparchive.conf release dists/stable > dists/stable/Release
 
           git add .
