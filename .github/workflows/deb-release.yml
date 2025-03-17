@@ -1,4 +1,4 @@
-name: Build and Publish DEB Package to GitHub Pages
+name: Build and Publish DEB Package for AMD64
 
 on:
   push:
@@ -12,13 +12,8 @@ env:
   GO_VERSION: "1.22"
 
 jobs:
-  build-and-deploy:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        arch: [ amd64, arm64 ]  # Две архитектуры
-        os: [ ubuntu-22.04 ]
-
+  build-deb-amd64:
+    runs-on: ubuntu-22.04
     steps:
       # 1. Клонируем репозиторий
       - name: Checkout code
@@ -33,40 +28,32 @@ jobs:
       # 3. Устанавливаем необходимые пакетные зависимости для сборки
       - name: Install dependencies
         run: |
-          sudo dpkg --add-architecture arm64
           sudo apt-get update
-          sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential apt-utils \
-                                  brotli libsodium-dev liblzo2-dev \
-                                  gcc-aarch64-linux-gnu \
-                                  libsodium-dev:arm64 brotli:arm64 liblzo2-dev:arm64
+          sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential \
+                                  apt-utils brotli libsodium-dev liblzo2-dev
 
       # 4. make deps (если нужно подтянуть go-модули и т.п.)
       - name: Make deps
         run: make deps
 
-      # 5. Сборка WAL-G под соответствующую архитектуру
-      - name: Build WAL-G
+      # 5. Сборка WAL-G под `amd64`
+      - name: Build WAL-G for AMD64
         run: |
           export GOOS=linux
-          export GOARCH=${{ matrix.arch }}
+          export GOARCH=amd64
           export CGO_ENABLED=1
           export USE_BROTLI=1
           export USE_LIBSODIUM=1
-          export USE_LZO=1  
-
-          # Определяем компилятор в зависимости от архитектуры (sh-совместимый синтаксис)
-          if [ "${{ matrix.arch }}" = "arm64" ]; then
-            export CC=aarch64-linux-gnu-gcc
-          fi
+          export USE_LZO=1
 
           make pg_build
-          mv main/pg/wal-g wal-g-${{ matrix.arch }}
+          mv main/pg/wal-g wal-g-amd64
 
       # 6. Отладочная информация о бинарнике
       - name: Debug WAL-G binary
         run: |
           ls -lh
-          file wal-g-${{ matrix.arch }}
+          file wal-g-amd64
 
       # 7. Выделяем версию из тега
       - name: Extract version
@@ -77,18 +64,18 @@ jobs:
         run: |
           mkdir -p wal-g-deb/DEBIAN
           mkdir -p wal-g-deb/usr/bin/
-          cp wal-g-${{ matrix.arch }} wal-g-deb/usr/bin/wal-g
+          cp wal-g-amd64 wal-g-deb/usr/bin/wal-g
           chmod 755 wal-g-deb/usr/bin/wal-g
           cat <<EOF > wal-g-deb/DEBIAN/control
           Package: wal-g
           Version: ${VERSION}
           Section: utils
           Priority: optional
-          Architecture: ${{ matrix.arch }}
+          Architecture: amd64
           Maintainer: You <you@example.com>
           Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
           EOF
-          dpkg-deb --build wal-g-deb wal-g_${VERSION}_${{ matrix.arch }}.deb
+          dpkg-deb --build wal-g-deb wal-g_${VERSION}_amd64.deb
 
       # 9. Дополнительная отладка: ищем файл wal-g_*.deb
       - name: Debug file location
@@ -105,8 +92,8 @@ jobs:
           git pull --rebase
 
           # Создаём папку под конкретную архитектуру, копируем .deb
-          mkdir -p dists/stable/main/binary-${{ matrix.arch }}
-          cp ../wal-g_${VERSION}_${{ matrix.arch }}.deb dists/stable/main/binary-${{ matrix.arch }}/
+          mkdir -p dists/stable/main/binary-amd64
+          cp ../wal-g_${VERSION}_amd64.deb dists/stable/main/binary-amd64/
 
           # Создаём конфиг apt-ftparchive
           cat <<CONF > ../aptftparchive.conf
@@ -118,19 +105,19 @@ jobs:
             Label "WAL-G APT Repository";
             Suite "stable";
             Codename "stable";
-            Architectures "amd64 arm64";
+            Architectures "amd64";
             Components "main";
           }
           CONF
 
           # Генерируем Packages и Packages.gz
-          apt-ftparchive -c ../aptftparchive.conf packages dists/stable/main/binary-${{ matrix.arch }} > dists/stable/main/binary-${{ matrix.arch }}/Packages
-          gzip -kf dists/stable/main/binary-${{ matrix.arch }}/Packages
+          apt-ftparchive -c ../aptftparchive.conf packages dists/stable/main/binary-amd64 > dists/stable/main/binary-amd64/Packages
+          gzip -kf dists/stable/main/binary-amd64/Packages
 
           # Генерируем Release с хэшами и нужными полями
           apt-ftparchive -c ../aptftparchive.conf release dists/stable > dists/stable/Release
 
           git add .
-          git commit -m "Add WAL-G package ${VERSION} [${{ matrix.arch }}]"
+          git commit -m "Add WAL-G package ${VERSION} [amd64]"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git push origin gh-pages
