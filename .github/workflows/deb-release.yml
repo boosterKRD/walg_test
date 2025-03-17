@@ -77,4 +77,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wal-g-deb-${{ matrix.arch }}
-          path: wal-g_${env.VERSION}_${{ matrix.arch }}.deb
+          path: ./wal-g_${{ env.VERSION }}_${{ matrix.arch }}.deb
