@@ -1,8 +1,25 @@
-Origin: WAL-G Repo
-Label: WAL-G APT Repository
-Suite: stable
-Codename: stable
-# ВАЖНО: перечисляем все архитектуры, которые хотим поддерживать
-Architectures: amd64 arm64
-Components: main
-Description: APT repository for WAL-G
+Date: Mon, 17 Mar 2025 15:04:45 +0000
+MD5Sum:
+ 77edde0213f48df002122c8dcbd2c01b               38 Release
+ f863a7d63ec0ecb3384a94a8aafbfe62             2720 main/binary-amd64/Packages
+ 25f148d7f302fbaf5bf92c76b367a5f4             1157 main/binary-amd64/Packages.gz
+ 697e141908549a42d543b9efcf4e3f88              406 main/binary-arm64/Packages
+ a143e063705d4550b40092db5f44a103              337 main/binary-arm64/Packages.gz
+SHA1:
+ 8d732a49bef0d0a85e17130903f92d8077d5bd7e               38 Release
+ ea39dbac3a877d5bd586125724f039be277dfba7             2720 main/binary-amd64/Packages
+ 077bbb3db7e40158a04f23f9500ababc7bcb0251             1157 main/binary-amd64/Packages.gz
+ dfa3e240a1e434878295d4d470e1ce2d923f96f5              406 main/binary-arm64/Packages
+ c3614fa0744013de82ffa504ad31afc85c315dbb              337 main/binary-arm64/Packages.gz
+SHA256:
+ 38ade78edf34f081641941cda2c611cad6bb697cda007d1f72c817b6f778faa7               38 Release
+ 2e90610410ff8ccd13cb101f33fe18f35c2ea68f9ba8084d2d6af0c33b9f8ad0             2720 main/binary-amd64/Packages
+ 597238fe0a37b4c97f56b12745dfb9f7c24853b873dab73b9fa6e27c1bc90f87             1157 main/binary-amd64/Packages.gz
+ 7ae4067a6af0b62b2ae721f0ca7a87314c93b789e8e847ce70a98bffad4552a1              406 main/binary-arm64/Packages
+ cd06399ea0203d126853d595b767f27587ac9d4e1457f52f98b164e3dbdd4671              337 main/binary-arm64/Packages.gz
+SHA512:
+ 24ad72adae31cafae4a0f90dab1b1c9092f41134493237bd7ef9d6d0b7b9d7cddc72c1cdd4aef4388fa0e98f43cbf3ded20bb42cc142afcc3bbe1b3066e4e8ed               38 Release
+ bbcc1b216d4dd6fba237e74e0c4c780794be83b5ed0bdd2160db4a737083deb2756514aea7e936e2547daa39fbb694edfb1f0abdce57bad1aa3f2a5724e878e9             2720 main/binary-amd64/Packages
+ a61f552fb69094529eb4c2f86520baff892d01a0744e939dedbad68fac4fe00fa29ab30f55fca3b7bba1a5be2976ec106c8e80dca9f260ded55840e2b3f5892a             1157 main/binary-amd64/Packages.gz
+ b64473da2ea5f48ec8c2debdc8d7e19c2e08a2de1cb651564d98c403f3d91aa4d26cc33828306e9cce6560e31efd54c98533b3399ef3b333c05d62fffb0a86fa              406 main/binary-arm64/Packages
+ 3653851186c895939d4ef728b0dffcd70a52e8de8f0e2eb4cd82b4e61e9991bcc55f391deb6386b344dfa6edc3f8782a2e678b332882984cfdf8014abe226cd8              337 main/binary-arm64/Packages.gz

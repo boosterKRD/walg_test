@@ -1,13 +1,70 @@
 Package: wal-g
-Version: 1.0.21
 Architecture: amd64
+Version: 1.0.13
+Priority: optional
+Section: utils
+Maintainer: Your Name <your@email.com>
+Filename: dists/stable/main/binary-amd64/wal-g_1.0.13_amd64.deb
+Size: 12591816
+MD5sum: 7ac6c46000ccfa319ec8b7517b2b287a
+SHA1: e9eac542a4ea031aebffeb7bb56a317c7673b02d
+SHA256: 7ec1c03f2aa794d74f707db646bfd99c168dd6a85b58dd2842dbf0c71f40c42a
+SHA512: bb048e894ea739b6d06b8c9f38d1b5be97d6f38f43066895b929cc8ae9afa85292ed8e10e222c5c2cfc15a02384e5d27c0de24e7b4d8743a9b26bbf38b45b3be
+Description: WAL-G backup tool for PostgreSQL
+
+Package: wal-g
+Architecture: amd64
+Version: 1.0.14
+Priority: optional
+Section: utils
+Maintainer: You <you@example.com>
+Filename: dists/stable/main/binary-amd64/wal-g_1.0.14_amd64.deb
+Size: 12590036
+MD5sum: 6e04e2d31ccc5dd98c574e01001f70d2
+SHA1: 0c5b86087dd4f87a76f49cf584ca553614bb49ca
+SHA256: 3179910b515d6ed3a08f9d260c2ff9017f11957238f084579251e5c4c1184a6e
+SHA512: c3286ddbd56504b0fdde6276549147f1d1a7c286ad1c8ecc8bef2fac30e729b5f12714de3ba64fd817674f1bfba3b187737328f10c765871da141d01851644ee
+Description: WAL-G backup tool for PostgreSQL
+
+Package: wal-g
+Architecture: amd64
+Version: 1.0.20
+Priority: optional
+Section: utils
+Maintainer: You <you@example.com>
+Filename: dists/stable/main/binary-amd64/wal-g_1.0.20_amd64.deb
+Size: 12591082
+MD5sum: 0c5cc0894f075cc3042d6aaf4d7480ff
+SHA1: 10fa0a5853f064de4620544c75475e8383eeda51
+SHA256: 69a30e32e4d20eefcebc45b0ed4963a6316cb0b3bf5ca8b087f0bee82fbd86bf
+SHA512: 5fbb40aa20fa45f214f438836d968279e0ab3e2bf8937954fcad259149027cb3222ddfef17330f164dd7cb6464d2e41b08d56c5565e0adc17c813a5aa6a98b25
+Description: WAL-G backup tool for PostgreSQL
+
+Package: wal-g
+Architecture: amd64
+Version: 1.0.21
+Priority: optional
+Section: utils
 Maintainer: You <you@example.com>
 Filename: dists/stable/main/binary-amd64/wal-g_1.0.21_amd64.deb
 Size: 12590312
 MD5sum: cf5014c88a1ea0eb5ad37d9b92ac4cd9
 SHA1: 423940967944e2a41cee94861b1df6f1357a6d1b
 SHA256: ad51e8f8e25a613cc1123c0e5115b357805511552a29f57a0a283c7092c560c1
-Section: utils
+SHA512: 87846130a3d17a634f055808b70c32381f254079322698f7769bdca1ace2b245949a9d58644dc8d22f608b2ad36dac55e3569e9627c5df3fc3dac1acddc55829
+Description: WAL-G backup tool for PostgreSQL
+
+Package: wal-g
+Architecture: amd64
+Version: 1.0.22
 Priority: optional
+Section: utils
+Maintainer: You <you@example.com>
+Filename: dists/stable/main/binary-amd64/wal-g_1.0.22_amd64.deb
+Size: 12590290
+MD5sum: fa17864055ddaaebab6935466ade0dac
+SHA1: 4368fedf2da3c3b6cbe22c5d7e16b6d5032768aa
+SHA256: 8dbb96d1e26213719b402eab71cc57a27b7b31741377324000fbd1c6636a3f1d
+SHA512: 94b43e5316ecd28d6825cfd1449af1cd0c6e40cbcc067011185a847a8d6c49fe799416045df2823816b9112aacefd5e179faa41b692741ce6122cc869765de1e
 Description: WAL-G backup tool for PostgreSQL
 
