@@ -54,3 +54,17 @@ SHA256: 241211a5cf7abac3ac403599e93d6c4cc318d08e20fe6e8cb6a4810358e28652
 SHA512: d0521f8a057ae3bd2ee25d84405e46be64200f7f9c0a4597cd4f9ae786023e275c040bb14eb59c9042240167c580b24f505eabb17fb3d44bbc171d91b7336518
 Description: WAL-G backup tool for PostgreSQL
 
+Package: wal-g
+Architecture: arm64
+Version: 1.0.25
+Priority: optional
+Section: utils
+Maintainer: You <you@example.com>
+Filename: dists/stable/main/binary-arm64/wal-g_1.0.25_arm64.deb
+Size: 11507746
+MD5sum: 7919748856cc2b6b61e3425b21601c90
+SHA1: bdd78a731b52fa92e52d7f3f502f1465fb1bb7a0
+SHA256: cf2c1937252dff1440defef192641d7b8f56d3913c66919d41c7db9565925406
+SHA512: d19fac6b6eadd9f339fdc4e4d85010c9e8180b93df555be00c2c37f5ca6106c8faf16d4d0d03d4aba2b528ad011ca34fe83aad22f151c695a301c63f730c98ba
+Description: WAL-G backup tool for PostgreSQL
+
