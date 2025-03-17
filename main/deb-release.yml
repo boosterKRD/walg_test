@@ -1,0 +1,108 @@
+name: Build and Publish DEB Package to GitHub Pages
+
+on:
+  push:
+    tags:
+      - 'v*'  # Запуск при пуше нового тега (например, v3.0.2)
+
+# Разрешаем Actions писать в репозиторий (напр. в gh-pages)
+permissions:
+  contents: write
+
+env:
+  GO_VERSION: "1.22"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [ amd64 ]
+        os: [ ubuntu-22.04 ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install dependencies
+        run: sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential
+
+      - name: Make deps
+        run: make deps
+
+      - name: Build WAL-G
+        run: |
+          make pg_build
+          mv main/pg/wal-g wal-g-${{ matrix.arch }}
+
+      - name: Debug WAL-G binary
+        run: |
+          ls -lh
+          file wal-g-${{ matrix.arch }}
+
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Create DEB package
+        run: |
+          mkdir -p wal-g-deb/DEBIAN
+          mkdir -p wal-g-deb/usr/bin/
+          cp wal-g-${{ matrix.arch }} wal-g-deb/usr/bin/wal-g
+          chmod 755 wal-g-deb/usr/bin/wal-g
+          cat <<EOF > wal-g-deb/DEBIAN/control
+          Package: wal-g
+          Version: ${VERSION}
+          Section: utils
+          Priority: optional
+          Architecture: ${{ matrix.arch }}
+          Maintainer: Your Name <your@email.com>
+          Description: WAL-G backup tool for PostgreSQL
+          EOF
+          dpkg-deb --build wal-g-deb wal-g_${VERSION}_${{ matrix.arch }}.deb
+
+      - name: Debug file location
+        run: find . -name "wal-g_*.deb"
+
+      - name: Debug artifact path
+        run: |
+          echo "Checking for file: ./wal-g_${VERSION}_${{ matrix.arch }}.deb"
+          ls -lh ./wal-g_${VERSION}_${{ matrix.arch }}.deb || echo "DEB package not found"
+
+      - name: Deploy to GitHub Pages
+        run: |
+          # Настраиваем git-пользователя
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          # Клонируем gh-pages
+          git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
+          cd repo-pages
+
+          # Копируем .deb
+          mkdir -p dists/stable/main/binary-amd64
+          cp ../wal-g_${VERSION}_${{ matrix.arch }}.deb dists/stable/main/binary-amd64/
+
+          # Генерируем Packages и Release
+          dpkg-scanpackages --arch amd64 dists/stable/main/binary-amd64 > dists/stable/main/binary-amd64/Packages
+          gzip -k dists/stable/main/binary-amd64/Packages
+
+          cat <<EOF > dists/stable/Release
+          Origin: WAL-G Repo
+          Label: WAL-G APT Repository
+          Suite: stable
+          Codename: stable
+          Architectures: amd64
+          Components: main
+          Description: APT repository for WAL-G
+          EOF
+
+          git add .
+          git commit -m "Update APT repo with WAL-G ${VERSION}"
+
+          # ВАЖНО: Используем GITHUB_TOKEN, чтобы пуш не требовал логина
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin gh-pages
