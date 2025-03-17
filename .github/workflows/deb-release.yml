@@ -31,7 +31,7 @@ jobs:
 
       # 3. Устанавливаем необходимые пакетные зависимости для сборки (добавляем apt-utils)
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential apt-utils
+        run: sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential apt-utils brotli libsodium-dev liblzo2-dev
 
       # 4. make deps (если нужно подтянуть go-модули и т.п.)
       - name: Make deps
@@ -42,6 +42,9 @@ jobs:
         run: |
           export GOOS=linux
           export GOARCH=${{ matrix.arch }}
+          export USE_BROTLI=1
+          export USE_LIBSODIUM=1
+          export USE_LZO=1          
           make pg_build
           mv main/pg/wal-g wal-g-${{ matrix.arch }}
 
@@ -69,7 +72,7 @@ jobs:
           Priority: optional
           Architecture: ${{ matrix.arch }}
           Maintainer: You <you@example.com>
-          Description: WAL-G backup tool for PostgreSQL
+          Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
           EOF
           dpkg-deb --build wal-g-deb wal-g_${VERSION}_${{ matrix.arch }}.deb
 
