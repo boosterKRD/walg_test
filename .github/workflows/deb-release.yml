@@ -31,7 +31,7 @@ jobs:
 
       # 3. Устанавливаем необходимые пакетные зависимости для сборки (добавляем apt-utils)
       - name: Install dependencies
-        run: sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential apt-utils brotli libsodium-dev liblzo2-dev
+        run: sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential apt-utils brotli libsodium-dev liblzo2-dev gcc-aarch64-linux-gnu
 
       # 4. make deps (если нужно подтянуть go-модули и т.п.)
       - name: Make deps
