@@ -84,6 +84,20 @@ Description: WAL-G backup tool for PostgreSQL
 
 Package: wal-g
 Architecture: arm64
+Version: 1.0.67
+Priority: optional
+Section: utils
+Maintainer: You <you@example.com>
+Filename: dists/stable/main/binary-arm64/wal-g_1.0.67_arm64.deb
+Size: 10420660
+MD5sum: 93457984b8f34a05d74ea52ee79e8c3c
+SHA1: c435d1303d203b3afddc35471454dab2ea9f3ff4
+SHA256: 837e72aa13b6edc4cb617802186d531e6f029b667c395fd9643b4c726484957b
+SHA512: 1dac99077875cf4b91d1bab6c6163e67e1d08ca124a4e64ee6a510dff69eb8f107c359510d004d88a34eb9b62324507ec9b26e5235a1467de270e923e4d89a66
+Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
+
+Package: wal-g
+Architecture: arm64
 Version: 1.0.68
 Priority: optional
 Section: utils

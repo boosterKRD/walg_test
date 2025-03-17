@@ -1,31 +1,31 @@
 Architectures: arm64
 Codename: stable
 Components: main
-Date: Mon, 17 Mar 2025 20:00:50 +0000
+Date: Mon, 17 Mar 2025 20:01:22 +0000
 Label: WAL-G APT Repository
 Origin: WAL-G Repo
 Suite: stable
 MD5Sum:
- 57400ba3a210dda56a0862c9d3f18068              154 Release
+ da885074a2648ef7f99deedef447da51              154 Release
  dd644b5a6bb54a2a51cb89ab8ea01442            17630 main/binary-amd64/Packages
  4d4408dad3c3eb91023c3934744d1c1a             5864 main/binary-amd64/Packages.gz
- 2193bb1a77db9fce6a4d9630efb1ec3c             3834 main/binary-arm64/Packages
- 0c63f1585c0373ea1da60d59c47eb435             1547 main/binary-arm64/Packages.gz
+ edd7fe79871c343e5557243af8053394             4410 main/binary-arm64/Packages
+ edb8f4bcec64c969e1b6322cc70c2a54             1729 main/binary-arm64/Packages.gz
 SHA1:
- 3af35f8b66773c7ca5e72ff5c162f9021cae48ac              154 Release
+ b312de0656a568f2e27e123ebf31739db841e4bb              154 Release
  bb71484f746ed43d05ac5019863c3d3e92940d5e            17630 main/binary-amd64/Packages
  8bc78b055fdce24dbad0c201c774c450b988fb83             5864 main/binary-amd64/Packages.gz
- 2f9713d83c166b51cec9b0f8ec0760382df69916             3834 main/binary-arm64/Packages
- 0fc6cfda569cb637c1a573944d1ab36a75e5871d             1547 main/binary-arm64/Packages.gz
+ 0b6c2ed0bb4a1155688eb78b0160972cab025565             4410 main/binary-arm64/Packages
+ 0c61afc4a17a85024c4a86c75d4b84a547293c3d             1729 main/binary-arm64/Packages.gz
 SHA256:
- 5d74f6c03819fab1fd5fe9b22e33fdc2bab3aad6c85eb4da6a84e2ef937af69d              154 Release
+ 9e71225c443f034daec3b851a8b6080b7f95bab1b868ee83f1c4c239a0753df2              154 Release
  9b425e0279438de2e46834510f46e76e30e8f374ec324dcca14f0a25d638415f            17630 main/binary-amd64/Packages
  d18dba8ab8ed0ce182d0fae30ba13e2c48fe0739ff6032315c41165ee0293afd             5864 main/binary-amd64/Packages.gz
- 467711c342dde07b81ee64ae246bc88e0b19af9e28dae3aae4c04d4ff6c201b7             3834 main/binary-arm64/Packages
- f0d5ad0671f6d287dd8867e715ede2c4696e8caabe47121b4874659d0f986eaa             1547 main/binary-arm64/Packages.gz
+ 7148a0c203397384ccaa9904746a328a465e15e693264604c2d425de309bfbb2             4410 main/binary-arm64/Packages
+ 2a64931ae6ead30dcf55b621731fa0aaf0dc3b05a1b1c7d7b6ba831dd4a9e31d             1729 main/binary-arm64/Packages.gz
 SHA512:
- 9eb1eb1d1ffb07d3586f06a6b6c42d247b574a63a5d09fd442e41b855d3ce86bd8c2b35b9b94874b2b852bc0ec0a61231107283515668a78e4229f4f706c54ea              154 Release
+ a28fb6bb25f0cec42e32cc124647d367532c9607c6103be30f87b496f8a546cb74f241c8820fdbaf8e5eb40d4567f89fbb5dbb0099584241c615f19473a6179a              154 Release
  063f560ebeeab1665b43343d94795ea49362039d77840c4150f0b5f02661a5b418d0108ae9b003554227868e077b3eeaf505ee3ada347754c0131a2d8b049d1f            17630 main/binary-amd64/Packages
  50a9425805d7c0cea5feb1800078aa053e6996d19557c2e397520f8ebd1c5cea75b9d200a2fec783fc4f6bf25cfa989ea926599c1717f261b02ee822d259b09c             5864 main/binary-amd64/Packages.gz
- 5d96b275e8c5a289d3f9f71ee531e6d2e764dc9c440aacb93dbb734c5b4bf88c048a241aeddebd7b31ec146b4c85ad17bbd0869f2e9dbace0830201af798af06             3834 main/binary-arm64/Packages
- e9e0a7040a1fe68567ac5b9e6c6e5476ef48db5bef861e7aa2a7133eef62af26f8d2446a07359d96d843cebe49d4692ed7cf91cf04fd4779529efe4479479cd6             1547 main/binary-arm64/Packages.gz
+ c24634ccfd13c576878e414a1f5b260e5c3e8ff3172766c11e077d47763890f7614291ebd63d7d0c91e3f2eed54ccfc1707f6774e544beb005116c644c503d93             4410 main/binary-arm64/Packages
+ 83fc33dc9740dfe512fcbc29517c47f84e8a5bdefb6039284168ea365416f8a8ce6f087386f0f498adadbeb34127c000b5b354f98fafdade9b8893f9080fb1d1             1729 main/binary-arm64/Packages.gz
