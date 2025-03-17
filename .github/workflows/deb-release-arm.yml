@@ -27,33 +27,28 @@ jobs:
           arch: aarch64
           distro: ubuntu20.04
           shell: /bin/bash
-        env:
-          GO_VERSION: "1.22"
-          USE_BROTLI: "1"
-          USE_LIBSODIUM: "1"
-          USE_LZO: "1"
-          run: |
-            # Устанавливаем зависимости
-            apt-get update
-            apt-get install -y build-essential curl git cmake \
-                               brotli libsodium-dev liblzo2-dev \
-                               devscripts debhelper dh-make dpkg-dev
+        run: |
+          # Устанавливаем зависимости
+          apt-get update
+          apt-get install -y build-essential curl git cmake \
+                            brotli libsodium-dev liblzo2-dev \
+                            devscripts debhelper dh-make dpkg-dev
 
-            # Устанавливаем Go для ARM64
-            curl -LO https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz
-            tar -C /usr/local -xzf go${GO_VERSION}.linux-arm64.tar.gz
-            export GOROOT=/usr/local/go
-            export GOPATH=$HOME/go
-            export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+          # Устанавливаем Go для ARM64
+          curl -LO https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz
+          tar -C /usr/local -xzf go${GO_VERSION}.linux-arm64.tar.gz
+          export GOROOT=/usr/local/go
+          export GOPATH=$HOME/go
+          export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-            # Сборка WAL-G
-            make deps
-            export GOOS=linux
-            export GOARCH=arm64
-            export CGO_ENABLED=1
-            make pg_build
-            mv main/pg/wal-g wal-g-arm64
-
+          # Сборка WAL-G
+          make deps
+          export GOOS=linux
+          export GOARCH=arm64
+          export CGO_ENABLED=1
+          make pg_build
+          mv main/pg/wal-g wal-g-arm64
+          
       - name: Debug WAL-G binary
         run: |
           ls -lh
