@@ -2,7 +2,7 @@ name: Deploy DEB to GitHub Pages
 
 on:
   workflow_run:
-    workflows: ["Build DEB Package"]
+    workflows: ["Build and Publish DEB Package"]
     types:
       - completed
 
@@ -47,5 +47,5 @@ jobs:
 
           # Коммитим изменения
           git add .
-          git commit -m "Update APT repo with WAL-G"
+          git commit -m "Update APT repo with WAL-G ${VERSION}"
           git push origin gh-pages
