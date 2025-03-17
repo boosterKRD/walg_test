@@ -9,10 +9,10 @@ permissions:
   contents: write
 
 env:
-  GO_VERSION: "1.22"
-  USE_BROTLI: "1"
-  USE_LIBSODIUM: "1"
-  USE_LZO: "1"
+  GO_VERSION: "1.22.8"
+  USE_BROTLI: 1
+  USE_LIBSODIUM: 1
+  USE_LZO: 1
 
 jobs:
   build-deb-arm64:
@@ -35,30 +35,25 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
-          env:
-            GO_VERSION: ${{ env.GO_VERSION }}
-            USE_BROTLI: ${{ env.USE_BROTLI }}
-            USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
-            USE_LZO: ${{ env.USE_LZO }}
+          env: |
+            USE_BROTLI=${{ env.USE_BROTLI }}
+            USE_LIBSODIUM=${{ env.USE_LIBSODIUM }}
+            USE_LZO=${{ env.USE_LZO }}
           shell: /bin/bash
           run: |
             apt-get update
-            apt-get install -y build-essential curl git cmake liblzo2-dev brotli libsodium-dev \
-                               devscripts debhelper dh-make dpkg-dev
+            apt-get install -y build-essential curl git cmake liblzo2-dev brotli libsodium-dev devscripts debhelper dh-make dpkg-dev
 
-            curl -LO https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz
-            tar -C /usr/local -xzf go${GO_VERSION}.linux-arm64.tar.gz
+            curl -LO https://go.dev/dl/go${{ env.GO_VERSION }}.linux-arm64.tar.gz
+            tar -C /usr/local -xzf go${{ env.GO_VERSION }}.linux-arm64.tar.gz
             export GOROOT=/usr/local/go
-            export GOPATH=$HOME/go
+            export GOPATH=$HOME/go          
             export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
             git config --global --add safe.directory /home/runner/work/wal-g/wal-g
             git config --global --add safe.directory /home/runner/work/wal-g/wal-g/submodules/brotli
 
             make deps
-            export GOOS=linux
-            export GOARCH=arm64
-            export CGO_ENABLED=1
             make pg_build
             mv main/pg/wal-g wal-g-arm64
 
@@ -66,6 +61,7 @@ jobs:
             mkdir -p wal-g-deb/usr/bin/
             cp wal-g-arm64 wal-g-deb/usr/bin/wal-g
             chmod 755 wal-g-deb/usr/bin/wal-g
+
             cat <<EOF > wal-g-deb/DEBIAN/control
             Package: wal-g
             Version: ${GITHUB_REF#refs/tags/v}
@@ -75,10 +71,11 @@ jobs:
             Maintainer: You <you@example.com>
             Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
             EOF
+
             dpkg-deb --build wal-g-deb wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb
 
-            mkdir -p /artifacts
-            cp wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb /artifacts/
+            mkdir -p artifacts
+            cp wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb artifacts/
 
       - name: Upload DEB package
         uses: actions/upload-artifact@v4
