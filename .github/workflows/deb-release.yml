@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*'  # Запуск при пуше нового тега (например, v3.0.2)
 
+# Разрешаем Actions писать в репозиторий (напр. в gh-pages)
+permissions:
+  contents: write
+
 env:
   GO_VERSION: "1.22"
 
@@ -70,15 +74,19 @@ jobs:
 
       - name: Deploy to GitHub Pages
         run: |
+          # Настраиваем git-пользователя
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
+          # Клонируем gh-pages
           git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
           cd repo-pages
 
+          # Копируем .deb
           mkdir -p dists/stable/main/binary-amd64
           cp ../wal-g_${VERSION}_${{ matrix.arch }}.deb dists/stable/main/binary-amd64/
-          
+
+          # Генерируем Packages и Release
           dpkg-scanpackages --arch amd64 dists/stable/main/binary-amd64 > dists/stable/main/binary-amd64/Packages
           gzip -k dists/stable/main/binary-amd64/Packages
 
@@ -94,4 +102,7 @@ jobs:
 
           git add .
           git commit -m "Update APT repo with WAL-G ${VERSION}"
+
+          # ВАЖНО: Используем GITHUB_TOKEN, чтобы пуш не требовал логина
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git push origin gh-pages
