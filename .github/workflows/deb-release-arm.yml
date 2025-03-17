@@ -1,0 +1,118 @@
+name: Build and Publish DEB Package for ARM64
+
+on:
+  push:
+    tags:
+      - 'v*'  # Запуск при пуше нового тега (например, v3.0.2)
+
+permissions:
+  contents: write
+
+env:
+  GO_VERSION: "1.22"
+  USE_BROTLI: 1
+  USE_LIBSODIUM: 1
+  USE_LZO: 1
+
+jobs:
+  build-deb-arm64:
+    runs-on: ubuntu-20.04  # Используем 20.04, т.к. 22.04 и выше могут не поддерживать arm64 в GitHub Actions
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build on arm64
+        uses: uraimo/run-on-arch-action@v3
+        with:
+          arch: aarch64
+          distro: ubuntu20.04
+          env: |
+            GO_VERSION=${{ env.GO_VERSION }}
+            USE_BROTLI=1
+            USE_LIBSODIUM=1
+            USE_LZO=1
+          shell: /bin/bash
+          run: |
+            # Устанавливаем зависимости
+            apt-get update
+            apt-get install -y build-essential curl git cmake \
+                               brotli libsodium-dev liblzo2-dev \
+                               devscripts debhelper dh-make dpkg-dev
+
+            # Устанавливаем Go для ARM64
+            curl -LO https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz
+            tar -C /usr/local -xzf go${GO_VERSION}.linux-arm64.tar.gz
+            export GOROOT=/usr/local/go
+            export GOPATH=$HOME/go
+            export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
+            # Сборка WAL-G
+            make deps
+            export GOOS=linux
+            export GOARCH=arm64
+            export CGO_ENABLED=1
+            make pg_build
+            mv main/pg/wal-g wal-g-arm64
+
+      - name: Create DEB package
+        run: |
+          mkdir -p wal-g-deb/DEBIAN
+          mkdir -p wal-g-deb/usr/bin/
+          cp wal-g-arm64 wal-g-deb/usr/bin/wal-g
+          chmod 755 wal-g-deb/usr/bin/wal-g
+          cat <<EOF > wal-g-deb/DEBIAN/control
+          Package: wal-g
+          Version: ${GITHUB_REF#refs/tags/v}
+          Section: utils
+          Priority: optional
+          Architecture: arm64
+          Maintainer: You <you@example.com>
+          Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
+          EOF
+          dpkg-deb --build wal-g-deb wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb
+
+      - name: Upload DEB package
+        uses: actions/upload-artifact@v4
+        with:
+          name: wal-g-arm64
+          path: wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb
+
+      - name: Deploy to GitHub Pages
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
+          cd repo-pages
+          git pull --rebase
+
+          # Копируем .deb в ARM64 репозиторий
+          mkdir -p dists/stable/main/binary-arm64
+          cp ../wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb dists/stable/main/binary-arm64/
+
+          # Создаём конфиг apt-ftparchive
+          cat <<CONF > ../aptftparchive.conf
+          Dir {
+            ArchiveDir "dists/stable";
+          }
+          APT::FTPArchive::Release {
+            Origin "WAL-G Repo";
+            Label "WAL-G APT Repository";
+            Suite "stable";
+            Codename "stable";
+            Architectures "arm64";
+            Components "main";
+          }
+          CONF
+
+          # Генерируем Packages и Packages.gz
+          apt-ftparchive -c ../aptftparchive.conf packages dists/stable/main/binary-arm64 > dists/stable/main/binary-arm64/Packages
+          gzip -kf dists/stable/main/binary-arm64/Packages
+
+          # Генерируем Release с хэшами и нужными полями
+          apt-ftparchive -c ../aptftparchive.conf release dists/stable > dists/stable/Release
+
+          git add .
+          git commit -m "Add WAL-G package ${GITHUB_REF#refs/tags/v} [arm64]"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin gh-pages
