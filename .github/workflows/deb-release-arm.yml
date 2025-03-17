@@ -42,7 +42,6 @@ jobs:
             USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
             USE_LZO: ${{ env.USE_LZO }}
         shell: /bin/bash
-        run: echo "ARM64 environment initialized"
 
       - name: Build and package WAL-G on ARM64
         run: |
@@ -57,8 +56,6 @@ jobs:
           export GOPATH=$HOME/go
           export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-          go get -v -t -d ./...
-          
           git config --global --add safe.directory /home/runner/work/wal-g/wal-g
           git config --global --add safe.directory /home/runner/work/wal-g/wal-g/submodules/brotli
           
