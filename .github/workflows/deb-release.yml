@@ -45,7 +45,13 @@ jobs:
           export CGO_ENABLED=1
           export USE_BROTLI=1
           export USE_LIBSODIUM=1
-          export USE_LZO=1          
+          export USE_LZO=1  
+
+          # Определяем компилятор в зависимости от архитектуры
+          if [[ "${{ matrix.arch }}" == "arm64" ]]; then
+            export CC=aarch64-linux-gnu-gcc
+          fi
+
           make pg_build
           mv main/pg/wal-g wal-g-${{ matrix.arch }}
 
