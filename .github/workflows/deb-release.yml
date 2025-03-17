@@ -27,13 +27,21 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential
 
-      - name: Make deps  # <--- Добавил шаг загрузки зависимостей
+      - name: Make deps
         run: make deps
 
       - name: Build WAL-G
         run: |
           make pg_build
           mv main/pg/wal-g wal-g-${{ matrix.arch }}
+
+      - name: Debug WAL-G binary
+        run: |
+          ls -lh
+          file wal-g-${{ matrix.arch }}
+
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       - name: Create DEB package
         run: |
@@ -43,17 +51,23 @@ jobs:
           chmod 755 wal-g-deb/usr/bin/wal-g
           cat <<EOF > wal-g-deb/DEBIAN/control
           Package: wal-g
-          Version: ${GITHUB_REF#refs/tags/v}
+          Version: ${VERSION}
           Section: utils
           Priority: optional
           Architecture: ${{ matrix.arch }}
           Maintainer: Your Name <your@email.com>
           Description: WAL-G backup tool for PostgreSQL
           EOF
-          dpkg-deb --build wal-g-deb wal-g_${GITHUB_REF#refs/tags/v}_${{ matrix.arch }}.deb
+          dpkg-deb --build wal-g-deb wal-g_${VERSION}_${{ matrix.arch }}.deb
+
+      - name: Debug DEB package
+        run: |
+          ls -lh
+          ls -lh wal-g-deb
+          dpkg --info wal-g_${VERSION}_${{ matrix.arch }}.deb || echo "DEB package not found"
 
       - name: Upload DEB package as artifact
         uses: actions/upload-artifact@v4
         with:
           name: wal-g-deb-${{ matrix.arch }}
-          path: wal-g_${GITHUB_REF#refs/tags/v}_${{ matrix.arch }}.deb
+          path: wal-g_${VERSION}_${{ matrix.arch }}.deb
