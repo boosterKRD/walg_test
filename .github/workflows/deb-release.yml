@@ -68,8 +68,13 @@ jobs:
           ls -lh wal-g-deb
           dpkg --info wal-g_${VERSION}_${{ matrix.arch }}.deb || echo "DEB package not found"
 
+      - name: Debug artifact path
+        run: |
+          echo "Checking for file: ./wal-g_${VERSION}_${{ matrix.arch }}.deb"
+          ls -lh ./wal-g_${VERSION}_${{ matrix.arch }}.deb || echo "DEB package not found"
+          
       - name: Upload DEB package as artifact
         uses: actions/upload-artifact@v4
         with:
           name: wal-g-deb-${{ matrix.arch }}
-          path: wal-g_${VERSION}_${{ matrix.arch }}.deb
+          path: wal-g_${env.VERSION}_${{ matrix.arch }}.deb
