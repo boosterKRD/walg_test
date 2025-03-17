@@ -35,48 +35,46 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
-          env:
-            GO_VERSION: ${{ env.GO_VERSION }}
+          env: |
             USE_BROTLI: ${{ env.USE_BROTLI }}
             USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
             USE_LZO: ${{ env.USE_LZO }}
-        shell: /bin/bash
-        run: |
-          apt-get update
-          apt-get install -y build-essential curl git cmake liblzo2-dev brotli libsodium-dev \
-                             devscripts debhelper dh-make dpkg-dev
+          shell: /bin/bash
+          run: |
+            apt-get update
+            apt-get install -y build-essential curl git cmake liblzo2-dev brotli libsodium-dev \
+                               devscripts debhelper dh-make dpkg-dev
 
-          # Устанавливаем Go вручную, так как setup-go не работает в эмулированной среде
-          curl -LO https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz
-          tar -C /usr/local -xzf go${GO_VERSION}.linux-arm64.tar.gz
-          export GOROOT=/usr/local/go
-          export GOPATH=$HOME/go
-          export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+            curl -LO https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz
+            tar -C /usr/local -xzf go${GO_VERSION}.linux-arm64.tar.gz
+            export GOROOT=/usr/local/go
+            export GOPATH=$HOME/go          
+            export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+            
+            go get -v -t -d ./...
+            
+            git config --global --add safe.directory /home/runner/work/wal-g/wal-g
+            git config --global --add safe.directory /home/runner/work/wal-g/wal-g/submodules/brotli
+            
+            make deps
+            make pg_build
+            mv main/pg/wal-g wal-g-arm64
 
-          go get -v -t -d ./...
-          
-          git config --global --add safe.directory /home/runner/work/wal-g/wal-g
-          git config --global --add safe.directory /home/runner/work/wal-g/wal-g/submodules/brotli
-          
-          make deps
-          make pg_build
-          mv main/pg/wal-g wal-g-arm64
-
-          # Создание DEB пакета
-          mkdir -p wal-g-deb/DEBIAN
-          mkdir -p wal-g-deb/usr/bin/
-          cp wal-g-arm64 wal-g-deb/usr/bin/wal-g
-          chmod 755 wal-g-deb/usr/bin/wal-g
-          cat <<EOF > wal-g-deb/DEBIAN/control
-          Package: wal-g
-          Version: ${GITHUB_REF#refs/tags/v}
-          Section: utils
-          Priority: optional
-          Architecture: arm64
-          Maintainer: You <you@example.com>
-          Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
-          EOF
-          dpkg-deb --build wal-g-deb wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb
+            # Создание DEB пакета
+            mkdir -p wal-g-deb/DEBIAN
+            mkdir -p wal-g-deb/usr/bin/
+            cp wal-g-arm64 wal-g-deb/usr/bin/wal-g
+            chmod 755 wal-g-deb/usr/bin/wal-g
+            cat <<EOF > wal-g-deb/DEBIAN/control
+            Package: wal-g
+            Version: ${GITHUB_REF#refs/tags/v}
+            Section: utils
+            Priority: optional
+            Architecture: arm64
+            Maintainer: You <you@example.com>
+            Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
+            EOF
+            dpkg-deb --build wal-g-deb wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb
 
       - name: Upload DEB package
         uses: actions/upload-artifact@v4
