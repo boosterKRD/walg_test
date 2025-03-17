@@ -35,11 +35,11 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
-          env: |
-            GO_VERSION=${{ env.GO_VERSION }}
-            USE_BROTLI=${{ env.USE_BROTLI }}
-            USE_LIBSODIUM=${{ env.USE_LIBSODIUM }}
-            USE_LZO=${{ env.USE_LZO }}
+          env:
+            GO_VERSION: ${{ env.GO_VERSION }}
+            USE_BROTLI: ${{ env.USE_BROTLI }}
+            USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
+            USE_LZO: ${{ env.USE_LZO }}
           shell: /bin/bash
           run: |
             apt-get update
@@ -54,7 +54,7 @@ jobs:
 
             git config --global --add safe.directory /home/runner/work/wal-g/wal-g
             git config --global --add safe.directory /home/runner/work/wal-g/wal-g/submodules/brotli
-            
+
             make deps
             export GOOS=linux
             export GOARCH=arm64
