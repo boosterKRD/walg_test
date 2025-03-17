@@ -26,8 +26,12 @@ jobs:
         with:
           arch: aarch64
           distro: ubuntu20.04
-          env: GO_VERSION=${{ env.GO_VERSION }},USE_BROTLI=1,USE_LIBSODIUM=1,USE_LZO=1
           shell: /bin/bash
+        env:
+          GO_VERSION: "1.22"
+          USE_BROTLI: "1"
+          USE_LIBSODIUM: "1"
+          USE_LZO: "1"
           run: |
             # Устанавливаем зависимости
             apt-get update
