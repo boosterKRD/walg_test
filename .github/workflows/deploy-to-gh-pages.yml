@@ -1,0 +1,51 @@
+name: Deploy DEB to GitHub Pages
+
+on:
+  workflow_run:
+    workflows: ["Build DEB Package"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub Pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Download DEB artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wal-g-deb-amd64
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Deploy DEB package to GitHub Pages
+        run: |
+          mkdir -p dists/stable/main/binary-amd64
+          mv wal-g_*.deb dists/stable/main/binary-amd64/
+          
+          # Генерируем Packages.gz
+          dpkg-scanpackages --arch amd64 dists/stable/main/binary-amd64 > dists/stable/main/binary-amd64/Packages
+          gzip -k dists/stable/main/binary-amd64/Packages
+          
+          # Создаём Release файл
+          cat <<EOF > dists/stable/Release
+          Origin: WAL-G Repo
+          Label: WAL-G APT Repository
+          Suite: stable
+          Codename: stable
+          Architectures: amd64
+          Components: main
+          Description: APT repository for WAL-G
+          EOF
+
+          # Коммитим изменения
+          git add .
+          git commit -m "Update APT repo with WAL-G"
+          git push origin gh-pages

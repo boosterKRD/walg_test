@@ -1,9 +1,9 @@
-name: Build and Publish DEB Packages to GitHub Pages
+name: Build DEB Package
 
 on:
   push:
     tags:
-      - 'v*'  # Запуск на новые версии (например, v3.0.2)
+      - 'v*'
 
 env:
   GO_VERSION: "1.22"
@@ -27,18 +27,10 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential
 
-      - name: Make deps
-        run: make deps
-
       - name: Build WAL-G
         run: |
           make pg_build
           mv main/pg/wal-g wal-g-${{ matrix.arch }}
-
-      - name: Debug WAL-G binary
-        run: |
-          ls -lh
-          file wal-g-${{ matrix.arch }}
 
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
@@ -59,20 +51,7 @@ jobs:
           Description: WAL-G backup tool for PostgreSQL
           EOF
           dpkg-deb --build wal-g-deb wal-g_${VERSION}_${{ matrix.arch }}.deb
-      - name: Debug file location
-        run: find . -name "wal-g_*.deb"
 
-      - name: Debug DEB package
-        run: |
-          ls -lh
-          ls -lh wal-g-deb
-          dpkg --info wal-g_${VERSION}_${{ matrix.arch }}.deb || echo "DEB package not found"
-
-      - name: Debug artifact path
-        run: |
-          echo "Checking for file: ./wal-g_${VERSION}_${{ matrix.arch }}.deb"
-          ls -lh ./wal-g_${VERSION}_${{ matrix.arch }}.deb || echo "DEB package not found"
-          
       - name: Upload DEB package as artifact
         uses: actions/upload-artifact@v4
         with:
