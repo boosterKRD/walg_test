@@ -1,0 +1,123 @@
+name: Build and Publish DEB Package for AMD64
+
+on:
+  push:
+    tags:
+      - 'v*'  # Запуск при пуше нового тега (например, v3.0.2)
+
+permissions:
+  contents: write
+
+env:
+  GO_VERSION: "1.22"
+
+jobs:
+  build-deb-amd64:
+    runs-on: ubuntu-22.04
+    steps:
+      # 1. Клонируем репозиторий
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем Go
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      # 3. Устанавливаем необходимые пакетные зависимости для сборки
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential \
+                                  apt-utils brotli libsodium-dev liblzo2-dev
+
+      # 4. make deps (если нужно подтянуть go-модули и т.п.)
+      - name: Make deps
+        run: make deps
+
+      # 5. Сборка WAL-G под `amd64`
+      - name: Build WAL-G for AMD64
+        run: |
+          export GOOS=linux
+          export GOARCH=amd64
+          export CGO_ENABLED=1
+          export USE_BROTLI=1
+          export USE_LIBSODIUM=1
+          export USE_LZO=1
+
+          make pg_build
+          mv main/pg/wal-g wal-g-amd64
+
+      # 6. Отладочная информация о бинарнике
+      - name: Debug WAL-G binary
+        run: |
+          ls -lh
+          file wal-g-amd64
+
+      # 7. Выделяем версию из тега
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      # 8. Формируем DEB-пакет
+      - name: Create DEB package
+        run: |
+          mkdir -p wal-g-deb/DEBIAN
+          mkdir -p wal-g-deb/usr/bin/
+          cp wal-g-amd64 wal-g-deb/usr/bin/wal-g
+          chmod 755 wal-g-deb/usr/bin/wal-g
+          cat <<EOF > wal-g-deb/DEBIAN/control
+          Package: wal-g
+          Version: ${VERSION}
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Maintainer: You <you@example.com>
+          Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
+          EOF
+          dpkg-deb --build wal-g-deb wal-g_${VERSION}_amd64.deb
+
+      # 9. Дополнительная отладка: ищем файл wal-g_*.deb
+      - name: Debug file location
+        run: find . -name "wal-g_*.deb"
+
+      # 10. Публикуем в gh-pages
+      - name: Deploy to GitHub Pages
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
+          cd repo-pages
+          git pull --rebase
+
+          # Создаём папку под конкретную архитектуру, копируем .deb
+          mkdir -p dists/stable/main/binary-amd64
+          cp ../wal-g_${VERSION}_amd64.deb dists/stable/main/binary-amd64/
+
+          # Создаём конфиг apt-ftparchive
+          cat <<CONF > ../aptftparchive.conf
+          Dir {
+            ArchiveDir "dists/stable";
+          }
+          APT::FTPArchive::Release {
+            Origin "WAL-G Repo";
+            Label "WAL-G APT Repository";
+            Suite "stable";
+            Codename "stable";
+            Architectures "amd64";
+            Components "main";
+          }
+          CONF
+
+          # Генерируем Packages и Packages.gz
+          apt-ftparchive -c ../aptftparchive.conf packages dists/stable/main/binary-amd64 > dists/stable/main/binary-amd64/Packages
+          gzip -kf dists/stable/main/binary-amd64/Packages
+
+          # Генерируем Release с хэшами и нужными полями
+          apt-ftparchive -c ../aptftparchive.conf release dists/stable > dists/stable/Release
+
+          git add .
+          git commit -m "Add WAL-G package ${VERSION} [amd64]"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin gh-pages
