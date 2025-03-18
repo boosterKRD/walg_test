@@ -1,0 +1,14 @@
+Package: wal-g
+Architecture: amd64
+Version: 2.0.11
+Priority: optional
+Section: utils
+Maintainer: You <you@example.com>
+Filename: dists/noble/main/binary-amd64/wal-g_2.0.11_amd64.deb
+Size: 13095296
+MD5sum: 5e41db1daf73679159cb05b08564ab17
+SHA1: 5bfdfb902b462ed32b2a4e0f98fd253984ff1eee
+SHA256: ca0b2107545d4699b22e93e78b40da500921861c63bb7225850d144700629d2d
+SHA512: b95ad2f4fb5d3bd576d4e272b7a32bfb72b128a4205063c8430df66c9fa03e40e94f9a42834fec3274a037da71a61197c431384cbb0d1818dc8541c7c6fb92ac
+Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
+
