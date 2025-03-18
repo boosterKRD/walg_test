@@ -75,17 +75,15 @@ jobs:
 
           Package: wal-g
           Architecture: amd64
-          Depends: ${shlibs:Depends}, ${misc:Depends}
+          Depends: \${shlibs:Depends}, \${misc:Depends}
           Description: WAL-G backup tool for PostgreSQL
           EOF
 
           # Create rules file
-          cat <<EOF > debian/rules
-          #!/usr/bin/make -f
-          export DH_GOPKG=${{ env.DH_GOPKG }}
-          %:
-          	dh \$@ --buildsystem=golang
-          EOF
+          echo "#!/usr/bin/make -f" > debian/rules
+          echo "export DH_GOPKG=${DH_GOPKG}" >> debian/rules
+          echo "%" >> debian/rules
+          echo "	dh \$@ --buildsystem=golang" >> debian/rules
           chmod +x debian/rules
 
           # Create changelog file
