@@ -84,22 +84,6 @@ jobs:
           Description: WAL-G backup tool for PostgreSQL
           EOF
 
-          # Create rules file
-          cat <<EOF > debian/rules
-          #!/usr/bin/make -f
-          # -*- makefile -*-
-          # NOTE: Only TABs allowed here !!!
-
-          override_dh_auto_build:
-
-          override_dh_auto_install:
-            dh_auto_install --destdir=debian/wal-g
-
-          %:
-            dh \$@
-          EOF
-          chmod +x debian/rules
-
           # Create changelog file
           cat <<EOF > debian/changelog
           wal-g (${VERSION}-1) unstable; urgency=medium

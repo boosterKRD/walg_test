@@ -1,4 +1,11 @@
 #!/usr/bin/make -f
-export DH_GOPKG=
-%
-	dh $@ --buildsystem=golang
+# -*- makefile -*-
+# NOTE: Only TABs allowed here !!!
+
+override_dh_auto_build:
+
+override_dh_auto_install:
+	dh_auto_install --destdir=debian/wal-g
+
+%:
+	dh $@
