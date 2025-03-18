@@ -99,11 +99,11 @@ jobs:
           echo "wal-g usr/bin/" > debian/install
 
       # 9. Debug: Check detected Go module path
-      - name: Debug: Show detected Go module path
-        run: echo "Using DH_GOPKG=${{ env.DH_GOPKG }}"
+      - name: Debug - Show detected Go module path
+        run: echo "Using DH_GOPKG=\"${{ env.DH_GOPKG }}\""
 
       # 10. Debug: Check Go files
-      - name: Debug: List Go source files
+      - name: Debug - List Go source files
         run: find . -name "*.go"
 
       # 11. Build the DEB package using debhelper (`dh`)
