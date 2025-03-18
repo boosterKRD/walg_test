@@ -13,7 +13,10 @@ env:
 
 jobs:
   build-deb-amd64:
-    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]  # Specify the different Ubuntu versions to run the job on
+    runs-on: ${{ matrix.os }}  # Dynamically uses the Ubuntu version from the matrix
     steps:
       # 1. Клонируем репозиторий
       - name: Checkout code
