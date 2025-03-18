@@ -1,0 +1,46 @@
+name: Release workflow for tagged versions
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v0.2.19, v0.2.14a
+
+env:
+  GO_VERSION: "1.22"
+  USE_BROTLI: 1
+  USE_LIBSODIUM: 1
+  USE_LZO: 1
+
+jobs:
+  release-ubuntu:
+    strategy:
+      matrix:
+        os: [ ubuntu-24.04 ]
+        db: [ pg ]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install deps
+        run: sudo apt-get install liblzo2-dev brotli libsodium-dev
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+        id: go
+
+      - name: Get dependencies
+        run: |
+          go get -v -t -d ./...
+
+      - name: Make deps
+        run: make deps
+
+      - name: Build WAL-G
+        run: make ${{ matrix.db }}_build
+
+      - name: Rename WAL-G binary
+        run: mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-${{ matrix.os }}-amd64
