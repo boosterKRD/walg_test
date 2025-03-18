@@ -56,13 +56,18 @@ jobs:
       # 7. Detect Go module path dynamically
       - name: Detect Go module path
         run: |
-          GO_MODULE_PATH=$(go list -m)
+          GO_MODULE_PATH=$(go list -m || echo "github.com/boosterKRD/walg_test")
           echo "DH_GOPKG=${GO_MODULE_PATH}" >> $GITHUB_ENV
 
       # 8. Create `debian/` directory and required files dynamically
       - name: Prepare Debian packaging
         run: |
           mkdir -p debian
+
+          # Определяем DH_GOPKG, если он не установлен
+          if [ -z "${DH_GOPKG}" ]; then
+            export DH_GOPKG="github.com/boosterKRD/walg_test"
+          fi
 
           # Create control file
           cat <<EOF > debian/control
@@ -85,7 +90,7 @@ jobs:
           echo "%" >> debian/rules
           echo -e "\tdh \$@ --buildsystem=golang" >> debian/rules
           chmod +x debian/rules
-
+          
           # Create changelog file
           cat <<EOF > debian/changelog
           wal-g (${VERSION}-1) unstable; urgency=medium
