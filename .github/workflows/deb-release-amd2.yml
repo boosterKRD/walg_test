@@ -1,0 +1,144 @@
+name: Build and Publish DEB Package for AMD64
+
+on:
+  push:
+    tags:
+      - 'v*'  # Запуск при пуше нового тега (например, v3.0.2)
+
+permissions:
+  contents: write
+
+env:
+  GO_VERSION: "1.22"
+
+jobs:
+  build-deb-amd64:
+    runs-on: ubuntu-22.04
+    steps:
+      # 1. Clone the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Install Go
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      # 3. Install required dependencies
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y devscripts debhelper dh-golang dpkg-dev build-essential \
+                                  apt-utils brotli libsodium-dev liblzo2-dev golang-any fakeroot
+
+      # 4. Fetch Go dependencies if needed
+      - name: Make deps
+        run: make deps
+
+      # 5. Build WAL-G for `amd64`
+      - name: Build WAL-G for AMD64
+        run: |
+          export GOOS=linux
+          export GOARCH=amd64
+          export CGO_ENABLED=1
+          export USE_BROTLI=1
+          export USE_LIBSODIUM=1
+          export USE_LZO=1
+
+          make pg_build
+          mv main/pg/wal-g wal-g
+
+      # 6. Extract version from the tag
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      # 7. Create `debian/` directory and required files dynamically
+      - name: Prepare Debian packaging
+        run: |
+          mkdir -p debian
+
+          # Create control file
+          cat <<EOF > debian/control
+          Source: wal-g
+          Maintainer: mdb <mdb-admin@yandex-team.ru>
+          Section: utils
+          Priority: optional
+          Standards-Version: 4.6.0
+          Build-Depends: debhelper-compat (= 13), golang-any, dh-golang
+          Homepage: https://github.com/wal-g/wal-g
+
+          Package: wal-g
+          Architecture: any
+          Depends: ${shlibs:Depends}, ${misc:Depends}
+          Description: WAL-G backup tool for PostgreSQL
+          EOF
+
+          # Create rules file
+          cat <<EOF > debian/rules
+          #!/usr/bin/make -f
+          %:
+          	dh \$@ --buildsystem=golang
+          EOF
+          chmod +x debian/rules
+
+          # Create changelog file
+          cat <<EOF > debian/changelog
+          wal-g (${VERSION}-1) unstable; urgency=medium
+
+            * Automated release
+
+           -- Your Name <mdb@yandex-team.ru>  $(date -R)
+          EOF
+
+          # Create install file
+          echo "wal-g usr/bin/" > debian/install
+
+      # 8. Build the DEB package using debhelper (`dh`)
+      - name: Build DEB package
+        run: dpkg-buildpackage -us -uc
+
+      # 9. Find the generated `.deb` package
+      - name: Debug file location
+        run: find .. -name "wal-g_*.deb"
+
+      # 10. Publish to GitHub Pages
+      - name: Deploy to GitHub Pages
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
+          cd repo-pages
+          git pull --rebase
+
+          # Create directory for package, move .deb file
+          mkdir -p dists/stable/main/binary-amd64
+          cp ../wal-g_${VERSION}_amd64.deb dists/stable/main/binary-amd64/
+
+          # Create APT repository metadata
+          cat <<CONF > ../aptftparchive.conf
+          Dir {
+            ArchiveDir "dists/stable";
+          }
+          APT::FTPArchive::Release {
+            Origin "WAL-G Repo";
+            Label "WAL-G APT Repository";
+            Suite "stable";
+            Codename "stable";
+            Architectures "amd64";
+            Components "main";
+          }
+          CONF
+
+          # Generate Packages and Packages.gz
+          apt-ftparchive -c ../aptftparchive.conf packages dists/stable/main/binary-amd64 > dists/stable/main/binary-amd64/Packages
+          gzip -kf dists/stable/main/binary-amd64/Packages
+
+          # Generate Release file
+          apt-ftparchive -c ../aptftparchive.conf release dists/stable > dists/stable/Release
+
+          git add .
+          git commit -m "Add WAL-G package ${VERSION} [amd64]"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin gh-pages
