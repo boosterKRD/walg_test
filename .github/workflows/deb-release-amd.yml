@@ -76,27 +76,28 @@ jobs:
           cd repo-pages
           git pull --rebase
 
-          mkdir -p dists/stable/main/binary-amd64
-          cp ../wal-g_${VERSION}_amd64.deb dists/stable/main/binary-amd64/
+          for CODENAME in focal jammy noble; do
+            mkdir -p dists/$CODENAME/main/binary-amd64
+            cp ../wal-g_${VERSION}_amd64.deb dists/$CODENAME/main/binary-amd64/
+          done
 
           cat <<CONF > ../aptftparchive.conf
           Dir {
-            ArchiveDir "dists/stable";
+            ArchiveDir "dists";
           }
           APT::FTPArchive::Release {
             Origin "WAL-G Repo";
             Label "WAL-G APT Repository";
-            Suite "stable";
-            Codename "stable";
-            Architectures "amd64";
+            Architectures "amd64 arm64";
             Components "main";
           }
           CONF
 
-          apt-ftparchive -c ../aptftparchive.conf packages dists/stable/main/binary-amd64 > dists/stable/main/binary-amd64/Packages
-          gzip -kf dists/stable/main/binary-amd64/Packages
-
-          apt-ftparchive -c ../aptftparchive.conf release dists/stable > dists/stable/Release
+          for CODENAME in focal jammy noble; do
+            apt-ftparchive -c ../aptftparchive.conf packages dists/$CODENAME/main/binary-amd64 > dists/$CODENAME/main/binary-amd64/Packages
+            gzip -kf dists/$CODENAME/main/binary-amd64/Packages
+            apt-ftparchive -c ../aptftparchive.conf release dists/$CODENAME > dists/$CODENAME/Release
+          done
 
           git add .
           git commit -m "Add WAL-G package ${VERSION} [amd64]"
