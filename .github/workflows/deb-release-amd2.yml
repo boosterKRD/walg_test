@@ -85,10 +85,19 @@ jobs:
           EOF
 
           # Create rules file
-          echo "#!/usr/bin/make -f" > debian/rules
-          echo "export DH_GOPKG=${DH_GOPKG}" >> debian/rules
-          echo "%" >> debian/rules
-          echo -e "\tdh \$@ --buildsystem=golang" >> debian/rules
+          cat <<EOF > debian/rules
+          #!/usr/bin/make -f
+          # -*- makefile -*-
+          # NOTE: Only TABs allowed here !!!
+
+          override_dh_auto_build:
+
+          override_dh_auto_install:
+            dh_auto_install --destdir=debian/wal-g
+
+          %:
+            dh \$@
+          EOF
           chmod +x debian/rules
 
           # Create changelog file
