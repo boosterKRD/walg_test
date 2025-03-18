@@ -1,0 +1,21 @@
+Architectures: amd64 arm64
+Components: main
+Date: Tue, 18 Mar 2025 18:10:15 +0000
+Label: WAL-G APT Repository
+Origin: WAL-G Repo
+MD5Sum:
+ e97c0abdddc495e9c5e0be5deaa6d9f8              129 Release
+ 0eafbed2ae12aad2a7b90f95ef4763ae              575 main/binary-amd64/Packages
+ 619de6625ccb62b9fd006438c0bbb429              445 main/binary-amd64/Packages.gz
+SHA1:
+ c974bbb6aadd588ac5935f5840269b92ebc0cea3              129 Release
+ ae01355bb4e74730144ada46e9df51e1cac79ace              575 main/binary-amd64/Packages
+ 427eec8d0a93cb2ed4e2509964fbb2613cc9791b              445 main/binary-amd64/Packages.gz
+SHA256:
+ ec31b6fa4c983c94b0c12e73141e455a9cf4c04ad0ad53f9d3a7d897108b6d38              129 Release
+ b0dbb4bc6c875699c01f84f59df192822b5446d58b4258c8816152a7ebcbe77a              575 main/binary-amd64/Packages
+ e02a4aab9bd79f7b4aeea60f99196b4ab21b8d0cba704c09e0fcedafa922a536              445 main/binary-amd64/Packages.gz
+SHA512:
+ ff10e845407cf0a2df3921dd4b18fb7fc5674937e4f7287354fbf685bc8f742e454355a6f118c971e4301b73b37202a60091552410d83c5b643821b3cb1b91a3              129 Release
+ 30fa658a7e190ccae423d07d3feec961acde7e6c4b6c7efaa6b693497c6cac48ba18dd013a190fa69698982783a2bc3338d79742a43b9eda8d503c30ed06c7e5              575 main/binary-amd64/Packages
+ c8df2b3a499b955d440afadcf62acfbd347f4a0308ae7763e562f5073ff16a8c641076aa11b2d76c68b731558b237061cfbf69e34549a11212f3bae84ed951c3              445 main/binary-amd64/Packages.gz
