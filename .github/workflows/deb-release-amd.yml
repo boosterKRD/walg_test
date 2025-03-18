@@ -42,7 +42,7 @@ jobs:
         run: make ${{ matrix.db }}_build
 
       - name: Rename WAL-G binary
-        run: mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-${{ matrix.os }}-amd64
+        run: mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-${{ matrix.os }}
 
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
@@ -51,7 +51,7 @@ jobs:
         run: |
           mkdir -p wal-g-deb/DEBIAN
           mkdir -p wal-g-deb/usr/bin/
-          cp wal-g-${{ matrix.db }}-${{ matrix.os }}-amd64 wal-g-deb/usr/bin/wal-g
+          cp wal-g-${{ matrix.db }}-${{ matrix.os }} wal-g-deb/usr/bin/wal-g
           chmod 755 wal-g-deb/usr/bin/wal-g
           cat <<EOF > wal-g-deb/DEBIAN/control
           Package: wal-g
@@ -62,7 +62,7 @@ jobs:
           Maintainer: You <you@example.com>
           Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
           EOF
-          dpkg-deb --build wal-g-deb wal-g_${VERSION}_amd64.deb
+          dpkg-deb --build wal-g-deb wal-g_${VERSION}.deb
 
       - name: Debug file location
         run: find . -name "wal-g_*.deb"
@@ -79,7 +79,7 @@ jobs:
             echo "Unsupported Ubuntu version: ${{ matrix.os }}"
             exit 1
           fi
-                  
+
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
@@ -88,7 +88,7 @@ jobs:
           git pull --rebase
 
           mkdir -p dists/$CODENAME/main/binary-amd64
-          cp ../wal-g_${VERSION}_amd64.deb dists/$CODENAME/main/binary-amd64/
+          cp ../wal-g_${VERSION}.deb dists/$CODENAME/main/binary-amd64/
 
           cat <<CONF > ../aptftparchive.conf
           Dir {
