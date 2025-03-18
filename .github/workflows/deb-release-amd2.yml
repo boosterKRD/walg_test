@@ -83,7 +83,7 @@ jobs:
           echo "#!/usr/bin/make -f" > debian/rules
           echo "export DH_GOPKG=${DH_GOPKG}" >> debian/rules
           echo "%" >> debian/rules
-          echo "	dh \$@ --buildsystem=golang" >> debian/rules
+          echo -e "\tdh \$@ --buildsystem=golang" >> debian/rules
           chmod +x debian/rules
 
           # Create changelog file
