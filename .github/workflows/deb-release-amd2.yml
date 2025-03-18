@@ -3,7 +3,7 @@ name: Build and Publish DEB Package for AMD64
 on:
   push:
     tags:
-      - 'v*'  # Запуск при пуше нового тега (например, v3.0.2)
+      - 'v*'  # Trigger on new tag push (e.g., v3.0.2)
 
 permissions:
   contents: write
@@ -53,7 +53,13 @@ jobs:
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
-      # 7. Create `debian/` directory and required files dynamically
+      # 7. Detect Go module path dynamically
+      - name: Detect Go module path
+        run: |
+          GO_MODULE_PATH=$(go list -m)
+          echo "DH_GOPKG=${GO_MODULE_PATH}" >> $GITHUB_ENV
+
+      # 8. Create `debian/` directory and required files dynamically
       - name: Prepare Debian packaging
         run: |
           mkdir -p debian
@@ -61,15 +67,14 @@ jobs:
           # Create control file
           cat <<EOF > debian/control
           Source: wal-g
-          Maintainer: mdb <mdb-admin@yandex-team.ru>
+          Maintainer: Your Name <you@example.com>
           Section: utils
           Priority: optional
           Standards-Version: 4.6.0
           Build-Depends: debhelper-compat (= 13), golang-any, dh-golang
-          Homepage: https://github.com/wal-g/wal-g
 
           Package: wal-g
-          Architecture: any
+          Architecture: amd64
           Depends: ${shlibs:Depends}, ${misc:Depends}
           Description: WAL-G backup tool for PostgreSQL
           EOF
@@ -77,6 +82,7 @@ jobs:
           # Create rules file
           cat <<EOF > debian/rules
           #!/usr/bin/make -f
+          export DH_GOPKG=${{ env.DH_GOPKG }}
           %:
           	dh \$@ --buildsystem=golang
           EOF
@@ -88,21 +94,31 @@ jobs:
 
             * Automated release
 
-           -- Your Name <mdb@yandex-team.ru>  $(date -R)
+           -- Your Name <you@example.com>  $(date -R)
           EOF
 
           # Create install file
           echo "wal-g usr/bin/" > debian/install
 
-      # 8. Build the DEB package using debhelper (`dh`)
-      - name: Build DEB package
-        run: dpkg-buildpackage -us -uc
+      # 9. Debug: Check detected Go module path
+      - name: Debug: Show detected Go module path
+        run: echo "Using DH_GOPKG=${{ env.DH_GOPKG }}"
 
-      # 9. Find the generated `.deb` package
+      # 10. Debug: Check Go files
+      - name: Debug: List Go source files
+        run: find . -name "*.go"
+
+      # 11. Build the DEB package using debhelper (`dh`)
+      - name: Build DEB package
+        run: |
+          export DH_GOPKG="${{ env.DH_GOPKG }}"
+          dpkg-buildpackage -us -uc
+
+      # 12. Find the generated `.deb` package
       - name: Debug file location
         run: find .. -name "wal-g_*.deb"
 
-      # 10. Publish to GitHub Pages
+      # 13. Publish to GitHub Pages
       - name: Deploy to GitHub Pages
         run: |
           git config --global user.name "github-actions"
