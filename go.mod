@@ -1,4 +1,4 @@
-module github.com/wal-g/wal-g
+module github.com/boosterKRD/walg_test
 
 go 1.22
 

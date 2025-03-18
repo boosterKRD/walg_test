@@ -90,7 +90,7 @@ jobs:
           echo "%" >> debian/rules
           echo -e "\tdh \$@ --buildsystem=golang" >> debian/rules
           chmod +x debian/rules
-          
+
           # Create changelog file
           cat <<EOF > debian/changelog
           wal-g (${VERSION}-1) unstable; urgency=medium
