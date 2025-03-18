@@ -1,7 +1,6 @@
 name: Release workflow for tagged versions
 on:
   push:
-    # Sequence of patterns matched against refs/tags
     tags:
       - 'v*' # Push events to matching v*, i.e. v0.2.19, v0.2.14a
 
@@ -44,3 +43,62 @@ jobs:
 
       - name: Rename WAL-G binary
         run: mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-${{ matrix.os }}-amd64
+
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Create DEB package
+        run: |
+          mkdir -p wal-g-deb/DEBIAN
+          mkdir -p wal-g-deb/usr/bin/
+          cp wal-g-${{ matrix.db }}-${{ matrix.os }}-amd64 wal-g-deb/usr/bin/wal-g
+          chmod 755 wal-g-deb/usr/bin/wal-g
+          cat <<EOF > wal-g-deb/DEBIAN/control
+          Package: wal-g
+          Version: ${VERSION}
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Maintainer: You <you@example.com>
+          Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
+          EOF
+          dpkg-deb --build wal-g-deb wal-g_${VERSION}_amd64.deb
+
+      - name: Debug file location
+        run: find . -name "wal-g_*.deb"
+
+      - name: Deploy to GitHub Pages
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
+          cd repo-pages
+          git pull --rebase
+
+          mkdir -p dists/stable/main/binary-amd64
+          cp ../wal-g_${VERSION}_amd64.deb dists/stable/main/binary-amd64/
+
+          cat <<CONF > ../aptftparchive.conf
+          Dir {
+            ArchiveDir "dists/stable";
+          }
+          APT::FTPArchive::Release {
+            Origin "WAL-G Repo";
+            Label "WAL-G APT Repository";
+            Suite "stable";
+            Codename "stable";
+            Architectures "amd64";
+            Components "main";
+          }
+          CONF
+
+          apt-ftparchive -c ../aptftparchive.conf packages dists/stable/main/binary-amd64 > dists/stable/main/binary-amd64/Packages
+          gzip -kf dists/stable/main/binary-amd64/Packages
+
+          apt-ftparchive -c ../aptftparchive.conf release dists/stable > dists/stable/Release
+
+          git add .
+          git commit -m "Add WAL-G package ${VERSION} [amd64]"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin gh-pages
