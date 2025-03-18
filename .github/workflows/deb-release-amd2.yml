@@ -115,7 +115,7 @@ jobs:
       # 9. Debug: Check detected Go module path
       - name: Debug - Show debian/rules
         run: cat -A debian/rules
-        
+
       # 10. Debug: Check Go files
       - name: Debug - List Go source files
         run: find . -name "*.go"
