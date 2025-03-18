@@ -32,9 +32,12 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential \
-                                  apt-utils brotli libsodium-dev liblzo2-dev
+          sudo apt-get install -y devscripts debhelper dh-make dpkg-dev build-essential apt-utils brotli libsodium-dev liblzo2-dev
 
+      - name: Get dependencies
+        run: |
+          go get -v -t -d ./...
+          
       # 4. make deps (если нужно подтянуть go-модули и т.п.)
       - name: Make deps
         run: make deps
