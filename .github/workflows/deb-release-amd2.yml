@@ -34,7 +34,11 @@ jobs:
 
       # 4. Fetch Go dependencies if needed
       - name: Make deps
-        run: make deps
+        run: |
+          export USE_BROTLI=1
+          export USE_LIBSODIUM=1
+          export USE_LZO=1
+          make deps
 
       # 5. Build WAL-G for `amd64`
       - name: Build WAL-G for AMD64
