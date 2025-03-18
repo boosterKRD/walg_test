@@ -69,6 +69,17 @@ jobs:
 
       - name: Deploy to GitHub Pages
         run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-24.04" ]]; then
+            CODENAME="noble"
+          elif [[ "${{ matrix.os }}" == "ubuntu-22.04" ]]; then
+            CODENAME="jammy"
+          elif [[ "${{ matrix.os }}" == "ubuntu-20.04" ]]; then
+            CODENAME="focal"
+          else
+            echo "Unsupported Ubuntu version: ${{ matrix.os }}"
+            exit 1
+          fi
+                  
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
@@ -76,10 +87,8 @@ jobs:
           cd repo-pages
           git pull --rebase
 
-          for CODENAME in focal jammy noble; do
-            mkdir -p dists/$CODENAME/main/binary-amd64
-            cp ../wal-g_${VERSION}_amd64.deb dists/$CODENAME/main/binary-amd64/
-          done
+          mkdir -p dists/$CODENAME/main/binary-amd64
+          cp ../wal-g_${VERSION}_amd64.deb dists/$CODENAME/main/binary-amd64/
 
           cat <<CONF > ../aptftparchive.conf
           Dir {
@@ -93,11 +102,10 @@ jobs:
           }
           CONF
 
-          for CODENAME in focal jammy noble; do
-            apt-ftparchive -c ../aptftparchive.conf packages dists/$CODENAME/main/binary-amd64 > dists/$CODENAME/main/binary-amd64/Packages
-            gzip -kf dists/$CODENAME/main/binary-amd64/Packages
-            apt-ftparchive -c ../aptftparchive.conf release dists/$CODENAME > dists/$CODENAME/Release
-          done
+          apt-ftparchive -c ../aptftparchive.conf packages dists/$CODENAME/main/binary-amd64 > dists/$CODENAME/main/binary-amd64/Packages
+          gzip -kf dists/$CODENAME/main/binary-amd64/Packages
+          apt-ftparchive -c ../aptftparchive.conf release dists/$CODENAME > dists/$CODENAME/Release
+
 
           git add .
           git commit -m "Add WAL-G package ${VERSION} [amd64]"
