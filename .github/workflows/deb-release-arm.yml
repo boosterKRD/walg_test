@@ -1,0 +1,145 @@
+name: Build and Publish DEB Package for ARM64
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  GO_VERSION: "1.22.8"
+  USE_BROTLI: 1
+  USE_LIBSODIUM: 1
+  USE_LZO: 1
+
+jobs:
+  build-deb-arm64:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        db: [pg]
+        include:
+          - arch: aarch64
+            distro: ubuntu20.04
+            label: ubuntu-20.04
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build and package WAL-G inside ARM64 container
+        uses: uraimo/run-on-arch-action@v3
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          env: |
+            USE_BROTLI: ${{ env.USE_BROTLI }}
+            USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
+            USE_LZO: ${{ env.USE_LZO }}
+          shell: /bin/bash
+          run: |
+            apt-get update
+            apt-get install -y build-essential curl git cmake liblzo2-dev brotli libsodium-dev devscripts debhelper dh-make dpkg-dev
+
+            curl -LO https://go.dev/dl/go${{ env.GO_VERSION }}.linux-arm64.tar.gz
+            tar -C /usr/local -xzf go${{ env.GO_VERSION }}.linux-arm64.tar.gz
+            export GOROOT=/usr/local/go
+            export GOPATH=$HOME/go          
+            export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
+            git config --global --add safe.directory /home/runner/work/wal-g/wal-g
+            git config --global --add safe.directory /home/runner/work/wal-g/wal-g/submodules/brotli
+            git config --global --add safe.directory /home/runner/work/walg_test/walg_test
+            git config --global --add safe.directory /home/runner/work/walg_test/walg_test/submodules/brotli
+
+            make deps
+            make pg_build
+            mv main/pg/wal-g wal-g-arm64
+
+            mkdir -p wal-g-deb/DEBIAN
+            mkdir -p wal-g-deb/usr/bin/
+            cp wal-g-arm64 wal-g-deb/usr/bin/wal-g
+            chmod 755 wal-g-deb/usr/bin/wal-g
+
+            cat <<EOF > wal-g-deb/DEBIAN/control
+            Package: wal-g
+            Version: ${GITHUB_REF#refs/tags/v}
+            Section: utils
+            Priority: optional
+            Architecture: arm64
+            Maintainer: You <you@example.com>
+            Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
+            EOF
+
+            dpkg-deb --build wal-g-deb wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb
+
+            mkdir -p artifacts
+            cp wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb artifacts/
+
+      - name: Upload DEB package
+        uses: actions/upload-artifact@v4
+        with:
+          name: wal-g-arm64
+          path: artifacts/wal-g_${{ github.ref_name }}_arm64.deb
+
+      - name: Deploy to GitHub Pages
+        run: |
+          CODENAME=""
+          if [[ "${{ matrix.label }}" == "ubuntu-24.04" ]]; then
+            CODENAME="noble"
+          elif [[ "${{ matrix.label }}" == "ubuntu-22.04" ]]; then
+            CODENAME="jammy"
+          elif [[ "${{ matrix.label }}" == "ubuntu-20.04" ]]; then
+            CODENAME="focal"
+          else
+            echo "Unsupported Ubuntu version: ${{ matrix.label }}"
+            exit 1
+          fi
+
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
+          cd repo-pages
+          for attempt in {1..5}; do
+            git pull --rebase origin gh-pages && break
+            echo "Retrying git pull ($attempt/5)..."
+            sleep $(shuf -i 1-10 -n 1)
+          done
+
+          mkdir -p dists/$CODENAME/main/binary-arm64
+          cp ../artifacts/wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb dists/$CODENAME/main/binary-arm64/
+
+
+          cat <<CONF > ../aptftparchive.conf
+          Dir {
+            ArchiveDir "dists";
+          }
+
+          APT::FTPArchive::Release {
+            Origin "WAL-G Repo";
+            Label "WAL-G APT Repository";
+            Architectures "amd64 arm64";
+            Components "main";
+          }
+
+          APT::FTPArchive::Release::Codename "focal";
+          APT::FTPArchive::Release::Codename "jammy";
+          APT::FTPArchive::Release::Codename "noble";
+          CONF
+
+          apt-ftparchive -c ../aptftparchive.conf packages dists/$CODENAME/main/binary-arm64 > dists/$CODENAME/main/binary-arm64/Packages
+          gzip -kf dists/$CODENAME/main/binary-arm64/Packages
+          apt-ftparchive -c ../aptftparchive.conf release dists/$CODENAME > dists/$CODENAME/Release
+
+          git add .
+          git commit -m "Add WAL-G package ${GITHUB_REF#refs/tags/v} [arm64]"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          for attempt in {1..5}; do
+            git push origin gh-pages && break
+            echo "Retrying git push ($attempt/5)..."
+            sleep $(shuf -i 1-10 -n 1)
+          done
