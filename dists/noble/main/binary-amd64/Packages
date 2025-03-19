@@ -68,3 +68,17 @@ SHA256: c89956011358ca11e75484a6fecd5d746a5a09fba2e8f74793ff1d6c855bb79f
 SHA512: 87db3db9596cfd897c7b47b96c2498c18ea86887ccd04366706b6a658b0019cb68909f8aea787f69b5a747d91e1f4837012e67d9f4f992ca7f9cd9c2d5a90843
 Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
 
+Package: wal-g
+Architecture: amd64
+Version: 2.0.28
+Priority: optional
+Section: utils
+Maintainer: You <you@example.com>
+Filename: dists/noble/main/binary-amd64/wal-g_2.0.28.deb
+Size: 13094980
+MD5sum: 75f30a10d51eef5048b8f01c093b54dd
+SHA1: 2db57188120cb87c2cf693db5cc1a5f2597fed34
+SHA256: 574a079831057d1a28233fcab943d0aa5e07cb1515185e8c3d3aa7af3da2aba3
+SHA512: b147adafa28599da5902b1589d3bb9927238c4513c5569829635847902c30b8da10d68fd4db1de09c7e7d95eded76acc4960c22995d31b86a4bf7610094d8dfa
+Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
+
