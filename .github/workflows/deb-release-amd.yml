@@ -19,6 +19,7 @@ jobs:
       max-parallel: 2
       fail-fast: false
     runs-on: ${{ matrix.os }}
+    continue-on-error: false
     steps:
       - name: Install deps
         run: |
@@ -66,7 +67,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wal-g-deb
-          path: wal-g_${VERSION}-${{ matrix.db }}-amd64-${{ matrix.os }}.deb
+          path: wal-g_${{ env.VERSION}}-${{ matrix.db }}-amd64-${{ matrix.os }}.deb
 
 
   deploy-to-gh-pages:
