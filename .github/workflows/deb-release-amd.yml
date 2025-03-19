@@ -1,4 +1,4 @@
-name: Release workflow for tagged versions
+name: Build and Publish DEB Package for AMD64
 on:
   push:
     tags:
@@ -95,7 +95,7 @@ jobs:
           mkdir -p dists/$CODENAME/main/binary-amd64
           cp ../wal-g_${VERSION}.deb dists/$CODENAME/main/binary-amd64/
 
-          apt-ftparchive -c .conf packages dists/$CODENAME/main/binary-amd64 > dists/$CODENAME/main/binary-amd64/Packages
+          apt-ftparchive -c aptftparchive.conf packages dists/$CODENAME/main/binary-amd64 > dists/$CODENAME/main/binary-amd64/Packages
           gzip -kf dists/$CODENAME/main/binary-amd64/Packages
           apt-ftparchive -c aptftparchive.conf release dists/$CODENAME > dists/$CODENAME/Release
 
