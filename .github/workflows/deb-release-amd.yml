@@ -68,7 +68,7 @@ jobs:
       - name: Upload DEB package
         uses: actions/upload-artifact@v4
         with:
-          name: wal-g-deb
+          name: wal-g-deb-${{ matrix.db }}-${{ matrix.os }}
           path: wal-g_${{ env.VERSION}}-${{ matrix.db }}-amd64-${{ matrix.os }}.deb
 
 
