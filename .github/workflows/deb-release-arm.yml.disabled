@@ -55,8 +55,8 @@ jobs:
             git config --global --add safe.directory /home/runner/work/walg_test/walg_test
             git config --global --add safe.directory /home/runner/work/walg_test/walg_test/submodules/brotli
 
-            make install_and_build_pg
-            # make pg_build
+            make deps
+            make pg_build
             mv main/pg/wal-g wal-g-arm64
 
             mkdir -p wal-g-deb/DEBIAN

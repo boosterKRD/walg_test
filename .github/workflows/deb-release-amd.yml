@@ -15,8 +15,8 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04 ]
-        db: [ pg, redis ]
-      max-parallel: 4
+        db: [ pg, mongo, redis]
+      max-parallel: 2
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -33,8 +33,11 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: Make deps and Build WAL-G
-        run: make install_and_build_pg
+      - name: Make deps
+        run: make deps
+
+      - name: Build WAL-G
+        run: make ${{ matrix.db }}_build
 
       - name: Rename WAL-G binary
         run: mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-${{ matrix.os }}
