@@ -1,0 +1,121 @@
+name: Build and Publish DEB Package for AMD64
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  GO_VERSION: "1.22"
+  USE_BROTLI: 1
+  USE_LIBSODIUM: 1
+  USE_LZO: 1
+
+jobs:
+  release-ubuntu:
+    strategy:
+      matrix:
+        os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04 ]
+        db: [ pg, mongo, redis]
+      max-parallel: 2
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y liblzo2-dev brotli libsodium-dev
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Golang
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Make deps
+        run: make deps
+
+      - name: Build WAL-G
+        run: make ${{ matrix.db }}_build
+
+      - name: Rename WAL-G binary
+        run: mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-amd64-${{ matrix.os }}
+
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Create DEB package
+        run: |
+          mkdir -p wal-g-deb/DEBIAN
+          mkdir -p wal-g-deb/usr/bin/
+          cp wal-g-${{ matrix.db }}-amd64-${{ matrix.os }} wal-g-deb/usr/bin/wal-g
+          chmod 755 wal-g-deb/usr/bin/wal-g
+          cat <<EOF > wal-g-deb/DEBIAN/control
+          Package: wal-g-${{ matrix.db }}
+          Version: ${VERSION}
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Maintainer: You <you@example.com>
+          Description: WAL-G backup tool for ${{ matrix.db }} (Brotli, libsodium, LZO enabled)
+          EOF
+          dpkg-deb --build wal-g-deb wal-g_${VERSION}-${{ matrix.db }}-amd64-${{ matrix.os }}.deb
+
+      - name: Upload DEB package
+        uses: actions/upload-artifact@v4
+        with:
+          name: wal-g-deb
+          path: wal-g_${VERSION}-${{ matrix.db }}-amd64-${{ matrix.os }}.deb
+
+
+  deploy-to-gh-pages:
+    needs: release-ubuntu
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all DEB packages
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Set up APT Repository and Deploy
+        run: |
+          mkdir -p public
+
+          # Перебираем все скачанные .deb файлы
+          for deb_file in ./artifacts/*.deb; do
+            if [[ "$deb_file" == *"ubuntu-24.04"* ]]; then
+              CODENAME="noble"
+            elif [[ "$deb_file" == *"ubuntu-22.04"* ]]; then
+              CODENAME="jammy"
+            elif [[ "$deb_file" == *"ubuntu-20.04"* ]]; then
+              CODENAME="focal"
+            else
+              echo "Unsupported Ubuntu version in $deb_file"
+              exit 1
+            fi
+
+            mkdir -p public/dists/$CODENAME/main/binary-amd64
+            cp $deb_file public/dists/$CODENAME/main/binary-amd64/
+          done
+
+          # Генерация Packages и Release только если есть пакеты
+          for CODENAME in noble jammy focal; do
+            if [[ -d public/dists/$CODENAME/main/binary-amd64 && $(ls -A public/dists/$CODENAME/main/binary-amd64/*.deb 2>/dev/null) ]]; then
+              apt-ftparchive packages public/dists/$CODENAME/main/binary-amd64 > public/dists/$CODENAME/main/binary-amd64/Packages
+              gzip -kf public/dists/$CODENAME/main/binary-amd64/Packages
+              apt-ftparchive release public/dists/$CODENAME > public/dists/$CODENAME/Release
+            fi
+          done
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
