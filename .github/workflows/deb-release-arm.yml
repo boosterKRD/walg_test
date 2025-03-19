@@ -113,9 +113,9 @@ jobs:
           mkdir -p dists/$CODENAME/main/binary-arm64
           cp ../artifacts/wal-g_${GITHUB_REF#refs/tags/v}_arm64.deb dists/$CODENAME/main/binary-arm64/
 
-          apt-ftparchive -c aptftparchive.conf packages dists/$CODENAME/main/binary-arm64 > dists/$CODENAME/main/binary-arm64/Packages
+          apt-ftparchive -c ../aptftparchive.conf packages dists/$CODENAME/main/binary-arm64 > dists/$CODENAME/main/binary-arm64/Packages
           gzip -kf dists/$CODENAME/main/binary-arm64/Packages
-          apt-ftparchive -c aptftparchive.conf release dists/$CODENAME > dists/$CODENAME/Release
+          apt-ftparchive -c ../aptftparchive.conf release dists/$CODENAME > dists/$CODENAME/Release
 
           git add .
           git commit -m "Add WAL-G package ${GITHUB_REF#refs/tags/v} [arm64]"

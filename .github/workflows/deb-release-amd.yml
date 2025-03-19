@@ -91,7 +91,7 @@ jobs:
           else
             echo "❌ aptftparchive.conf MISSING2!"
           fi
-          
+
       - name: Deploy to GitHub Pages
         run: |
           if [[ "${{ matrix.os }}" == "ubuntu-24.04" ]]; then
@@ -119,9 +119,9 @@ jobs:
           mkdir -p dists/$CODENAME/main/binary-amd64
           cp ../wal-g_${VERSION}.deb dists/$CODENAME/main/binary-amd64/
 
-          apt-ftparchive -c aptftparchive.conf packages dists/$CODENAME/main/binary-amd64 > dists/$CODENAME/main/binary-amd64/Packages
+          apt-ftparchive -c ../aptftparchive.conf packages dists/$CODENAME/main/binary-amd64 > dists/$CODENAME/main/binary-amd64/Packages
           gzip -kf dists/$CODENAME/main/binary-amd64/Packages
-          apt-ftparchive -c aptftparchive.conf release dists/$CODENAME > dists/$CODENAME/Release
+          apt-ftparchive -c ../aptftparchive.conf release dists/$CODENAME > dists/$CODENAME/Release
 
 
           git add .
