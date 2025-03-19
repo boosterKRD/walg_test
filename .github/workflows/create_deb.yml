@@ -42,8 +42,8 @@ jobs:
       - name: Rename WAL-G binary
         run: mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-amd64-${{ matrix.os }}
 
-      # - name: Extract version
-      #   run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       - name: Create DEB package
         run: |
