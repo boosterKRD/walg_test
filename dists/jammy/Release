@@ -1,21 +1,22 @@
 Architectures: amd64 arm64
+Codename: noble
 Components: main
-Date: Tue, 18 Mar 2025 21:05:40 +0000
+Date: Wed, 19 Mar 2025 08:25:14 +0000
 Label: WAL-G APT Repository
 Origin: WAL-G Repo
 MD5Sum:
- a2cf575a10f5c61abf1730920ceed03e              129 Release
- b6770934722d05df83abe2e103cdd281             1138 main/binary-amd64/Packages
- 6202c642ced7235f271575296bd7f075              636 main/binary-amd64/Packages.gz
+ 1887b74e28b8d64ba90e404fb983c07b              145 Release
+ 301f92c2f70434c7ded767fbdc06c819             1707 main/binary-amd64/Packages
+ 23780678aa868f8c8bccd52a20cca7e0              814 main/binary-amd64/Packages.gz
 SHA1:
- 6dd27420e539f7cf96e3e07f851c59b300a1909f              129 Release
- 60e567861f68ea39943faca18b8b98b9c171c91a             1138 main/binary-amd64/Packages
- a380166b4882433d5acba1aa8665d580c18f933e              636 main/binary-amd64/Packages.gz
+ b11c56f4891e631a8652c804c5aaa8726dc369f4              145 Release
+ 0a8d3feae55c2a39c3809ddae36639c636167c98             1707 main/binary-amd64/Packages
+ 0f6e869794d94eeedcb45429c7caf0a5c51caee8              814 main/binary-amd64/Packages.gz
 SHA256:
- fff072a5695c6a3990687c6df0176e521502e65d81cfd43947eb42531a8f5ad7              129 Release
- 5801fc3d0c5f1188e7dea72cdb7ab7b9a55ec39104ea92fbc00b5f64d8027c9c             1138 main/binary-amd64/Packages
- 38f6abec50278bc9a8cd5fcb0fa56907ee207cc740397c337e41aa0a2e94a502              636 main/binary-amd64/Packages.gz
+ 3707be2f5e492a5a947d16c960dc4b8ddf52abcf76326268ccdd1531d5886055              145 Release
+ 8a558389f76acdd1ed71e3f90c738468ce0297eb316fa4a19adf194259eff77d             1707 main/binary-amd64/Packages
+ 22719570fc48afc7f2e13bfe0c6b6604f967fde71277d9827671840b893dcfac              814 main/binary-amd64/Packages.gz
 SHA512:
- 9093b565e53c67920db91c3955fc750e33521b4bd01e8edfaab32395cd06eecc14532328f24c85aa203ab0f3cad46ee94391290232a5f9a21957a812c74e69e3              129 Release
- 9b2ea7b09bcd0389d7802c174e2d3ceec371733c32ae7c5f1e64eaa5a7224a4fd0ba9b212a5524c383c3976f92986c6fd03aef678ef174279157ed81b0785516             1138 main/binary-amd64/Packages
- c03eb12982e15e3618e428fdd939650ac6a3dae698558f6d0b0c220dc54871a4806d4b7822995482d06c35d1b61a6a8a04ad4d269c404cafbe55b8a0e228a514              636 main/binary-amd64/Packages.gz
+ c8e4fb311949ac02d63097ff01989b3d9331f44cd7d2cb795db0b96981b4c8e80f08ab3e53125fb561df70b56f23b9fefd851983aae92926f89fdfee4e66fcb7              145 Release
+ b20519c1a8b748b3257c1dabfd25847791ce9aef3e08efd9b79a9195fbbf5debc7636296189952054c9be27872836a66044fbc55871bd2d25665cc980e1cbe07             1707 main/binary-amd64/Packages
+ 48cfc4ec840d1706957790b43d5a0d601f5095cbd5b188cad1ab8bb3d8d7b81b048c2d8396442a9f094681332abf2b7f2ab4beda3ce7a7c159b232105d2d4b93              814 main/binary-amd64/Packages.gz
