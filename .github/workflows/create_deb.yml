@@ -1,0 +1,69 @@
+name: Build and Publish DEB Package for AMD64
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v0.2.19, v0.2.14a
+
+env:
+  GO_VERSION: "1.22"
+  USE_BROTLI: 1
+  USE_LIBSODIUM: 1
+  USE_LZO: 1
+
+jobs:
+  release-ubuntu:
+    strategy:
+      matrix:
+        os: [ ubuntu-20.04 ]
+        db: [ pg]
+      max-parallel: 2
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y liblzo2-dev brotli libsodium-dev
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Golang
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Make deps
+        run: make deps
+
+      - name: Build WAL-G
+        run: make ${{ matrix.db }}_build
+
+      - name: Rename WAL-G binary
+        run: mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-amd64-${{ matrix.os }}
+
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Create DEB package
+        run: |
+          mkdir -p wal-g-deb/DEBIAN
+          mkdir -p wal-g-deb/usr/bin/
+          cp wal-g-${{ matrix.db }}-amd64-${{ matrix.os }} wal-g-deb/usr/bin/wal-g
+          chmod 755 wal-g-deb/usr/bin/wal-g
+          cat <<EOF > wal-g-deb/DEBIAN/control
+          Package: wal-g
+          Version: ${VERSION}
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Maintainer: You <you@example.com>
+          Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
+          EOF
+          dpkg-deb --build wal-g-deb wal-g_${VERSION}-${{ matrix.db }}-amd64-${{ matrix.os }}.deb
+
+      - name: Upload DEB package
+        uses: actions/upload-artifact@v4
+        with:
+          name: wal-g-deb
+          path: wal-g_${VERSION}-${{ matrix.db }}-amd64-${{ matrix.os }}.deb

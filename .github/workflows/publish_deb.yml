@@ -1,0 +1,67 @@
+name: Deploy DEB Packages to GitHub Pages
+
+on:
+  workflow_run:
+    workflows: ["Build and Publish DEB Package for AMD64"]
+    types:
+      - completed
+
+jobs:
+  deploy-to-gh-pages:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all DEB packages
+        uses: actions/download-artifact@v2
+        with:
+          name: wal-g-deb
+          path: ./artifacts
+
+      - name: Set distribution codename and deploy
+        run: |
+          # Determine the codename based on file names
+          for deb_file in ./artifacts/*.deb; do
+            if [[ "$deb_file" == *"ubuntu-24.04"* ]]; then
+              CODENAME="noble"
+            elif [[ "$deb_file" == *"ubuntu-22.04"* ]]; then
+              CODENAME="jammy"
+            elif [[ "$deb_file" == *"ubuntu-20.04"* ]]; then
+              CODENAME="focal"
+            else
+              echo "Unsupported Ubuntu version in $deb_file"
+              exit 1
+            fi
+
+            # Clone and set up GitHub Pages
+            git config --global user.name "github-actions"
+            git config --global user.email "github-actions@github.com"
+            git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
+            cd repo-pages
+
+            for attempt in {1..5}; do
+              git pull --rebase origin gh-pages && break
+              echo "Retrying git pull ($attempt/5)..."
+              sleep $(shuf -i 1-10 -n 1)
+            done
+
+            mkdir -p dists/$CODENAME/main/binary-amd64
+            cp $deb_file dists/$CODENAME/main/binary-amd64/
+
+            # Generate necessary metadata for APT repository
+            apt-ftparchive -c ../aptftparchive.conf packages dists/$CODENAME/main/binary-amd64 > dists/$CODENAME/main/binary-amd64/Packages
+            gzip -kf dists/$CODENAME/main/binary-amd64/Packages
+            apt-ftparchive -c ../aptftparchive.conf release dists/$CODENAME > dists/$CODENAME/Release
+
+            # Commit and push changes to GitHub Pages
+            git add .
+            git commit -m "Add WAL-G package ${GITHUB_REF#refs/tags/v} [amd64]"
+            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+            for attempt in {1..5}; do
+              git push origin gh-pages && break
+              echo "Retrying git push ($attempt/5)..."
+              sleep $(shuf -i 1-10 -n 1)
+            done
+          done
