@@ -75,10 +75,10 @@ Priority: optional
 Section: utils
 Maintainer: You <you@example.com>
 Filename: dists/jammy/main/binary-amd64/wal-g_2.0.30.deb
-Size: 13158494
-MD5sum: 60374b03982f5862ef6d11011402d916
-SHA1: bab3d5eb7242df4df37efd9f28caa3dc3efb3a8d
-SHA256: b8b144845b24a4e61f87c852627a9302adf28faf249aeee964631b30e2616ad8
-SHA512: 78d0bda1f96f7c8a29bd96b3effa2d89f682a870f7beda27e57d8072d6b0c2e36045da32659b8e6077b733a31cee9121bafac440bb21711f8e58b1bab1235dd7
+Size: 12529346
+MD5sum: 09306d12576d14c499dcdfe0ccd7dbe9
+SHA1: c0d50cba83374a084de3b0971dbe578ab2a99831
+SHA256: 8608db8278b6dd682314879dc21859721da7daba1a82157a1a0f05028b1534e6
+SHA512: 20a0af129f9222a8267d6749ed9608e07bf38d61f3c773e6526beef4ff2a9e554ec77fc16f68c89fbf3b92bc969f9bfeb18ac7bacae019aaab91f0ee565337ac
 Description: WAL-G backup tool for PostgreSQL (Brotli, libsodium, LZO enabled)
 
