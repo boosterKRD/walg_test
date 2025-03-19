@@ -15,32 +15,26 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04 ]
-        db: [ pg ]
-      max-parallel: 2
+        db: [ pg, redis ]
+      max-parallel: 4
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install deps
-        run: sudo apt-get install liblzo2-dev brotli libsodium-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y liblzo2-dev brotli libsodium-dev
 
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Go 1.x
+      - name: Set up Golang
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-        id: go
 
-      - name: Get dependencies
-        run: |
-          go get -v -t -d ./...
-
-      - name: Make deps
-        run: make deps
-
-      - name: Build WAL-G
-        run: make ${{ matrix.db }}_build
+      - name: Make deps and Build WAL-G
+        run: make install_and_build_pg
 
       - name: Rename WAL-G binary
         run: mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-${{ matrix.os }}
