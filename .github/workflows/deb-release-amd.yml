@@ -82,12 +82,19 @@ jobs:
         with:
           path: ./artifacts
 
+      - name: Debug artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          ls -l ./artifacts
+
       - name: Set up APT Repository and Deploy
         run: |
           mkdir -p public
 
           # Перебираем все скачанные .deb файлы
           for deb_file in ./artifacts/*.deb; do
+            echo "Processing file: $deb_file"
+
             if [[ "$deb_file" == *"ubuntu-24.04"* ]]; then
               CODENAME="noble"
             elif [[ "$deb_file" == *"ubuntu-22.04"* ]]; then
@@ -105,10 +112,14 @@ jobs:
 
           # Генерация Packages и Release только если есть пакеты
           for CODENAME in noble jammy focal; do
-            if [[ -d public/dists/$CODENAME/main/binary-amd64 && $(ls -A public/dists/$CODENAME/main/binary-amd64/*.deb 2>/dev/null) ]]; then
-              apt-ftparchive packages public/dists/$CODENAME/main/binary-amd64 > public/dists/$CODENAME/main/binary-amd64/Packages
-              gzip -kf public/dists/$CODENAME/main/binary-amd64/Packages
-              apt-ftparchive release public/dists/$CODENAME > public/dists/$CODENAME/Release
+            PACKAGE_PATH="public/dists/$CODENAME/main/binary-amd64"
+            if [[ -d "$PACKAGE_PATH" && $(ls -A "$PACKAGE_PATH"/*.deb 2>/dev/null) ]]; then
+              echo "Generating Packages for $CODENAME"
+              apt-ftparchive packages "$PACKAGE_PATH" > "$PACKAGE_PATH/Packages"
+              gzip -kf "$PACKAGE_PATH/Packages"
+              apt-ftparchive release "public/dists/$CODENAME" > "public/dists/$CODENAME/Release"
+            else
+              echo "No packages found for $CODENAME, skipping..."
             fi
           done
 
