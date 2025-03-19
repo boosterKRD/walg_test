@@ -68,6 +68,30 @@ jobs:
       - name: Debug file location
         run: find . -name "wal-g_*.deb"
 
+      - name: Debug Working Directory and Files
+        run: |
+          echo "🔍 Current Directory:"
+          pwd
+
+          echo "📂 Listing Files:"
+          ls -la
+
+          echo "📁 Checking repo-pages Directory Structure:"
+          tree repo-pages || echo "tree command not available"
+
+          echo "🔎 Checking for aptftparchive.conf:"
+          if [[ -f aptftparchive.conf ]]; then
+            echo "✅ aptftparchive.conf FOUND!"
+          else
+            echo "❌ aptftparchive.conf MISSING!"
+          fi
+
+          if [[ -f ../../aptftparchive.conf ]]; then
+            echo "✅ aptftparchive.conf FOUND2!"
+          else
+            echo "❌ aptftparchive.conf MISSING2!"
+          fi
+          
       - name: Deploy to GitHub Pages
         run: |
           if [[ "${{ matrix.os }}" == "ubuntu-24.04" ]]; then
