@@ -63,10 +63,10 @@ jobs:
           cat <<EOF > wal-g-deb/DEBIAN/control
           Package: wal-g-${{ matrix.db }}
           Version: ${VERSION}
-          Section: utils
-          Priority: optional
-          Architecture: amd64
-          Maintainer: You <you@example.com>
+          Section: database
+          Priority: extra
+          Architecture: any
+          Maintainer: mdb <mdb-admin@yandex-team.ru>
           Description: WAL-G backup tool for ${{ matrix.db }} (Brotli, libsodium, LZO enabled)
           EOF
           dpkg-deb --build wal-g-deb wal-g_${VERSION}-${{ matrix.db }}-amd64-${{ matrix.os }}.deb
@@ -146,7 +146,7 @@ jobs:
             echo "Placed $deb_file in $TARGET_DIR"
           done
 
-      - name: Generate APT Repository Metadata (without public/)
+      - name: Generate APT Repository Metadata 
         run: |
           cd repo-pages
           for CODENAME in noble jammy focal; do
@@ -161,6 +161,20 @@ jobs:
                 echo "No packages found for $CODENAME ($ARCH), skipping..."
               fi
             done
+          done
+
+      - name: Sign APT Repository Metadata
+        run: |
+          cd repo-pages
+          export GNUPGHOME=$(mktemp -d)
+
+          # Импортируем GPG-ключ из секретов GitHub
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+
+          for CODENAME in noble jammy focal; do
+            echo "Signing Release file for $CODENAME..."
+            gpg --batch --yes --default-key "WAL-G Repository" -abs -o dists/$CODENAME/Release.gpg dists/$CODENAME/Release
+            gpg --batch --yes --default-key "WAL-G Repository" --clearsign -o dists/$CODENAME/InRelease dists/$CODENAME/Release
           done
 
       - name: Commit and Push Changes to gh-pages
