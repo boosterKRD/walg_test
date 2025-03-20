@@ -1,0 +1,14 @@
+Package: wal-g-pg
+Architecture: amd64
+Version: 2.0.57
+Priority: optional
+Section: utils
+Maintainer: You <you@example.com>
+Filename: dists/focal/main/binary-amd64/wal-g_2.0.57-pg-amd64-ubuntu-20.04.deb
+Size: 11790660
+MD5sum: 433b2753db47e5ffbc2c5b5cce48a4cd
+SHA1: ee3c34df7a06be003c8a924b47996830f6440008
+SHA256: 227bebcc0a9a36f481c527a67cffd806db55215a3bc67e615c09ce3704eac3fa
+SHA512: 0562498057289e34c2132eb3a102d4251845c99c27b7c69eb02b0bcd7f89247abf5461d6d718ab063f5b5d7e32873733b37c8c0a90a7634e2797e1280001b771
+Description: WAL-G backup tool for pg (Brotli, libsodium, LZO enabled)
+
