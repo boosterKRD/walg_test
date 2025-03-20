@@ -4,6 +4,14 @@ on:
     tags:
       - 'v*'
 
+
+permissions:
+  id-token: write  # REQUIRED for deploy-pages
+  contents: read   # Allows checking out the repository
+  pages: write     # Allows deploying to GitHub Pages
+  actions: read    # Allows downloading artifacts
+
+
 env:
   GO_VERSION: "1.22"
   USE_BROTLI: 1
