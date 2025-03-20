@@ -6,10 +6,8 @@ on:
 
 
 permissions:
-  id-token: write  # REQUIRED for deploy-pages
-  contents: read   # Allows checking out the repository
-  pages: write     # Allows deploying to GitHub Pages
-  actions: read    # Allows downloading artifacts
+  contents: write   # Need for `git push`
+  actions: read     # Need fot downloading artifacts
 
 
 env:
@@ -85,8 +83,17 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout gh-pages branch
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
+          cd repo-pages
+          for attempt in {1..5}; do
+            git pull --rebase origin gh-pages && break
+            echo "Retrying git pull ($attempt/5)..."
+            sleep $(shuf -i 1-10 -n 1)
+          done
 
       - name: Download all DEB packages
         uses: actions/download-artifact@v4
@@ -99,15 +106,13 @@ jobs:
           echo "Downloaded artifacts:"
           ls -l ./artifacts
 
-      - name: Set up APT Repository and Deploy
+      - name: Copy DEB files to APT repo (without public/)
         run: |
-          mkdir -p public
+          cd repo-pages
 
-          # Перебираем все скачанные .deb файлы
-          for deb_file in ./artifacts/*.deb; do
+          for deb_file in ../artifacts/*.deb; do
             echo "Processing file: $deb_file"
 
-            # Extract Ubuntu version from filename
             if [[ "$deb_file" =~ ubuntu-([0-9]{2}\.[0-9]{2}) ]]; then
               VERSION="${BASH_REMATCH[1]}"
             else
@@ -115,7 +120,6 @@ jobs:
               exit 1
             fi
 
-            # Extract architecture from filename (assuming -amd64- or -arm64- pattern)
             if [[ "$deb_file" =~ -amd64- ]]; then
               ARCH="amd64"
             elif [[ "$deb_file" =~ -arm64- ]]; then
@@ -124,7 +128,7 @@ jobs:
               echo "Could not determine architecture for $deb_file"
               exit 1
             fi
-            # Map Ubuntu version to codename
+
             case "$VERSION" in
               "24.04") CODENAME="noble" ;;
               "22.04") CODENAME="jammy" ;;
@@ -132,33 +136,42 @@ jobs:
               *) echo "Unsupported Ubuntu version: $VERSION" && exit 1 ;;
             esac
 
-            # Create directory for the package and copy it
-            TARGET_DIR="public/dists/$CODENAME/main/binary-$ARCH"
-            mkdir -p "$TARGET_DIR"
+            # ✅ Создаем папки, если их нет
+            mkdir -p dists/$CODENAME/main/binary-arm64
+            mkdir -p dists/$CODENAME/main/binary-amd64
+
+            TARGET_DIR="dists/$CODENAME/main/binary-$ARCH"
             cp "$deb_file" "$TARGET_DIR/"
 
-            echo "Placed $deb_file in $TARGET_DIR"            
+            echo "Placed $deb_file in $TARGET_DIR"
           done
 
-          # Generate Packages and Release files if packages exist
+      - name: Generate APT Repository Metadata (without public/)
+        run: |
+          cd repo-pages
           for CODENAME in noble jammy focal; do
             for ARCH in amd64 arm64; do
-              PACKAGE_PATH="public/dists/$CODENAME/main/binary-$ARCH"
+              PACKAGE_PATH="dists/$CODENAME/main/binary-$ARCH"
               if [[ -d "$PACKAGE_PATH" && $(ls -A "$PACKAGE_PATH"/*.deb 2>/dev/null) ]]; then
                 echo "Generating Packages for $CODENAME ($ARCH)"
                 apt-ftparchive packages "$PACKAGE_PATH" > "$PACKAGE_PATH/Packages"
                 gzip -kf "$PACKAGE_PATH/Packages"
-                apt-ftparchive release "public/dists/$CODENAME" > "public/dists/$CODENAME/Release"
+                apt-ftparchive release "dists/$CODENAME" > "dists/$CODENAME/Release"
               else
                 echo "No packages found for $CODENAME ($ARCH), skipping..."
               fi
             done
-          done          
+          done
 
-      - name: Upload to GitHub Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+      - name: Commit and Push Changes to gh-pages
+        run: |
+          cd repo-pages
+          git add .
+          git commit -m "Update APT repository with new packages"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          for attempt in {1..5}; do
+            git push origin gh-pages && break
+            echo "Retrying git push ($attempt/5)..."
+            sleep $(shuf -i 1-10 -n 1)
+          done
+          
