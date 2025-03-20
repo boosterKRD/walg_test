@@ -84,6 +84,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
+          merge-multiple: true
 
       - name: Debug artifacts
         run: |
@@ -98,33 +99,53 @@ jobs:
           for deb_file in ./artifacts/*.deb; do
             echo "Processing file: $deb_file"
 
-            if [[ "$deb_file" == *"ubuntu-24.04"* ]]; then
-              CODENAME="noble"
-            elif [[ "$deb_file" == *"ubuntu-22.04"* ]]; then
-              CODENAME="jammy"
-            elif [[ "$deb_file" == *"ubuntu-20.04"* ]]; then
-              CODENAME="focal"
+            # Extract Ubuntu version from filename
+            if [[ "$deb_file" =~ ubuntu-([0-9]{2}\.[0-9]{2}) ]]; then
+              VERSION="${BASH_REMATCH[1]}"
             else
-              echo "Unsupported Ubuntu version in $deb_file"
+              echo "Could not determine Ubuntu version for $deb_file"
               exit 1
             fi
 
-            mkdir -p public/dists/$CODENAME/main/binary-amd64
-            cp $deb_file public/dists/$CODENAME/main/binary-amd64/
+            # Extract architecture from filename (assuming -amd64- or -arm64- pattern)
+            if [[ "$deb_file" =~ -amd64- ]]; then
+              ARCH="amd64"
+            elif [[ "$deb_file" =~ -arm64- ]]; then
+              ARCH="arm64"
+            else
+              echo "Could not determine architecture for $deb_file"
+              exit 1
+            fi
+            # Map Ubuntu version to codename
+            case "$VERSION" in
+              "24.04") CODENAME="noble" ;;
+              "22.04") CODENAME="jammy" ;;
+              "20.04") CODENAME="focal" ;;
+              *) echo "Unsupported Ubuntu version: $VERSION" && exit 1 ;;
+            esac
+
+            # Create directory for the package and copy it
+            TARGET_DIR="public/dists/$CODENAME/main/binary-$ARCH"
+            mkdir -p "$TARGET_DIR"
+            cp "$deb_file" "$TARGET_DIR/"
+
+            echo "Placed $deb_file in $TARGET_DIR"            
           done
 
-          # Генерация Packages и Release только если есть пакеты
+          # Generate Packages and Release files if packages exist
           for CODENAME in noble jammy focal; do
-            PACKAGE_PATH="public/dists/$CODENAME/main/binary-amd64"
-            if [[ -d "$PACKAGE_PATH" && $(ls -A "$PACKAGE_PATH"/*.deb 2>/dev/null) ]]; then
-              echo "Generating Packages for $CODENAME"
-              apt-ftparchive packages "$PACKAGE_PATH" > "$PACKAGE_PATH/Packages"
-              gzip -kf "$PACKAGE_PATH/Packages"
-              apt-ftparchive release "public/dists/$CODENAME" > "public/dists/$CODENAME/Release"
-            else
-              echo "No packages found for $CODENAME, skipping..."
-            fi
-          done
+            for ARCH in amd64 arm64; do
+              PACKAGE_PATH="public/dists/$CODENAME/main/binary-$ARCH"
+              if [[ -d "$PACKAGE_PATH" && $(ls -A "$PACKAGE_PATH"/*.deb 2>/dev/null) ]]; then
+                echo "Generating Packages for $CODENAME ($ARCH)"
+                apt-ftparchive packages "$PACKAGE_PATH" > "$PACKAGE_PATH/Packages"
+                gzip -kf "$PACKAGE_PATH/Packages"
+                apt-ftparchive release "public/dists/$CODENAME" > "public/dists/$CODENAME/Release"
+              else
+                echo "No packages found for $CODENAME ($ARCH), skipping..."
+              fi
+            done
+          done          
 
       - name: Upload to GitHub Pages
         uses: actions/upload-pages-artifact@v3
