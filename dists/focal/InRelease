@@ -1,0 +1,37 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Date: Thu, 20 Mar 2025 19:16:07 +0000
+MD5Sum:
+ 9793947f594509cc96f4210a043dfaa7               38 Release
+ be21594beb69b7c318f80f37796af2b8             4159 main/binary-amd64/Packages
+ d26879a5e5533b8d01f79bee77bdd0b3             1630 main/binary-amd64/Packages.gz
+SHA1:
+ 700804616b60d3c7fd4659012497574f75e9d15e               38 Release
+ f744d3c783b341c48e6b255eb5d703fb7226b1ae             4159 main/binary-amd64/Packages
+ 63e2b1a8c4c697fc41527d08e6b78523d5c29e9e             1630 main/binary-amd64/Packages.gz
+SHA256:
+ 34138df3745b5a4b0ee80d18cd29825ce21eae461bd0aaa50dc92406fcd0947f               38 Release
+ 6589f9e37cf46d35f18ddfe6dd430affd1b22d4dfba641979a7eb439e53d8417             4159 main/binary-amd64/Packages
+ 6fa1f28866f39c56f0c44623475188cb7e43a1469f5d708875ed94cd7c4f82c6             1630 main/binary-amd64/Packages.gz
+SHA512:
+ 04c2517613be9e1801f2db79a79cf96de551e881ae328a34d57ee5a326f4e7935908c6ba29ce37c1d156729c047a6ee157393f0424864897822ebef1d2d052f2               38 Release
+ f5b73c293e2c632aa59202c8a72114231a7ff4340fe852ac61d11eb7ca1dc6a9afbc8316258a9afddd6490ab814f0569766622e76561eb31c0364e67b3f0bb4b             4159 main/binary-amd64/Packages
+ 6d6f1ee0da07cd40014a6018f40f1c5fc515eda26161050deaa5d0137fe3c32bb5340979af5189561879dcf2d469eaee47a22a71233e0a5cabd6cb24f3835fa0             1630 main/binary-amd64/Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iQJNBAEBCgA3FiEEgW8CHvdM12HPjtPUIDgxJA2l8zEFAmfcaXgZHG1kYi1hZG1p
+bkB5YW5kZXgtdGVhbS5ydQAKCRAgODEkDaXzMfQ1D/9HUF2laqchKAs+CWe2CZp8
+KDvhqbRw2TbVV//FoSZrTwEcBmrpEMemIuhYiVrOQouhp4qJGmYF4h56UVbIaju7
+6aZ+DcaizU+0LY59MOIP4Xdy1N3sBxu+HeMBZMTXNww58uZNDRUUbroAYhh0rLKC
+RAI+/7Mr09cCQzaPuuJQ9Iqf5u9p5Ugc1N6O123sPy3va9KazCN6ymuZoYhE+Inf
+gm5mgxyH76IBvEyygw6F7YJ3TYn0X1mRuoctaVXbbMRG0Nql3fq9OXTiG8YkeylK
+4RkmFLxA3OaO0rAwHPCBkHBTOVBIgTl0wGQd56q1gcll2KbvSFTBHghJH5BwxCko
+p8KqjY4A8HZjmyam4lV4CoZOuZdfdZ8Qt4kttO5R9oOcyxjUk3J71X5jiTZLblwt
+3OB+oN6+KFKTdNGf7MqiDcCwDkOM2klWdCTtS80cOyuBGuCmFScGitt7ahY7jmSg
+83sbete3ejwHDwI14p5KkP0G/cs0tCQP6IIrQT3/bQt+ARoGNUbvzqCDQrsWlWBO
+hV31ewIndLfosAncze0p4bx0x/jRvU9BPRFh8iO7U/WmYQfYS0EcPU/u5dAXmfrg
+/5zyMg7cIymlTZm46qKHj40inFS8ClkL00Y1PtHD41yvwd2JQwBCF3jQbsFNzo5o
+rRZ8oCBAvaJRljEizt/8kg==
+=8vrI
+-----END PGP SIGNATURE-----

@@ -1,0 +1,37 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Date: Thu, 20 Mar 2025 19:16:06 +0000
+MD5Sum:
+ 7ac589fc5cf22caffdda92c2b1bfb8b5               38 Release
+ 7298528f35ee6d51269c02c90f2f0b05             3573 main/binary-amd64/Packages
+ 437340f3646db4b307ef1311488c9474             1441 main/binary-amd64/Packages.gz
+SHA1:
+ abc105106e3bd9559f80febfb58847bdf1e7d68b               38 Release
+ 3bc1b7169f819952a9c00a31b35b3c934dbaa83c             3573 main/binary-amd64/Packages
+ 83d2b07c62cbfec9ad986c49fd427bf35d90a674             1441 main/binary-amd64/Packages.gz
+SHA256:
+ 615a17abcfd86e869a9756c0145d7edfa48254f38334d4b24670709bc1ef04ac               38 Release
+ 43f7711b48fd1d50c34d6b754e937dee1f0438a364b5ff8dce84952efd57d5bd             3573 main/binary-amd64/Packages
+ 5128f8cc8f9e1fa1381ffe71bc562f287b3bfea2daa91e57fdd947f331cc2b70             1441 main/binary-amd64/Packages.gz
+SHA512:
+ f1b7eeefe0c320121683a6abc22fe6fb4b24ce7450651f427c87fd991c2d0686de68965898c1b585fd4f5e6a42f971345a5c01510888b53373ccb66e4303c8e0               38 Release
+ bc6706e33da81ee6460256f7845831eec2ea8fba26e9cdda17d53cb0ded8f3f83bf8e2ebe02cdd909fc58304c2cb43d538079d5ac3abf540434046e6a659d1e9             3573 main/binary-amd64/Packages
+ 49d304592e5178dc092ca81c44e4ee59f7ecbb390cb27414b7e6bd95d3d669ebd273b156b6d39cffa457039a37a980c9c94d87ed0e8bb685ef62c05795891ee2             1441 main/binary-amd64/Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iQJNBAEBCgA3FiEEgW8CHvdM12HPjtPUIDgxJA2l8zEFAmfcaXgZHG1kYi1hZG1p
+bkB5YW5kZXgtdGVhbS5ydQAKCRAgODEkDaXzMefED/9aqE29vJuKalnzgbUegryd
+CE+RNwZY5cywYAC5a5RZSm+XFtChf9iMSJeiQxlVFzUH7/JkAGrHGpgKvA8d9Uyf
+uURtPllCT29b3NQxwtLVHsr7hEcPV/R3jtKiLFN8hRyPVhleNfV5vTG+OCpYWdRP
+mRFcb0l/IwZ6vTyqqZdHf/pCueeEJw1pNqtJbSkHa0u/lVudtSbDwCJ8OcKbX0y4
+zioPMLVk/ooRipVgtxaxjXMR2FwVHsJhSNqDifH2701azbjFwtjcg7ILqD/aiz4N
+YugdjKQzVA9IPxOI+ZautLYilprDlexceC9ea2A3YSokHoxjp2+h8aIubX/DIB54
+DaCA9Xm3bhyq3cCNVd+rnl30P4dFD0wEaCSne9xpNRUk6mlJsEyoTbynP+91CLIi
+A9Wzef71shJwRbHy5ctzC6UBf6OzkxCcxfdBxyeaWyR3BeNebfQFV35Mmq5tBHQ8
+YfGEqTOsjekLSH2EgS7xNyVmgeth4uKlKp856gPkxBpX2XkQPmiIih8PHIorKTM1
+VYGuRbHQbi8xO8WSWL5cGKHYHHWpqirD/HXsO9f9tS2Rq3w4+igQtICbewlosvzG
+DBeloMkCaVkHfz5366y4/ULfUXmcc+zcBIlQ4V+gaUwOAft3P80fTiUy7ccBbvlc
+DQu/8hqYYCXj17+PdQnGVQ==
+=WIDC
+-----END PGP SIGNATURE-----
