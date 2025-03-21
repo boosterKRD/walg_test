@@ -141,15 +141,14 @@ jobs:
             Description: WAL-G backup tool for ${{ matrix.db }} (Brotli, libsodium, LZO enabled)
             EOF
             dpkg-deb --build wal-g-deb wal-g_${VERSION}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb
-
-            mkdir -p artifacts
+            cp wal-g_${VERSION}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb /tmp/
+            # mkdir -p artifacts
 
       - name: Upload DEB package
         uses: actions/upload-artifact@v4
         with:
           name: wal-g-deb-${{ matrix.db }}-${{ matrix.label }}-arm64
-          path: wal-g_${{ env.VERSION}}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb
-
+          path: /tmp/wal-g_${{ env.VERSION}}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb
 
   deploy-to-gh-pages:
     needs: [release-ubuntu, release-ubuntu-arm64]
