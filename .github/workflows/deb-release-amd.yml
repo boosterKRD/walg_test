@@ -15,15 +15,19 @@ env:
   USE_BROTLI: 1
   USE_LIBSODIUM: 1
   USE_LZO: 1
+  RUN_AMD64: true
+  RUN_ARM64: false
+  RUN_DEPLOY: true
 
 jobs:
   release-ubuntu-amd64:
+    if: env.RUN_AMD64 == 'true'
     strategy:
       matrix:
-        # os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04 ]
-        os: [ ubuntu-20.04 ]
-        # db: [ pg, mongo, redis]
-        db: [ pg]
+        os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04 ]
+        # os: [ ubuntu-20.04 ]
+        db: [ pg, mongo, redis]
+        # db: [ pg]
         deb_arch: [amd64]
       max-parallel: 6
       fail-fast: false
@@ -78,6 +82,7 @@ jobs:
           path: wal-g_${{ env.VERSION}}-${{ matrix.db }}-${{ matrix.deb_arch }}-${{ matrix.os }}.deb
 
   release-ubuntu-arm64:
+    if: env.RUN_ARM64 == 'true'
     runs-on: ubuntu-20.04
     env:
       GO_VERSION: "1.22.8"    
@@ -149,6 +154,7 @@ jobs:
 
 
   deploy-to-gh-pages:
+    if: env.RUN_DEPLOY == 'true'
     needs: [release-ubuntu-amd64, release-ubuntu-arm64]
     runs-on: ubuntu-20.04
 
