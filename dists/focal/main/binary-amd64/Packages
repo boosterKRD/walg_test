@@ -138,3 +138,17 @@ SHA256: 0fc49f4a6810b10ef7d9141fcb121a2fda65e9009344f8fde6a234354e05b724
 SHA512: 5159ce6d6ed4f6ba0c3949680585fea1334c69bb7e8594a83e042864926134fc2c8814374bd56f2b26ccf41d1e3e5410d54706ecf19d8c2ee8303fe54b157cff
 Description: WAL-G backup tool for pg (Brotli, libsodium, LZO enabled)
 
+Package: wal-g-pg
+Architecture: amd64
+Version: 2.1.0
+Priority: extra
+Section: database
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Filename: dists/focal/main/binary-amd64/wal-g_2.1.0-pg-amd64-ubuntu-20.04.deb
+Size: 11787592
+MD5sum: 64693361893ce22dd1166156f6148578
+SHA1: 94fa010a3049b98270c3343771c7da17671657c2
+SHA256: 06a528df486be2cf511d6bb55cf1f17e1a3fb95703d0fb727e17d1ceb265f869
+SHA512: d5b75a17281d9c734aaa03386e27bef7b5cf802388be9c2d6361e82852b8c5dc3eac3114c7ac8378d00717b8657dfb034c3539689720f83dc772724363b8efc2
+Description: WAL-G backup tool for pg (Brotli, libsodium, LZO enabled)
+
