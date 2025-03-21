@@ -1,5 +1,19 @@
 Package: wal-g-pg
 Architecture: arm64
+Version: 2.0.98
+Priority: extra
+Section: database
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Filename: dists/jammy/main/binary-arm64/wal-g_2.0.98-pg-arm64-ubuntu-22.04.deb
+Size: 10410120
+MD5sum: 94f3782e466aa5872be6ae73e075842d
+SHA1: a2ad171f32a0093dfcaf6ee9ee03383336c2845a
+SHA256: 969d8a5ab3b98ab2ab3a56ecefb05a1eccb627f8b8ba3b24a9d6a4865277f4c5
+SHA512: faeecb3a245090cbd7cafa95620d48de4479609f3dc969446fbb890ed4412c72978aefa7b968b7ed2a66d9fab5d8205eeae65bec1fcb820bc0a4cde0a67810e7
+Description: WAL-G backup tool for pg (Brotli, libsodium, LZO enabled)
+
+Package: wal-g-pg
+Architecture: arm64
 Version: 2.1.5
 Priority: extra
 Section: database
