@@ -215,16 +215,25 @@ jobs:
               PACKAGE_PATH="dists/$CODENAME/main/binary-$ARCH"
               if [[ -d "$PACKAGE_PATH" && $(ls -A "$PACKAGE_PATH"/*.deb 2>/dev/null) ]]; then
                 echo "Generating Packages for $CODENAME ($ARCH)"
-                apt-ftparchive -c ../aptftparchive.conf packages "$PACKAGE_PATH" > "$PACKAGE_PATH/Packages"
+                apt-ftparchive packages "$PACKAGE_PATH" > "$PACKAGE_PATH/Packages"
                 gzip -kf "$PACKAGE_PATH/Packages"
               else
                 echo "No packages found for $CODENAME ($ARCH), skipping..."
               fi
             done
 
-            echo "Generating Release file for $CODENAME"
-            apt-ftparchive -c ../aptftparchive.conf release "dists/$CODENAME" > "dists/$CODENAME/Release"
-          done          
+            if [[ -d "dists/$CODENAME" ]]; then
+              echo "Generating Release file for $CODENAME"
+              apt-ftparchive \
+                -o APT::FTPArchive::Release::Codename="$CODENAME" \
+                -o APT::FTPArchive::Release::Origin="WAL-G Repo" \
+                -o APT::FTPArchive::Release::Label="WAL-G APT Repository" \
+                -o APT::FTPArchive::Release::Architectures="amd64 arm64" \
+                -o APT::FTPArchive::Release::Components="main" \
+                release "dists/$CODENAME" > "dists/$CODENAME/Release"
+            fi
+          done
+
       - name: Sign APT Repository Metadata
         run: |
           cd repo-pages
