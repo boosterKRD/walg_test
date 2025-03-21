@@ -33,7 +33,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y liblzo2-dev brotli libsodium-dev
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -54,7 +53,7 @@ jobs:
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
-      - name: Create DEB package
+      - name: Create DEB package (AMD64)
         run: |
           mkdir -p wal-g-deb/DEBIAN
           mkdir -p wal-g-deb/usr/bin/
@@ -71,10 +70,10 @@ jobs:
           EOF
           dpkg-deb --build wal-g-deb wal-g_${VERSION}-${{ matrix.db }}-amd64-${{ matrix.os }}.deb
 
-      - name: Upload DEB package
+      - name: Upload DEB package (AMD64)
         uses: actions/upload-artifact@v4
         with:
-          name: wal-g-deb-${{ matrix.db }}-${{ matrix.os }}
+          name: wal-g-deb-${{ matrix.db }}-${{ matrix.os }}-amd64
           path: wal-g_${{ env.VERSION}}-${{ matrix.db }}-amd64-${{ matrix.os }}.deb
 
   release-ubuntu-arm64:
@@ -96,15 +95,11 @@ jobs:
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
-      - name: Build and package WAL-G inside ARM64 container
+      - name: Build and package WAL-G inside ARM64 container (ARM64)
         uses: uraimo/run-on-arch-action@v3
         with:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
-          setup: |
-            mkdir -p "${PWD}/artifacts"
-          dockerRunArgs: |
-            --volume "${PWD}/artifacts:/artifacts"          
           env: |
             VERSION: ${{ env.VERSION }}
             USE_BROTLI: ${{ env.USE_BROTLI }}
@@ -114,27 +109,25 @@ jobs:
           run: |
             apt-get update
             apt-get install -y build-essential curl git cmake liblzo2-dev brotli libsodium-dev devscripts debhelper dh-make dpkg-dev
-
             curl -LO https://go.dev/dl/go${{ env.GO_VERSION }}.linux-arm64.tar.gz
             tar -C /usr/local -xzf go${{ env.GO_VERSION }}.linux-arm64.tar.gz
             export GOROOT=/usr/local/go
             export GOPATH=$HOME/go          
             export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-
             git config --global --add safe.directory /home/runner/work/wal-g/wal-g
             git config --global --add safe.directory /home/runner/work/wal-g/wal-g/submodules/brotli
             git config --global --add safe.directory /home/runner/work/walg_test/walg_test
             git config --global --add safe.directory /home/runner/work/walg_test/walg_test/submodules/brotli
-
             make deps
             make pg_build
             mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-arm64-${{ matrix.label }}
 
+      - name: Create DEB package (ARM64)
+        run: |            
             mkdir -p wal-g-deb/DEBIAN
             mkdir -p wal-g-deb/usr/bin/
             cp wal-g-${{ matrix.db }}-arm64-${{ matrix.label }} wal-g-deb/usr/bin/wal-g
             chmod 755 wal-g-deb/usr/bin/wal-g
-
             cat <<EOF > wal-g-deb/DEBIAN/control
             Package: wal-g-${{ matrix.db }}
             Version: ${VERSION}
@@ -144,17 +137,14 @@ jobs:
             Maintainer: mdb <mdb-admin@yandex-team.ru>
             Description: WAL-G backup tool for ${{ matrix.db }} (Brotli, libsodium, LZO enabled)
             EOF
-            # dpkg-deb --build wal-g-deb wal-g_${VERSION}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb
-            dpkg-deb --build wal-g-deb /artifacts/wal-g_${VERSION}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb
+            dpkg-deb --build wal-g-deb wal-g_${VERSION}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb
 
-            
-            
-
-      - name: Upload DEB package
+      - name: Upload DEB package (ARM64)
         uses: actions/upload-artifact@v4
         with:
           name: wal-g-deb-${{ matrix.db }}-${{ matrix.label }}-arm64
-          path: artifacts/wal-g_${{ env.VERSION}}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb
+          path: wal-g_${{ env.VERSION}}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb
+
 
   deploy-to-gh-pages:
     needs: [release-ubuntu, release-ubuntu-arm64]
@@ -172,7 +162,6 @@ jobs:
             echo "Retrying git pull ($attempt/5)..."
             sleep $(shuf -i 1-10 -n 1)
           done
-
       - name: Download all DEB packages
         uses: actions/download-artifact@v4
         with:
@@ -183,21 +172,17 @@ jobs:
         run: |
           echo "Downloaded artifacts:"
           ls -l ./artifacts
-
       - name: Copy DEB files to APT repo (without public/)
         run: |
           cd repo-pages
-
           for deb_file in ../artifacts/*.deb; do
             echo "Processing file: $deb_file"
-
             if [[ "$deb_file" =~ ubuntu-([0-9]{2}\.[0-9]{2}) ]]; then
               VERSION="${BASH_REMATCH[1]}"
             else
               echo "Could not determine Ubuntu version for $deb_file"
               exit 1
             fi
-
             if [[ "$deb_file" =~ -amd64- ]]; then
               ARCH="amd64"
             elif [[ "$deb_file" =~ -arm64- ]]; then
@@ -206,24 +191,19 @@ jobs:
               echo "Could not determine architecture for $deb_file"
               exit 1
             fi
-
             case "$VERSION" in
               "24.04") CODENAME="noble" ;;
               "22.04") CODENAME="jammy" ;;
               "20.04") CODENAME="focal" ;;
               *) echo "Unsupported Ubuntu version: $VERSION" && exit 1 ;;
             esac
-
             # ✅ Создаем папки, если их нет
             mkdir -p dists/$CODENAME/main/binary-arm64
             mkdir -p dists/$CODENAME/main/binary-amd64
-
             TARGET_DIR="dists/$CODENAME/main/binary-$ARCH"
             cp "$deb_file" "$TARGET_DIR/"
-
             echo "Placed $deb_file in $TARGET_DIR"
           done
-
       - name: Generate APT Repository Metadata 
         run: |
           cd repo-pages
@@ -240,21 +220,17 @@ jobs:
               fi
             done
           done
-
       - name: Sign APT Repository Metadata
         run: |
           cd repo-pages
           export GNUPGHOME=$(mktemp -d)
-
           # Импортируем GPG-ключ из секретов GitHub
           echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
-
           for CODENAME in noble jammy focal; do
             echo "Signing Release file for $CODENAME..."
             gpg --batch --yes --default-key "WAL-G Repository" -abs -o dists/$CODENAME/Release.gpg dists/$CODENAME/Release
             gpg --batch --yes --default-key "WAL-G Repository" --clearsign -o dists/$CODENAME/InRelease dists/$CODENAME/Release
           done
-
       - name: Commit and Push Changes to gh-pages
         run: |
           cd repo-pages
@@ -266,4 +242,3 @@ jobs:
             echo "Retrying git push ($attempt/5)..."
             sleep $(shuf -i 1-10 -n 1)
           done
-          
