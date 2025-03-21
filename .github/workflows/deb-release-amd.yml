@@ -6,7 +6,7 @@ on:
 
 
 permissions:
-  contents: write   # Need for git push  
+  contents: write   # Need for git push     
   actions: read     # Need fot downloading artifacts
 
 
@@ -215,14 +215,16 @@ jobs:
               PACKAGE_PATH="dists/$CODENAME/main/binary-$ARCH"
               if [[ -d "$PACKAGE_PATH" && $(ls -A "$PACKAGE_PATH"/*.deb 2>/dev/null) ]]; then
                 echo "Generating Packages for $CODENAME ($ARCH)"
-                apt-ftparchive packages "$PACKAGE_PATH" > "$PACKAGE_PATH/Packages"
+                apt-ftparchive -c ../aptftparchive.conf packages "$PACKAGE_PATH" > "$PACKAGE_PATH/Packages"
                 gzip -kf "$PACKAGE_PATH/Packages"
-                apt-ftparchive release "dists/$CODENAME" > "dists/$CODENAME/Release"
               else
                 echo "No packages found for $CODENAME ($ARCH), skipping..."
               fi
             done
-          done
+
+            echo "Generating Release file for $CODENAME"
+            apt-ftparchive -c ../aptftparchive.conf release "dists/$CODENAME" > "dists/$CODENAME/Release"
+          done          
       - name: Sign APT Repository Metadata
         run: |
           cd repo-pages
