@@ -101,6 +101,10 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"          
           env: |
             VERSION: ${{ env.VERSION }}
             USE_BROTLI: ${{ env.USE_BROTLI }}
@@ -140,15 +144,17 @@ jobs:
             Maintainer: mdb <mdb-admin@yandex-team.ru>
             Description: WAL-G backup tool for ${{ matrix.db }} (Brotli, libsodium, LZO enabled)
             EOF
-            dpkg-deb --build wal-g-deb wal-g_${VERSION}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb
-            cp wal-g_${VERSION}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb /tmp/
-            # mkdir -p artifacts
+            # dpkg-deb --build wal-g-deb wal-g_${VERSION}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb
+            dpkg-deb --build wal-g-deb /artifacts/wal-g_${VERSION}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb
+
+            
+            
 
       - name: Upload DEB package
         uses: actions/upload-artifact@v4
         with:
           name: wal-g-deb-${{ matrix.db }}-${{ matrix.label }}-arm64
-          path: /tmp/wal-g_${{ env.VERSION}}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb
+          path: artifacts/wal-g_${{ env.VERSION}}-${{ matrix.db }}-arm64-${{ matrix.label }}.deb
 
   deploy-to-gh-pages:
     needs: [release-ubuntu, release-ubuntu-arm64]
