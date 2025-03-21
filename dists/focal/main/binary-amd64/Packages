@@ -1,3 +1,17 @@
+Package: wal-g-pg
+Architecture: amd64
+Version: 2.1.16
+Priority: extra
+Section: database
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Filename: dists/focal/main/binary-amd64/wal-g_2.1.16-pg-amd64-ubuntu-20.04.deb
+Size: 11789624
+MD5sum: 3368d6a7a0c223d24bdf21700dca804c
+SHA1: dc1e9c36e13c2fcf719258f45f94315b3a4a91bd
+SHA256: a3a0e6a9cd52f2bec596f14f0b33fc66a85802628bd1349b30ec8580a0256876
+SHA512: 365c6417af20ce5b3e4ab130068f5160b944c28c51932754bfb6aa81c44766abb373a0450346874c0823f3084af7e9f06eb59a4b6f812c1464befcba5561eebc
+Description: WAL-G backup tool for pg (Brotli, libsodium, LZO enabled)
+
 Package: wal-g-mongo
 Architecture: amd64
 Version: 2.1.23
