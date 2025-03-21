@@ -6,7 +6,7 @@ on:
 
 
 permissions:
-  contents: write   # Need for git push
+  contents: write   # Need for git push 
   actions: read     # Need fot downloading artifacts
 
 
