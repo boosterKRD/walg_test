@@ -79,6 +79,8 @@ jobs:
 
   release-ubuntu-arm64:
     runs-on: ubuntu-20.04
+    env:
+      GO_VERSION: "1.22.8"    
     strategy:
       matrix:
         db: [pg]
