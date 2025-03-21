@@ -15,17 +15,16 @@ env:
   USE_BROTLI: 1
   USE_LIBSODIUM: 1
   USE_LZO: 1
-  VERSION: "${{ github.ref_name }}"
 
 jobs:
   release-ubuntu:
     strategy:
       matrix:
-        os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04 ]
-        # os: [ ubuntu-20.04 ]
-        db: [ pg, mongo, redis]
-        # db: [ pg]
-      max-parallel: 2
+        # os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04 ]
+        os: [ ubuntu-20.04 ]
+        # db: [ pg, mongo, redis]
+        db: [ pg]
+      max-parallel: 6
       fail-fast: false
     runs-on: ${{ matrix.os }}
     continue-on-error: false
@@ -52,8 +51,8 @@ jobs:
       - name: Rename WAL-G binary
         run: mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-amd64-${{ matrix.os }}
 
-      # - name: Extract version
-      #   run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       - name: Create DEB package
         run: |
@@ -91,6 +90,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       - name: Build and package WAL-G inside ARM64 container
         uses: uraimo/run-on-arch-action@v3
