@@ -86,8 +86,8 @@ jobs:
         db: [pg]
         include:
           - arch: aarch64
-            distro: ubuntu20.04
-            label: ubuntu-20.04
+            distro: ubuntu22.04
+            label: ubuntu-22.04
             deb_arch: arm64
       fail-fast: false
     steps:
