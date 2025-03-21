@@ -102,6 +102,7 @@ jobs:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
           env: |
+            VERSION: ${{ env.VERSION }}
             USE_BROTLI: ${{ env.USE_BROTLI }}
             USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
             USE_LZO: ${{ env.USE_LZO }}
@@ -124,7 +125,6 @@ jobs:
             make deps
             make pg_build
             mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-arm64-${{ matrix.label }}
-            # echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
             mkdir -p wal-g-deb/DEBIAN
             mkdir -p wal-g-deb/usr/bin/
