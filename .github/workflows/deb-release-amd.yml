@@ -50,6 +50,7 @@ jobs:
 
       - name: Rename WAL-G binary
         run: mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-${{ matrix.deb_arch }}-${{ matrix.os }}
+        
 
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
@@ -77,75 +78,75 @@ jobs:
           name: wal-g-deb-${{ matrix.db }}-${{ matrix.os }}-${{ matrix.deb_arch }}
           path: wal-g_${{ env.VERSION}}-${{ matrix.db }}-${{ matrix.deb_arch }}-${{ matrix.os }}.deb
 
-  # release-ubuntu-arm64:
-  #   runs-on: ubuntu-20.04
-  #   env:
-  #     GO_VERSION: "1.22.8"    
-  #   strategy:
-  #     matrix:
-  #       db: [pg]
-  #       include:
-  #         - arch: aarch64
-  #           distro: ubuntu22.04
-  #           label: ubuntu-22.04
-  #           deb_arch: arm64
-  #     fail-fast: false
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+  release-ubuntu-arm64:
+    runs-on: ubuntu-20.04
+    env:
+      GO_VERSION: "1.22.8"    
+    strategy:
+      matrix:
+        db: [pg, mongo, redis]
+        include:
+          - arch: aarch64
+            distro: ubuntu22.04
+            label: ubuntu-22.04
+            deb_arch: arm64
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #     - name: Extract version
-  #       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
-  #     - name: Build and package WAL-G inside ARM64 container (${{ matrix.deb_arch }})
-  #       uses: uraimo/run-on-arch-action@v3
-  #       with:
-  #         arch: ${{ matrix.arch }}
-  #         distro: ${{ matrix.distro }}
-  #         env: |
-  #           VERSION: ${{ env.VERSION }}
-  #           USE_BROTLI: ${{ env.USE_BROTLI }}
-  #           USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
-  #           USE_LZO: ${{ env.USE_LZO }}
-  #         shell: /bin/bash
-  #         run: |
-  #           apt-get update
-  #           apt-get install -y build-essential curl git cmake liblzo2-dev brotli libsodium-dev devscripts debhelper dh-make dpkg-dev
-  #           curl -LO https://go.dev/dl/go${{ env.GO_VERSION }}.linux-arm64.tar.gz
-  #           tar -C /usr/local -xzf go${{ env.GO_VERSION }}.linux-arm64.tar.gz
-  #           export GOROOT=/usr/local/go
-  #           export GOPATH=$HOME/go          
-  #           export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-  #           git config --global --add safe.directory /home/runner/work/wal-g/wal-g
-  #           git config --global --add safe.directory /home/runner/work/wal-g/wal-g/submodules/brotli
-  #           git config --global --add safe.directory /home/runner/work/walg_test/walg_test
-  #           git config --global --add safe.directory /home/runner/work/walg_test/walg_test/submodules/brotli
-  #           make deps
-  #           make pg_build
-  #           mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-${{ matrix.deb_arch }}-${{ matrix.label }}
+      - name: Build and package WAL-G inside ARM64 container (${{ matrix.deb_arch }})
+        uses: uraimo/run-on-arch-action@v3
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          env: |
+            VERSION: ${{ env.VERSION }}
+            USE_BROTLI: ${{ env.USE_BROTLI }}
+            USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
+            USE_LZO: ${{ env.USE_LZO }}
+          shell: /bin/bash
+          run: |
+            apt-get update
+            apt-get install -y build-essential curl git cmake liblzo2-dev brotli libsodium-dev devscripts debhelper dh-make dpkg-dev
+            curl -LO https://go.dev/dl/go${{ env.GO_VERSION }}.linux-arm64.tar.gz
+            tar -C /usr/local -xzf go${{ env.GO_VERSION }}.linux-arm64.tar.gz
+            export GOROOT=/usr/local/go
+            export GOPATH=$HOME/go          
+            export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+            git config --global --add safe.directory /home/runner/work/wal-g/wal-g
+            git config --global --add safe.directory /home/runner/work/wal-g/wal-g/submodules/brotli
+            git config --global --add safe.directory /home/runner/work/walg_test/walg_test
+            git config --global --add safe.directory /home/runner/work/walg_test/walg_test/submodules/brotli
+            make deps
+            make pg_build
+            mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-${{ matrix.deb_arch }}-${{ matrix.label }}
 
-  #     - name: Create DEB package (${{ matrix.deb_arch }})
-  #       run: |            
-  #           mkdir -p wal-g-deb/DEBIAN
-  #           mkdir -p wal-g-deb/usr/bin/
-  #           cp wal-g-${{ matrix.db }}-${{ matrix.deb_arch }}-${{ matrix.label }} wal-g-deb/usr/bin/wal-g
-  #           chmod 755 wal-g-deb/usr/bin/wal-g
-  #           cat <<EOF > wal-g-deb/DEBIAN/control
-  #           Package: wal-g-${{ matrix.db }}
-  #           Version: ${VERSION}
-  #           Section: database
-  #           Priority: extra
-  #           Architecture: ${{ matrix.deb_arch }}
-  #           Maintainer: mdb <mdb-admin@yandex-team.ru>
-  #           Description: WAL-G backup tool for ${{ matrix.db }} (Brotli, libsodium, LZO enabled)
-  #           EOF
-  #           dpkg-deb --build wal-g-deb wal-g_${VERSION}-${{ matrix.db }}-${{ matrix.deb_arch }}-${{ matrix.label }}.deb
+      - name: Create DEB package (${{ matrix.deb_arch }})
+        run: |            
+            mkdir -p wal-g-deb/DEBIAN
+            mkdir -p wal-g-deb/usr/bin/
+            cp wal-g-${{ matrix.db }}-${{ matrix.deb_arch }}-${{ matrix.label }} wal-g-deb/usr/bin/wal-g
+            chmod 755 wal-g-deb/usr/bin/wal-g
+            cat <<EOF > wal-g-deb/DEBIAN/control
+            Package: wal-g-${{ matrix.db }}
+            Version: ${VERSION}
+            Section: database
+            Priority: extra
+            Architecture: ${{ matrix.deb_arch }}
+            Maintainer: mdb <mdb-admin@yandex-team.ru>
+            Description: WAL-G backup tool for ${{ matrix.db }} (Brotli, libsodium, LZO enabled)
+            EOF
+            dpkg-deb --build wal-g-deb wal-g_${VERSION}-${{ matrix.db }}-${{ matrix.deb_arch }}-${{ matrix.label }}.deb
 
-  #     - name: Upload DEB package (${{ matrix.deb_arch }})
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: wal-g-deb-${{ matrix.db }}-${{ matrix.label }}-${{ matrix.deb_arch }}
-  #         path: wal-g_${{ env.VERSION}}-${{ matrix.db }}-${{ matrix.deb_arch }}-${{ matrix.label }}.deb
+      - name: Upload DEB package (${{ matrix.deb_arch }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: wal-g-deb-${{ matrix.db }}-${{ matrix.label }}-${{ matrix.deb_arch }}
+          path: wal-g_${{ env.VERSION}}-${{ matrix.db }}-${{ matrix.deb_arch }}-${{ matrix.label }}.deb
 
 
   deploy-to-gh-pages:
