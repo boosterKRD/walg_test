@@ -54,3 +54,45 @@ SHA256: 3716a399376e817f615b20ff91d8ce4276513fdbc63a9b6928e96e60d964e495
 SHA512: 9a77273a82c9e3874b27350f2dd1f23d953969e668c3ab9ce67f4e670682629ebde462a06c9082b9cfc4d03b209121637fb13ca5c1ee1b0648b45fe72f237537
 Description: WAL-G backup tool for redis (Brotli, libsodium, LZO enabled)
 
+Package: wal-g-mongo
+Architecture: amd64
+Version: 2.1.50
+Priority: extra
+Section: database
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Filename: dists/focal/main/binary-amd64/wal-g_2.1.50-mongo-amd64-ubuntu-20.04.deb
+Size: 11241384
+MD5sum: f6d18935658524be824b588dfda90fe9
+SHA1: 277c448393c2f0c267993f701525811173dbd95f
+SHA256: 4765b22c7f6f0cc8a841c44f7dd802ce3f3ef9a848ab184630e92574192c6201
+SHA512: b89dfcc80fb0fdba4f0b0b8f9b08686a61f3b2975632a749c49fe799ddc41efa8fc01f50bf601329cfd788af684f1d4eca5ac1612967a752adf55039fda38645
+Description: WAL-G backup tool for mongo (Brotli, libsodium, LZO enabled)
+
+Package: wal-g-pg
+Architecture: amd64
+Version: 2.1.50
+Priority: extra
+Section: database
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Filename: dists/focal/main/binary-amd64/wal-g_2.1.50-pg-amd64-ubuntu-20.04.deb
+Size: 11792948
+MD5sum: 58d220df63c3aa453ceb6fcb8b6bc88d
+SHA1: 4dd13a331df2f00520806dbba95f24982e174311
+SHA256: ac5648fc1f77537542f9735a59f922a494d40a36ce2ca77e32b08da14f69d9d0
+SHA512: 8d42a6048129cdaf689d4f6da49a4a29ac5b39b75f7a08ad50ea7e90d4a21e9fcb1dbbfded1e79fa643863a6a3a228ff39536198465585309767837ffa84d76c
+Description: WAL-G backup tool for pg (Brotli, libsodium, LZO enabled)
+
+Package: wal-g-redis
+Architecture: amd64
+Version: 2.1.50
+Priority: extra
+Section: database
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Filename: dists/focal/main/binary-amd64/wal-g_2.1.50-redis-amd64-ubuntu-20.04.deb
+Size: 10806384
+MD5sum: f838fd33e265527ac7ca0e9c8d5700d4
+SHA1: f147b35548a333faffc56565f8ba0effb43e6b03
+SHA256: c01fe3769cf8d81df657481da5505f3dd8180b617cdf616894ad37a91ce133e3
+SHA512: a6af92108c6d618741869ef4c5d13f7c2d87dabd7f132adc27c4d06d7c82d1cced1a8f4332582a1830bc10a85f8832529549f2eb6630dd41614cdaf007838bf6
+Description: WAL-G backup tool for redis (Brotli, libsodium, LZO enabled)
+
