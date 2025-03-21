@@ -149,7 +149,8 @@ jobs:
 
 
   deploy-to-gh-pages:
-    needs: [release-ubuntu-amd64, release-ubuntu-arm64]
+    # needs: [release-ubuntu-amd64, release-ubuntu-arm64]
+    needs: [release-ubuntu-amd64]
     runs-on: ubuntu-20.04
 
     steps:
