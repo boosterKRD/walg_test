@@ -1,0 +1,42 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Architectures: amd64 arm64
+Codename: jammy
+Components: main
+Date: Fri, 21 Mar 2025 16:24:48 +0000
+Label: WAL-G APT Repository
+Origin: WAL-G Repo
+MD5Sum:
+ 879f5814a72e252396ed775fa1c1d0f3              145 Release
+ 43fac25319b903ea4ae67f2bef823e12             1803 main/binary-amd64/Packages
+ efda2ae797721c35aa70ba12ad69f8d1              853 main/binary-amd64/Packages.gz
+SHA1:
+ eb308289702e2a2f1d9c2d0a721137d2631d6eda              145 Release
+ d5a79311750bfc2d2dd483171b66adb3a82e494a             1803 main/binary-amd64/Packages
+ 4794bb04adc2669971872bb75fa5432f4b3562f7              853 main/binary-amd64/Packages.gz
+SHA256:
+ bf347811fedd5b023e18081c99a31bd8811a0112ab3b58b53b3f8fd61a256758              145 Release
+ 4847a308aca91836796fe552237abefdcd83b0ebda244da4cb7568bf0e88c499             1803 main/binary-amd64/Packages
+ 4d24fd4f8f342c4bbe8c992df12bc2c5f028d6513d50155c5322b1b909cc7d78              853 main/binary-amd64/Packages.gz
+SHA512:
+ 47fdb83b98e73be287483b014b35fccd28453894f2aa1b584e7bf7e8b3c7a5a281bce4ed2f79b797fa6c47adc9754c882b00513f3972051ab2540e1ed6dda1b6              145 Release
+ cc404adac351b0adc17ef13a603e4ea57460ab131e76ed1d46325c707b37920000a613c7e7088ee24aff72d0935749b8c945a0f81f9830b875e911a13e6a9f50             1803 main/binary-amd64/Packages
+ cc48834f21080891f80bfef0a5bdc78f7774c670cf5c406b4fed542ffda1c3e060bef33b6ec45cded7817bcb065d5071b70d3260a3ea3ea60afc485062cd18cb              853 main/binary-amd64/Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iQJNBAEBCgA3FiEEgW8CHvdM12HPjtPUIDgxJA2l8zEFAmfdktEZHG1kYi1hZG1p
+bkB5YW5kZXgtdGVhbS5ydQAKCRAgODEkDaXzMeLjEACJ/7cwx7c+/hHwo8eFTWEt
+sR0IGyOfcsBxl0cDla8PydI0Bi48dNLcEXIrHULjSKSUPINtkIYd5nONch3jW4P7
+5+s9Mrh5xxumGA7MXZhBY7dl1jBf7XYTSil/ZAo5OvmfWKEKsX/eYeuY3pbmBixb
+EZB9/ieR3lNXRwoXLSGxLrniy/Y5QQam877TEN7ysTT62ALkpSc6IImMGsKJeFr4
+fAFijYf3ZfKzyCFPLmabjQ5HJ3/EBsvC1TiM/ZR7y+Uhg/VsJsln5oybAqLFdZ8C
+2hx6adlwrynpq6u50tsaJeWybfli4mya8ECmGXRtn5T3PLxngyHAmYSHAUZPEBQg
++B0ndzMbJM5lgRaIdp3Qmg+dp7as1tL5tmfsP7UbGiW7JY4QM73ye8gstdIyLNvo
+OcT/TAaOYqcs2jvac25EbFHKUtai2/9JTME04wytNhNonuRlyXiFkmXUMHzjtj49
+9jOcHpuwMcg+cBYdruoPwLrJtVrgqIz1o5AvjamV1cRrrf+KPkZg/lkcu2D2BUxA
+ex1JYyPZUCZkOkCIIpesUsGORXutEU9gXAyLleBikjlYXe68d7JkQg0muO7Q25lD
+Acyz8Isghmj5Zowioj3AXvXuVL5mCG6qIWWWpPWrFmyaFnsBCm0Us/nSnOqD6Eu6
+OE1ez5POd8P1x/sx9FQc2g==
+=evq7
+-----END PGP SIGNATURE-----
