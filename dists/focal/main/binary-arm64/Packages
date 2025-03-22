@@ -1,0 +1,42 @@
+Package: wal-g-mongo
+Architecture: arm64
+Version: 2.1.55
+Priority: extra
+Section: database
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Filename: dists/focal/main/binary-arm64/wal-g_2.1.55-mongo-arm64-ubuntu-20.04.deb
+Size: 9923936
+MD5sum: ed311c982bba07c5c01a5665f7743ac0
+SHA1: 89c757ee866712f4e5598c4416ada76e487e4021
+SHA256: ee4fefa000a0b74ffd2cfe54d1eb4b30aee6436ff3ba2c1f26b69cf2036e5a42
+SHA512: 5318f4339324aff5c4141f31f2061f56b9dcb2281309bd85e8f3857b7dd4ecb7a2486a94c3ae3d9ec4f9c6fc229219c79fd6934ca375aae86be654acc0b61fda
+Description: WAL-G backup tool for mongo (Brotli, libsodium, LZO enabled)
+
+Package: wal-g-pg
+Architecture: arm64
+Version: 2.1.55
+Priority: extra
+Section: database
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Filename: dists/focal/main/binary-arm64/wal-g_2.1.55-pg-arm64-ubuntu-20.04.deb
+Size: 10425372
+MD5sum: 286a873c1ad19ce725cfa33135a19f42
+SHA1: 0c0b2938ed26cccd507e1683383decda67544971
+SHA256: 2d19456101f82f734da574502acf3032fffa0fe587312244aaad3b7e00162c7a
+SHA512: 258885cf4b28ccbb8a1579c565e483245fd9035bbfc34a98abd5eba3158c6b9cb4144f754ba35d4fb9e7de1dcb5799a6a946d86800a4dda54c2e2733cba36f16
+Description: WAL-G backup tool for pg (Brotli, libsodium, LZO enabled)
+
+Package: wal-g-redis
+Architecture: arm64
+Version: 2.1.55
+Priority: extra
+Section: database
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Filename: dists/focal/main/binary-arm64/wal-g_2.1.55-redis-arm64-ubuntu-20.04.deb
+Size: 9556856
+MD5sum: 1614996740d79c7833539b372a685294
+SHA1: c4bbebf52c764504b2a9a608fec9e76cdf86d565
+SHA256: 85d27a1c4b3dde1437f79d1572b869817db48fe23c33521f6abe093879525d54
+SHA512: 506114badbae529ce3eead778933f479f005fe3472cd171a0534c3abe14db2b1183e66eb475d27f95269be27bb929ccd678c0cae7f2e650afcebccd2eeae8136
+Description: WAL-G backup tool for redis (Brotli, libsodium, LZO enabled)
+
