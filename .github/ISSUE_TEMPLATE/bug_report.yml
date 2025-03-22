@@ -38,16 +38,7 @@ body:
     attributes:
       label: Config and WAL-G logs
       description: Add config and WAL-G stdout/stderr logs for debugging. You can set WALG_LOG_LEVEL=DEVEL for more details.
-      render: shell
       placeholder: |
-        <details><summary>If you can, provide logs</summary>
-        <p>
-
-        ```bash
-        any logs here
-        ```
-
-        </p>
-        </details>
+        Paste your config and logs here. You can also drag & drop files.
     validations:
       required: false
