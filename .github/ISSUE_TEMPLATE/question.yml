@@ -1,0 +1,13 @@
+name: Question
+description: Ask a question or get support
+title: "[QUESTION] "
+labels: [question]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: What is your question?
+      placeholder: |
+        Ask anything related to WAL-G, usage, config, etc.
+    validations:
+      required: true
