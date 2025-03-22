@@ -90,6 +90,10 @@ jobs:
             distro: ubuntu22.04
             label: ubuntu-22.04
             deb_arch: arm64
+          - arch: aarch64
+            distro: ubuntu20.04
+            label: ubuntu-20.04
+            deb_arch: arm64            
       fail-fast: false
     steps:
       - name: Checkout code
@@ -122,7 +126,7 @@ jobs:
             git config --global --add safe.directory /home/runner/work/walg_test/walg_test
             git config --global --add safe.directory /home/runner/work/walg_test/walg_test/submodules/brotli
             make deps
-            make pg_build
+            make ${{ matrix.db }}_build
             mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-${{ matrix.deb_arch }}-${{ matrix.label }}
 
       - name: Create DEB package (${{ matrix.deb_arch }})
