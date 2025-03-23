@@ -1,8 +1,16 @@
-name: Question
+name: ❓ Question
 description: Ask a question or get support
-title: "[QUESTION] "
+title: "[QUESTION] <your question>"
 labels: [question]
 body:
+  - type: input
+    id: walg-version
+    attributes:
+      label: WAL-G Version
+      placeholder: e.g. v2.1.55 or master
+    validations:
+      required: false
+
   - type: textarea
     id: question
     attributes:

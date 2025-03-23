@@ -1,8 +1,20 @@
-name: General issue
+name: 🗣️ General Discussion
 description: Open a general issue or share feedback
-title: "[GENERAL] "
+title: "[DISCUSSION] <topic>"
 labels: [discussion]
 body:
+
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: How urgent is this?
+      options:
+        - Not urgent
+        - Nice to have
+        - Important
+    validations:
+      required: true
+
   - type: textarea
     id: topic
     attributes:

@@ -1,6 +1,6 @@
-name: Bug report
-description: Report a bug or issue in WAL-G
-title: "[BUG] "
+name: 🐞 Bug Report
+description: Found a bug in WAL-G? Let us know.
+title: "[BUG] <short summary>"
 labels: [bug]
 body:
   - type: input
@@ -8,10 +8,18 @@ body:
     attributes:
       label: Database name
       description: WAL-G provides support for many databases. Please write the name of the database you use.
-      placeholder: e.g. PostgreSQL, MongoDB, Redis
+      placeholder: e.g. PostgreSQL, MongoDB, Redis, or all
     validations:
       required: true
 
+  - type: input
+    id: walg-version
+    attributes:
+      label: WAL-G Version
+      placeholder: e.g. v2.1.55 or master
+    validations:
+      required: true
+      
   - type: textarea
     id: problem
     attributes:

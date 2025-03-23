@@ -1,6 +1,6 @@
-name: Feature request
+name: 💡 Feature Request
 description: Suggest an idea or enhancement for WAL-G
-title: "[FEATURE] "
+title: "[FEATURE] <what you want> "
 labels: [enhancement]
 body:
   - type: textarea
