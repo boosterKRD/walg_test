@@ -4,11 +4,9 @@ on:
     tags:
       - 'v*'
 
-
 permissions:
   contents: write   # Need for git push     
-  actions: read     # Need fot downloading artifacts
-
+  actions: read     # Need for downloading artifacts
 
 env:
   GO_VERSION: "1.22"
@@ -76,40 +74,38 @@ jobs:
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
-        - name: Build DEB packages inside ARM64 container
-          uses: uraimo/run-on-arch-action@v3
-          with:
-            arch: ${{ matrix.arch }}
-            distro: ${{ matrix.distro }}
-            shell: /bin/bash
-            env: |
-              VERSION: ${{ env.VERSION }}
-              USE_BROTLI: ${{ env.USE_BROTLI }}
-              USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
-              USE_LZO: ${{ env.USE_LZO }}
-            run: |
-              apt-get update
-              apt-get install -y build-essential debhelper dh-golang golang-any \
-                liblzo2-dev brotli libsodium-dev git devscripts dpkg-dev
-              curl -LO https://go.dev/dl/go1.22.8.linux-arm64.tar.gz
-              tar -C /usr/local -xzf go1.22.8.linux-arm64.tar.gz
-              export GOROOT=/usr/local/go
-              export GOPATH=$HOME/go
-              export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
-              git config --global --add safe.directory "$PWD"
-              dpkg-buildpackage -us -uc -b
+      - name: Build DEB packages inside ARM64 container
+        uses: uraimo/run-on-arch-action@v3
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          shell: /bin/bash
+          env:
+            VERSION: ${{ env.VERSION }}
+            USE_BROTLI: ${{ env.USE_BROTLI }}
+            USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
+            USE_LZO: ${{ env.USE_LZO }}
+          run: |
+            apt-get update
+            apt-get install -y build-essential debhelper dh-golang golang-any \
+              liblzo2-dev brotli libsodium-dev git devscripts dpkg-dev
+            curl -LO https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz
+            tar -C /usr/local -xzf go${GO_VERSION}.linux-arm64.tar.gz
+            export GOROOT=/usr/local/go
+            export GOPATH=$HOME/go
+            export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+            git config --global --add safe.directory "$PWD"
+            dpkg-buildpackage -us -uc -b
 
       - name: Upload DEBs
         uses: actions/upload-artifact@v4
         with:
           name: wal-g-debs-${{ matrix.label }}-${{ matrix.deb_arch }}
           path: ../*.deb
-  
+
   deploy-to-gh-pages:
     needs: [release-ubuntu-amd64, release-ubuntu-arm64]
-    # needs: [release-ubuntu-amd64]
     runs-on: ubuntu-20.04
-
     steps:
       - name: Checkout gh-pages branch
         run: |
@@ -122,6 +118,7 @@ jobs:
             echo "Retrying git pull ($attempt/5)..."
             sleep $(shuf -i 1-10 -n 1)
           done
+
       - name: Download all DEB packages
         uses: actions/download-artifact@v4
         with:
@@ -132,6 +129,7 @@ jobs:
         run: |
           echo "Downloaded artifacts:"
           ls -l ./artifacts
+
       - name: Copy DEB files to APT repo (without public/)
         run: |
           cd repo-pages
@@ -157,7 +155,6 @@ jobs:
               "20.04") CODENAME="focal" ;;
               *) echo "Unsupported Ubuntu version: $VERSION" && exit 1 ;;
             esac
-            # ✅ Создаем папки, если их нет
             mkdir -p dists/$CODENAME/main/binary-arm64
             mkdir -p dists/$CODENAME/main/binary-amd64
             TARGET_DIR="dists/$CODENAME/main/binary-$ARCH"
@@ -196,13 +193,13 @@ jobs:
         run: |
           cd repo-pages
           export GNUPGHOME=$(mktemp -d)
-          # Импортируем GPG-ключ из секретов GitHub
           echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
           for CODENAME in noble jammy focal; do
             echo "Signing Release file for $CODENAME..."
             gpg --batch --yes --default-key "WAL-G Repository" -abs -o dists/$CODENAME/Release.gpg dists/$CODENAME/Release
             gpg --batch --yes --default-key "WAL-G Repository" --clearsign -o dists/$CODENAME/InRelease dists/$CODENAME/Release
           done
+
       - name: Commit and Push Changes to gh-pages
         run: |
           cd repo-pages
