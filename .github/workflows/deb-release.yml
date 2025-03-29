@@ -97,7 +97,7 @@
               USE_LZO: ${{ env.USE_LZO }}
             run: |
               apt-get update
-              apt-get install -y build-essential debhelper dh-golang \
+              apt-get install -y build-essential cmake debhelper dh-golang \
                 liblzo2-dev brotli libsodium-dev git devscripts dpkg-dev
               curl -LO https://go.dev/dl/go${{ env.GO_VERSION }}.linux-arm64.tar.gz
               tar -C /usr/local -xzf go${{ env.GO_VERSION }}.linux-arm64.tar.gz

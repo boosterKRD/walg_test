@@ -1,9 +1,9 @@
 git add .  
-git commit -m "v3.1.6"
-git tag -a v3.1.6 -m "Release v3.1.6"
+git commit -m "v3.1.7"
+git tag -a v3.1.7 -m "Release v3.1.7"
 
 git push origin main  
-git push origin v3.1.6
+git push origin v3.1.7
 
 
 
