@@ -27,6 +27,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Enable focal-backports (for debhelper-compat)
+        if: matrix.os == 'ubuntu-20.04'
+        run: |
+          echo "deb http://archive.ubuntu.com/ubuntu focal-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
+
       - name: Install build dependencies
         run: |
           sudo apt-get update
