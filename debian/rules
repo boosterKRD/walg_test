@@ -1,11 +1,18 @@
 #!/usr/bin/make -f
-# -*- makefile -*-
-# NOTE: Only TABs allowed here !!!
 
-override_dh_auto_build:
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
 
-override_dh_auto_install:
-	dh_auto_install --destdir=debian/wal-g
+export DH_GOLANG_EXCLUDES := iphlpapi
 
 %:
-	dh $@
+	dh $@ --buildsystem=golang --with=golang
+
+override_dh_auto_build:
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make deps
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make pg_build
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make mongo_build
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make redis_build
+
+override_dh_auto_clean:
+	make clean

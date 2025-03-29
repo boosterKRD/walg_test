@@ -1,0 +1,37 @@
+Source: wal-g
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Section: utils
+Priority: database
+Standards-Version: 4.6.0
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-golang,
+ golang-any,
+ liblzo2-dev,
+ brotli,
+ libsodium-dev,
+ git
+Rules-Requires-Root: no
+XS-Go-Import-Path: github.com/wal-g/wal-g
+
+Package: wal-g-pg
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: WAL-G backup tool for PostgreSQL
+ WAL-G is an archival restoration tool for PostgreSQL. This package
+ includes support for PostgreSQL backups and restore with page compression,
+ streaming, and cloud integration.
+
+Package: wal-g-mongo
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: WAL-G backup tool for MongoDB
+ WAL-G is an archival restoration tool for MongoDB. This package
+ includes support for MongoDB backups to cloud storage.
+
+Package: wal-g-redis
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: WAL-G backup tool for Redis
+ WAL-G is an archival restoration tool for Redis. This package
+ includes support for Redis backup and restore functionality.
