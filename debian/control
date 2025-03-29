@@ -4,7 +4,7 @@ Section: utils
 Priority: database
 Standards-Version: 4.6.0
 Build-Depends:
- debhelper (>= 13),
+ debhelper-compat (= 13),
  dh-golang,
  golang-any,
  liblzo2-dev,
