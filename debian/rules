@@ -9,6 +9,8 @@ export DH_GOLANG_EXCLUDES := iphlpapi
 	dh $@ --buildsystem=golang --with=golang
 
 override_dh_auto_build:
+	pwd
+	ls -l
 	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make deps
 	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make pg_build
 	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make mysql_build
