@@ -4,6 +4,8 @@ export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
 export DH_GOLANG_EXCLUDES := iphlpapi
+export GO111MODULE=on
+export GOFLAGS=-mod=vendor
 
 %:
 	dh $@ --buildsystem=golang --with=golang
