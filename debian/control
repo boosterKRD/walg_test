@@ -4,6 +4,7 @@ Section: utils
 Priority: database
 Standards-Version: 4.6.0
 Build-Depends:
+ debhelper (>= 12),
  curl,
  liblzo2-dev,
  brotli,
