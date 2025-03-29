@@ -8,7 +8,8 @@ export GO111MODULE=on
 export GOFLAGS=-mod=vendor
 
 %:
-	dh $@ --buildsystem=golang --with=golang
+	dh $@
+	# dh $@ --buildsystem=golang --with=golang
 
 override_dh_auto_build:
 	pwd
