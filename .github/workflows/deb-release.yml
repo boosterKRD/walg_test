@@ -76,25 +76,28 @@ jobs:
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
-      - name: Build DEB packages inside ARM64 container
-        uses: uraimo/run-on-arch-action@v3
-        with:
-          arch: ${{ matrix.arch }}
-          distro: ${{ matrix.distro }}
-          shell: /bin/bash
-          env: |
-            VERSION=${{ env.VERSION }}
-          run: |
-            apt-get update
-            apt-get install -y build-essential debhelper dh-golang golang-any \
-              liblzo2-dev brotli libsodium-dev git devscripts dpkg-dev
-            curl -LO https://go.dev/dl/go1.22.8.linux-arm64.tar.gz
-            tar -C /usr/local -xzf go1.22.8.linux-arm64.tar.gz
-            export GOROOT=/usr/local/go
-            export GOPATH=$HOME/go
-            export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
-            git config --global --add safe.directory "$PWD"
-            dpkg-buildpackage -us -uc -b
+        - name: Build DEB packages inside ARM64 container
+          uses: uraimo/run-on-arch-action@v3
+          with:
+            arch: ${{ matrix.arch }}
+            distro: ${{ matrix.distro }}
+            shell: /bin/bash
+            env: |
+              VERSION: ${{ env.VERSION }}
+              USE_BROTLI: ${{ env.USE_BROTLI }}
+              USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
+              USE_LZO: ${{ env.USE_LZO }}
+            run: |
+              apt-get update
+              apt-get install -y build-essential debhelper dh-golang golang-any \
+                liblzo2-dev brotli libsodium-dev git devscripts dpkg-dev
+              curl -LO https://go.dev/dl/go1.22.8.linux-arm64.tar.gz
+              tar -C /usr/local -xzf go1.22.8.linux-arm64.tar.gz
+              export GOROOT=/usr/local/go
+              export GOPATH=$HOME/go
+              export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+              git config --global --add safe.directory "$PWD"
+              dpkg-buildpackage -us -uc -b
 
       - name: Upload DEBs
         uses: actions/upload-artifact@v4
