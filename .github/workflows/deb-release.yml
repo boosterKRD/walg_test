@@ -80,7 +80,7 @@ jobs:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
           shell: /bin/bash
-          env:
+          env: |
             VERSION: ${{ env.VERSION }}
             USE_BROTLI: ${{ env.USE_BROTLI }}
             USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
