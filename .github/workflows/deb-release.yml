@@ -27,6 +27,10 @@
         - name: Checkout code
           uses: actions/checkout@v4
 
+        - name: Set up Golang
+          uses: actions/setup-go@v5
+          with:
+            go-version: ${{ env.GO_VERSION }}
         # - name: Enable focal-backports (for debhelper-compat)
         #   if: matrix.os == 'ubuntu-20.04'
         #   run: |
@@ -39,7 +43,6 @@
               build-essential \
               debhelper \
               dh-golang \
-              golang-any \
               liblzo2-dev \
               brotli \
               libsodium-dev \
@@ -94,7 +97,7 @@
               USE_LZO: ${{ env.USE_LZO }}
             run: |
               apt-get update
-              apt-get install -y build-essential debhelper dh-golang golang-any \
+              apt-get install -y build-essential debhelper dh-golang \
                 liblzo2-dev brotli libsodium-dev git devscripts dpkg-dev
               curl -LO https://go.dev/dl/go${{ env.GO_VERSION }}.linux-arm64.tar.gz
               tar -C /usr/local -xzf go${{ env.GO_VERSION }}.linux-arm64.tar.gz
