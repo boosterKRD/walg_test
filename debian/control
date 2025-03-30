@@ -1,7 +1,7 @@
 Source: wal-g
 Maintainer: mdb <mdb-admin@yandex-team.ru>
-Section: utils
-Priority: database
+Section: database
+Priority: extra
 Standards-Version: 4.6.0
 Build-Depends:
  debhelper-compat (= 12),
