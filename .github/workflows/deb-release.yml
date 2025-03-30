@@ -59,7 +59,7 @@
           uses: actions/upload-artifact@v4
           with:
             name: wal-g-debs-${{ matrix.os }}-${{ matrix.deb_arch }}
-            path: ./*.deb
+            path: '**/*.deb'
 
 
     release-ubuntu-arm64:
@@ -112,7 +112,7 @@
           uses: actions/upload-artifact@v4
           with:
             name: wal-g-debs-${{ matrix.label }}-${{ matrix.deb_arch }}
-            path: ./*.deb
+            path: '**/*.deb'
 
     deploy-to-gh-pages:
       needs: [release-ubuntu-amd64, release-ubuntu-arm64]
