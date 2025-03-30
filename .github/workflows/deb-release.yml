@@ -64,11 +64,16 @@
           run: |
             dpkg-buildpackage -us -uc -b
 
+        - name: Move DEBs to staging dir
+          run: |
+            mkdir -p output-debs
+            mv ../*.deb output-debs/
+
         - name: Upload DEBs
           uses: actions/upload-artifact@v4
           with:
-            name: wal-g-debs-${{ matrix.os }}-${{ matrix.deb_arch }}
-            path: ../*.deb
+            name: wal-g-debs
+            path: output-debs/*.deb
             if-no-files-found: error
 
 
@@ -127,11 +132,16 @@
               git config --global --add safe.directory "$PWD"
               dpkg-buildpackage -us -uc -b
 
+        - name: Move DEBs to staging dir
+          run: |
+            mkdir -p output-debs
+            mv ../*.deb output-debs/
+
         - name: Upload DEBs
           uses: actions/upload-artifact@v4
           with:
-            name: wal-g-debs-${{ matrix.label }}-${{ matrix.deb_arch }}
-            path: ../*.deb
+            name: wal-g-debs
+            path: output-debs/*.deb
             if-no-files-found: error
 
     deploy-to-gh-pages:
