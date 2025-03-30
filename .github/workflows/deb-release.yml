@@ -54,13 +54,11 @@
         - name: Patch debian/changelog with tag version
           run: |
             VERSION=${GITHUB_REF#refs/tags/v}
-            cat > debian/changelog <<EOF
-wal-g ($VERSION-1) unstable; urgency=medium
-
-  * Auto-generated release for version $VERSION
-
- -- GitHub Actions <ci@example.com>  $(date -R)
-EOF
+            echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
+            echo "" >> debian/changelog
+            echo "  * Auto-generated release for version $VERSION" >> debian/changelog
+            echo "" >> debian/changelog
+            echo " -- GitHub Actions <ci@example.com>  $(date -R)" >> debian/changelog
 
         - name: Build DEB packages
           run: |
@@ -100,13 +98,11 @@ EOF
         - name: Patch debian/changelog with tag version
           run: |
             VERSION=${GITHUB_REF#refs/tags/v}
-            cat > debian/changelog <<EOF
-wal-g ($VERSION-1) unstable; urgency=medium
-
-  * Auto-generated release for version $VERSION
-
- -- GitHub Actions <ci@example.com>  $(date -R)
-EOF
+            echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
+            echo "" >> debian/changelog
+            echo "  * Auto-generated release for version $VERSION" >> debian/changelog
+            echo "" >> debian/changelog
+            echo " -- GitHub Actions <ci@example.com>  $(date -R)" >> debian/changelog
 
         - name: Build DEB packages inside ARM64 container
           uses: uraimo/run-on-arch-action@v3
