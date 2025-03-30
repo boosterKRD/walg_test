@@ -51,6 +51,17 @@
         - name: Extract version
           run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
+        - name: Patch debian/changelog with tag version
+          run: |
+            VERSION=${GITHUB_REF#refs/tags/v}
+            cat > debian/changelog <<EOF
+wal-g ($VERSION-1) unstable; urgency=medium
+
+  * Auto-generated release for version $VERSION
+
+ -- GitHub Actions <ci@example.com>  $(date -R)
+EOF
+
         - name: Build DEB packages
           run: |
             dpkg-buildpackage -us -uc -b
@@ -59,7 +70,8 @@
           uses: actions/upload-artifact@v4
           with:
             name: wal-g-debs-${{ matrix.os }}-${{ matrix.deb_arch }}
-            path: '**/*.deb'
+            path: ../*.deb
+            if-no-files-found: error
 
 
     release-ubuntu-arm64:
@@ -84,6 +96,17 @@
 
         - name: Extract version
           run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+        - name: Patch debian/changelog with tag version
+          run: |
+            VERSION=${GITHUB_REF#refs/tags/v}
+            cat > debian/changelog <<EOF
+wal-g ($VERSION-1) unstable; urgency=medium
+
+  * Auto-generated release for version $VERSION
+
+ -- GitHub Actions <ci@example.com>  $(date -R)
+EOF
 
         - name: Build DEB packages inside ARM64 container
           uses: uraimo/run-on-arch-action@v3
@@ -112,7 +135,8 @@
           uses: actions/upload-artifact@v4
           with:
             name: wal-g-debs-${{ matrix.label }}-${{ matrix.deb_arch }}
-            path: '**/*.deb'
+            path: ../*.deb
+            if-no-files-found: error
 
     deploy-to-gh-pages:
       needs: [release-ubuntu-amd64, release-ubuntu-arm64]
