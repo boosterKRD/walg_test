@@ -1,3 +1,39 @@
+Package: wal-g-fdb
+Architecture: amd64
+Version: 3.1.30-1
+Priority: extra
+Section: database
+Source: wal-g
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Installed-Size: 58867
+Depends: libc6 (>= 2.34)
+Filename: dists/jammy/main/binary-amd64/wal-g-fdb_3.1.30-1_amd64_ubuntu-22.04.deb
+Size: 11595574
+MD5sum: 40cdb7bac8b9d4ea45a6dd9ab5cf363d
+SHA1: cc83411b1b506fedb566424213100e0ca60fed6b
+SHA256: b9fdf858ae6983670df32ac1ac53544228b16056e4a48c4881aafab9e0153bb7
+SHA512: 549daf643d6d59a8b62682560f7382e0a8cc0caf315ae13c20b8af50cc0a9c67b3abde0161c1ee8852e823bd8ff32e5939ac9d4439eba1ee31fea7867fd20c50
+Description: WAL-G backup tool for FoundationDB
+ WAL-G is an archival restoration tool for FoundationDB backups.
+
+Package: wal-g-gp
+Architecture: amd64
+Version: 3.1.30-1
+Priority: extra
+Section: database
+Source: wal-g
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Installed-Size: 66759
+Depends: libc6 (>= 2.34)
+Filename: dists/jammy/main/binary-amd64/wal-g-gp_3.1.30-1_amd64_ubuntu-22.04.deb
+Size: 13545420
+MD5sum: 6e5c527d4a9087dc88031a74baf51e7f
+SHA1: b0fec3c9f621e01eaa0c58d8d35ca28eb3c4f34b
+SHA256: 4d1d88eaa7e7a051e0e4b51e873d4b561d95f667a1e29f14975fc19ecfdfa02c
+SHA512: 554ee8ecebcb509163296e785f57c8d6c93583029a93223fce49c95fb620adbeb9fd44d2bb73a13972a41160bbbe29c7c97e17554a20c7008151c91691ec24ba
+Description: WAL-G backup tool for Greenplum
+ WAL-G is an archival restoration tool for Greenplum backups.
+
 Package: wal-g-mongo
 Architecture: amd64
 Version: 3.1.24-1
@@ -17,6 +53,44 @@ Description: WAL-G backup tool for MongoDB
  WAL-G is an archival restoration tool for MongoDB. This package
  includes support for MongoDB backups to cloud storage.
 
+Package: wal-g-mongo
+Architecture: amd64
+Version: 3.1.30-1
+Priority: extra
+Section: database
+Source: wal-g
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Installed-Size: 62369
+Depends: libc6 (>= 2.34)
+Filename: dists/jammy/main/binary-amd64/wal-g-mongo_3.1.30-1_amd64_ubuntu-22.04.deb
+Size: 12500382
+MD5sum: 6603c6b1da3ad669fd15ddaeca5b04e9
+SHA1: e1df0ea884ae1fdc8ed9b2dc9df9880559e3166a
+SHA256: 09f1ebb0a1c6d0e8a22ba41088f69a4d6f56a52d3889e67cf47fc2b1111dbb12
+SHA512: 784fdc0f4757977e93155d8a7e15f8834016322171cdb952e7fe05f1962dc5f26b22bca97c2151da5eee0aba6a2b592c6ae83ef86ff77463215507b59da83f66
+Description: WAL-G backup tool for MongoDB
+ WAL-G is an archival restoration tool for MongoDB. This package
+ includes support for MongoDB backups to cloud storage.
+
+Package: wal-g-mysql
+Architecture: amd64
+Version: 3.1.30-1
+Priority: extra
+Section: database
+Source: wal-g
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Installed-Size: 60298
+Depends: libc6 (>= 2.34)
+Filename: dists/jammy/main/binary-amd64/wal-g-mysql_3.1.30-1_amd64_ubuntu-22.04.deb
+Size: 12048144
+MD5sum: 2c37ca0abb1a0266f232b8120f847b4f
+SHA1: 07b0978422fe201d9a31c41fc68eab0de71ef4e5
+SHA256: b226aa37751d5996dbf18667331ea2f5a1e232fec45936a1f607229c89281a05
+SHA512: 01a244ac03c8f304e0f6aa23afbd1cda2a9929064c2583a3584b5c9114c92adfc094b755f093dcea853ca7827760eb523d19ee458e8a5512ffb255f7e41bdd53
+Description: WAL-G backup tool for MySQL
+ WAL-G is an archival restoration tool for MySQL. This package
+ includes support for MySQL backups and restore.
+
 Package: wal-g-pg
 Architecture: amd64
 Version: 3.1.24-1
@@ -32,6 +106,26 @@ MD5sum: 5803e29019c74f97df08e619f7c7a370
 SHA1: bf6abd6d93aa455952f8d92bf60cb7c32cbda80a
 SHA256: 592f13c0e00f71f7e633ef113874e9c2fb3f5a07635504240b0c3c82c004df39
 SHA512: e243ae9032e9562f7aabe6fde8e607818db1332c852eb3115c979938f72cc9e89e521d8365047ad8af4f63f060f76b842bdd185a40ad2011b419e58bdadeed4c
+Description: WAL-G backup tool for PostgreSQL
+ WAL-G is an archival restoration tool for PostgreSQL. This package
+ includes support for PostgreSQL backups and restore with page compression,
+ streaming, and cloud integration.
+
+Package: wal-g-pg
+Architecture: amd64
+Version: 3.1.30-1
+Priority: extra
+Section: database
+Source: wal-g
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Installed-Size: 65188
+Depends: libc6 (>= 2.34)
+Filename: dists/jammy/main/binary-amd64/wal-g-pg_3.1.30-1_amd64_ubuntu-22.04.deb
+Size: 13120550
+MD5sum: 10f0418a1feab9553a7e617ecc49bd91
+SHA1: cfbfc6dd6426faa47c7063756aab8ab6f83876c7
+SHA256: 643f9b06386b377876b473071f6ae613c8939e73d67816466aa9f40538a06f8c
+SHA512: 348de0af8f7764f9325d06f6e0fa46cc600eba4da23f31ea1668ad0ce4ffc6e2e8b0abcc37b384f4b6b16f20e2a9536accbd011ed867e44a184d274d0ae0e224
 Description: WAL-G backup tool for PostgreSQL
  WAL-G is an archival restoration tool for PostgreSQL. This package
  includes support for PostgreSQL backups and restore with page compression,
@@ -55,6 +149,43 @@ SHA512: d43835196c7d20a2b1266466aa9a71fb78fdd923ad15f1edf317b474a4533eb0ab0c08a3
 Description: WAL-G backup tool for Redis
  WAL-G is an archival restoration tool for Redis. This package
  includes support for Redis backup and restore functionality.
+
+Package: wal-g-redis
+Architecture: amd64
+Version: 3.1.30-1
+Priority: extra
+Section: database
+Source: wal-g
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Installed-Size: 60918
+Depends: libc6 (>= 2.34)
+Filename: dists/jammy/main/binary-amd64/wal-g-redis_3.1.30-1_amd64_ubuntu-22.04.deb
+Size: 12022892
+MD5sum: ec2154531ca365bb6c6521bf20c2f51e
+SHA1: 4bd53369f4407c938b67525fb97e72847a96b528
+SHA256: bd130065d9768cc092df70f40888cc7dbddff9b9627a449d99f2f58522723a26
+SHA512: 56e415f7f69f12735a2cf08815e0a3152db8d8b444f9557dc5af22332b320facb3ac9312aaad39c56f5237eecde88e7967b14c3cb7d8bb8e2e4c2f76a363f34d
+Description: WAL-G backup tool for Redis
+ WAL-G is an archival restoration tool for Redis. This package
+ includes support for Redis backup and restore functionality.
+
+Package: wal-g-sqlserver
+Architecture: amd64
+Version: 3.1.30-1
+Priority: extra
+Section: database
+Source: wal-g
+Maintainer: mdb <mdb-admin@yandex-team.ru>
+Installed-Size: 61246
+Depends: libc6 (>= 2.34)
+Filename: dists/jammy/main/binary-amd64/wal-g-sqlserver_3.1.30-1_amd64_ubuntu-22.04.deb
+Size: 12347180
+MD5sum: 3588189dc0d236b95fcb3d5bc1a04dd4
+SHA1: 3f7665bd06d88c3559f47615a7cc3bdd81e45f64
+SHA256: 43d1c4e7d6936872f525a6997a06a0bf4538b460b0ec9595367b0d8f0d94a682
+SHA512: cc8900f1d2f5860aeeb4edda5b790bb74e0b5c445ade6a1a35d201e43c166a3a0884aa0fbaf628f8cbe23b4da751535b282deb9d5a8d2160dd18ecef9512952f
+Description: WAL-G backup tool for SQL Server
+ WAL-G is an archival restoration tool for Microsoft SQL Server backups.
 
 Package: wal-g-mongo
 Architecture: amd64
