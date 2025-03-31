@@ -131,12 +131,11 @@
               export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
               git config --global --add safe.directory "$PWD"
               dpkg-buildpackage -us -uc -b
-
-        - name: Move DEBs to staging dir
-          run: |
-            mkdir -p output-debs
-            mv ../*.deb output-debs/
-
+              
+              # Move DEBs to staging dir
+              mkdir -p output-debs
+              mv ../*.deb output-debs/
+        
         - name: Upload DEBs
           uses: actions/upload-artifact@v4
           with:
