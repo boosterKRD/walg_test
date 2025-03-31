@@ -31,10 +31,6 @@
           uses: actions/setup-go@v5
           with:
             go-version: ${{ env.GO_VERSION }}
-        # - name: Enable focal-backports (for debhelper-compat)
-        #   if: matrix.os == 'ubuntu-20.04'
-        #   run: |
-        #     echo "deb http://archive.ubuntu.com/ubuntu focal-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
 
         - name: Install build dependencies
           run: |
@@ -68,6 +64,15 @@
           run: |
             mkdir -p output-debs
             mv ../*.deb output-debs/
+
+        - name: Rename DEBs with Ubuntu version
+          run: |
+            for f in output-debs/*.deb; do
+              base=$(basename "$f" .deb)
+              # Пример: ubuntu-22.04 → 22.04
+              ubuntu_version=$(echo "${{ matrix.os }}" | cut -d'-' -f2)
+              mv "$f" "output-debs/${base}_ubuntu-${ubuntu_version}.deb"
+            done
 
         - name: Upload DEBs
           uses: actions/upload-artifact@v4
@@ -135,6 +140,12 @@
               # Move DEBs to staging dir
               mkdir -p output-debs
               mv ../*.deb output-debs/
+              
+              for f in output-debs/*.deb; do
+                base=$(basename "$f" .deb)
+                ver=$(echo "${{ matrix.distro }}" | grep -o '[0-9]\+\.[0-9]\+')
+                mv "$f" "output-debs/${base}_ubuntu-${ver}.deb"
+              done              
         
         - name: Upload DEBs
           uses: actions/upload-artifact@v4
