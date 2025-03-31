@@ -34,3 +34,28 @@ Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: WAL-G backup tool for Redis
  WAL-G is an archival restoration tool for Redis. This package
  includes support for Redis backup and restore functionality.
+
+Package: wal-g-mysql
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: WAL-G backup tool for MySQL
+ WAL-G is an archival restoration tool for MySQL. This package
+ includes support for MySQL backups and restore.
+
+Package: wal-g-sqlserver
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: WAL-G backup tool for SQL Server
+ WAL-G is an archival restoration tool for Microsoft SQL Server backups.
+
+Package: wal-g-fdb
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: WAL-G backup tool for FoundationDB
+ WAL-G is an archival restoration tool for FoundationDB backups.
+
+Package: wal-g-gp
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: WAL-G backup tool for Greenplum
+ WAL-G is an archival restoration tool for Greenplum backups. 

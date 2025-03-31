@@ -22,14 +22,21 @@ override_dh_auto_build:
 	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make mysql_build
 	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make mongo_build
 	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make redis_build
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make sqlserver_build
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make fdb_build
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make gp_build	
 
 override_dh_auto_install:
 	dh_auto_install
-	install -d $(CURDIR)/debian/wal-g/usr/bin
-	install -m 0755 main/pg/wal-g $(CURDIR)/debian/wal-g/usr/bin/wal-g
-	install -m 0755 main/mysql/wal-g $(CURDIR)/debian/wal-g/usr/bin/wal-g-mysql
-	install -m 0755 main/mongo/wal-g $(CURDIR)/debian/wal-g/usr/bin/wal-g-mongo
-	install -m 0755 main/redis/wal-g $(CURDIR)/debian/wal-g/usr/bin/wal-g-redis
+	# install -d $(CURDIR)/debian/wal-g/usr/bin
+	# install -m 0755 main/pg/wal-g $(CURDIR)/debian/wal-g/usr/bin/wal-g
+	# install -m 0755 main/mysql/wal-g $(CURDIR)/debian/wal-g/usr/bin/wal-g-mysql
+	# install -m 0755 main/mongo/wal-g $(CURDIR)/debian/wal-g/usr/bin/wal-g-mongo
+	# install -m 0755 main/redis/wal-g $(CURDIR)/debian/wal-g/usr/bin/wal-g-redis
+	# install -m 0755 main/sqlserver/wal-g $(CURDIR)/debian/wal-g/usr/bin/wal-g-sqlserver
+	# install -m 0755 main/fdb/wal-g $(CURDIR)/debian/wal-g/usr/bin/wal-g-fdb
+	# install -m 0755 main/gp/wal-g $(CURDIR)/debian/wal-g/usr/bin/wal-g-gp	
+	
 
 override_dh_install:
 	dh_install
