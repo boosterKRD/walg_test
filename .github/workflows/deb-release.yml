@@ -111,16 +111,24 @@ jobs:
 
       - name: Move DEBs to staging dir
         run: |
+          echo "PWD (before move): $(pwd)"
+          ls -l $BUILD_DIR/..
           mkdir -p $BUILD_DIR/output-debs
           mv $BUILD_DIR/../*.deb $BUILD_DIR/output-debs/
+          echo "After move:"
+          ls -l $BUILD_DIR/output-debs
 
       - name: Rename DEBs with Ubuntu version
         run: |
-          for f in output-debs/*.deb; do
+          echo "PWD (before rename): $(pwd)"
+          ls -l $BUILD_DIR/output-debs
+          for f in $BUILD_DIR/output-debs/*.deb; do
             base=$(basename "$f" .deb)
             ubuntu_version=$(echo "${{ matrix.os }}" | cut -d'-' -f2)
-            mv "$f" "output-debs/${base}_ubuntu-${ubuntu_version}.deb"
+            mv "$f" "$BUILD_DIR/output-debs/${base}_ubuntu-${ubuntu_version}.deb"
           done
+          echo "After rename:"
+          ls -l $BUILD_DIR/output-debs
 
       - name: Upload DEBs
         uses: actions/upload-artifact@v4
