@@ -134,7 +134,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wal-g-debs-${{ matrix.os }}-${{ matrix.deb_arch }}
-          path: output-debs/*.deb
+          path: ${{ env.BUILD_DIR }}/output-debs/*.deb
           if-no-files-found: error
 
   deploy-to-gh-pages:

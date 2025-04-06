@@ -271,8 +271,16 @@ clean_redis_features:
 
 etcd_test: deps etcd_build unlink_brotli etcd_integration_test
 
+# etcd_build: $(CMD_FILES) $(PKG_FILES)
+# 	(cd $(MAIN_ETCD_PATH) && go build -mod vendor -tags "$(BUILD_TAGS)" -o wal-g -ldflags "-s -w -X github.com/wal-g/wal-g/cmd/etcd.buildDate=`date -u +%Y.%m.%d_%H:%M:%S` -X github.com/wal-g/wal-g/cmd/etcd.gitRevision=`git rev-parse --short HEAD` -X github.com/wal-g/wal-g/cmd/etcd.walgVersion=`git tag -l --points-at HEAD`")
+
 etcd_build: $(CMD_FILES) $(PKG_FILES)
-	(cd $(MAIN_ETCD_PATH) && go build -mod vendor -tags "$(BUILD_TAGS)" -o wal-g -ldflags "-s -w -X github.com/wal-g/wal-g/cmd/etcd.buildDate=`date -u +%Y.%m.%d_%H:%M:%S` -X github.com/wal-g/wal-g/cmd/etcd.gitRevision=`git rev-parse --short HEAD` -X github.com/wal-g/wal-g/cmd/etcd.walgVersion=`git tag -l --points-at HEAD`")
+	(cd $(MAIN_ETCD_PATH) && \
+		go build -mod vendor -tags "$(BUILD_TAGS)" -o wal-g \
+		-ldflags "-s -w \
+			-X github.com/wal-g/wal-g/cmd/etcd.buildDate=$(WALG_BUILD_DATE) \
+			-X github.com/wal-g/wal-g/cmd/etcd.gitRevision=$(WALG_GIT_REVISION) \
+			-X github.com/wal-g/wal-g/cmd/etcd.walgVersion=$(WALG_VERSION)")
 
 etcd_install: etcd_build
 	mv $(MAIN_ETCD_PATH)/wal-g $(GOBIN)/wal-g
@@ -286,8 +294,16 @@ etcd_integration_test: load_docker_common
 	docker compose build etcd etcd_tests
 	docker compose up --exit-code-from etcd_tests etcd_tests
 
+# gp_build: $(CMD_FILES) $(PKG_FILES)
+# 	(cd $(MAIN_GP_PATH) && go build -mod vendor -tags "$(BUILD_TAGS)" -o wal-g -ldflags "-s -w -X github.com/wal-g/wal-g/cmd/gp.buildDate=`date -u +%Y.%m.%d_%H:%M:%S` -X github.com/wal-g/wal-g/cmd/gp.gitRevision=`git rev-parse --short HEAD` -X github.com/wal-g/wal-g/cmd/gp.walgVersion=`git tag -l --points-at HEAD`")
+
 gp_build: $(CMD_FILES) $(PKG_FILES)
-	(cd $(MAIN_GP_PATH) && go build -mod vendor -tags "$(BUILD_TAGS)" -o wal-g -ldflags "-s -w -X github.com/wal-g/wal-g/cmd/gp.buildDate=`date -u +%Y.%m.%d_%H:%M:%S` -X github.com/wal-g/wal-g/cmd/gp.gitRevision=`git rev-parse --short HEAD` -X github.com/wal-g/wal-g/cmd/gp.walgVersion=`git tag -l --points-at HEAD`")
+	(cd $(MAIN_GP_PATH) && \
+		go build -mod vendor -tags "$(BUILD_TAGS)" -o wal-g \
+		-ldflags "-s -w \
+			-X github.com/wal-g/wal-g/cmd/gp.buildDate=$(WALG_BUILD_DATE) \
+			-X github.com/wal-g/wal-g/cmd/gp.gitRevision=$(WALG_GIT_REVISION) \
+			-X github.com/wal-g/wal-g/cmd/gp.walgVersion=$(WALG_VERSION)")
 
 gp_clean:
 	(cd $(MAIN_GP_PATH) && go clean)
