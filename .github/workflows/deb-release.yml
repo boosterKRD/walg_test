@@ -36,10 +36,7 @@
 
         - name: Create source archive
           run: |
-            VERSION=${GITHUB_REF#refs/tags/v}
             tar --warning=no-file-changed -czf wal_g_${VERSION}.tar.gz --exclude=.git .
-            # git archive --format=tar.gz -o wal_g_${VERSION}.tar.gz HEAD
-
 
         - name: Upload source package artifact
           uses: actions/upload-artifact@v4
