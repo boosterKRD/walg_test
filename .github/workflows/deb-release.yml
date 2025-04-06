@@ -102,10 +102,7 @@
               brotli \
               libsodium-dev \
               git \
-              cmake \
-              curl \
-              gcc \
-              make 
+
 
         - name: Extract version
           run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
