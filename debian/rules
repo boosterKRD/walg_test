@@ -4,11 +4,7 @@ export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
 export DH_GOLANG_EXCLUDES := iphlpapi
-# export GO111MODULE=on
-# export GOPROXY=https://proxy.golang.org,direct
-export GOCACHE := $(CURDIR)/.gocache
 export GOMODCACHE := $(CURDIR)/.gomodcache
-export GOROOT := /usr/lib/go-1.22
 export PATH := $(GOROOT)/bin:$(PATH)
 export GOFLAGS := -mod=vendor
 export USE_BROTLI := 1
