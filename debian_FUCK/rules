@@ -4,16 +4,10 @@ export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
 export DH_GOLANG_EXCLUDES := iphlpapi
-# export GO111MODULE=on
-# export GOPROXY=https://proxy.golang.org,direct
+export GO111MODULE=on
+export GOPROXY=https://proxy.golang.org,direct
 export GOCACHE := $(CURDIR)/.gocache
 export GOMODCACHE := $(CURDIR)/.gomodcache
-export GOROOT := /usr/lib/go-1.22
-export PATH := $(GOROOT)/bin:$(PATH)
-export GOFLAGS := -mod=vendor
-export USE_BROTLI := 1
-export USE_LIBSODIUM := 1
-export USE_LZO := 1
 
 %:
 	dh $@
@@ -23,14 +17,14 @@ override_dh_auto_build:
 	@echo "Go version is:"
 	@go version
 	# deps теперь не создаёт vendor, просто инициализирует submodules
-	make deps
-	make pg_build
-	make mysql_build
-	make mongo_build
-	make redis_build
-	make sqlserver_build
-	make fdb_build
-	make gp_build 
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make deps
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make pg_build GOFLAGS="-mod=vendor"
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make mysql_build GOFLAGS="-mod=vendor"
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make mongo_build GOFLAGS="-mod=vendor"
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make redis_build GOFLAGS="-mod=vendor"
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make sqlserver_build GOFLAGS="-mod=vendor"
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make fdb_build GOFLAGS="-mod=vendor"
+	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make gp_build GOFLAGS="-mod=vendor"
 
 override_dh_auto_install:
 	install -d debian/wal-g/usr/bin

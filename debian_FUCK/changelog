@@ -1,0 +1,5 @@
+wal-g (6.0.9-1~noble) noble; urgency=medium
+
+  * Initial release for Ubuntu 24.04
+
+ -- boosterykt <booster.ykt@gmail.com>  Fri, 05 Apr 2025 15:47:46 +0000

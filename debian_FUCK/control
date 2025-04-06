@@ -14,7 +14,6 @@ Build-Depends:
  golang-any,
  liblzo2-dev,
  libsodium-dev,
- golang-1.22-go,
  make
 Rules-Requires-Root: no
 XS-Go-Import-Path: github.com/wal-g/wal-g

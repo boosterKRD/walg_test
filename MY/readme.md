@@ -1,9 +1,9 @@
 git add .  
-git commit -m "v3.1.30"
-git tag -a v3.1.30 -m "Release v3.1.30"
+git commit -m "v4.0.0"
+git tag -a v4.0.0 -m "Release v4.0.0"
 
 git push origin main  
-git push origin v3.1.30
+git push origin v4.0.0
 
 
 
@@ -69,3 +69,6 @@ cd wal-g
 debuild -S -sa
 
 sudo pbuilder build ../wal-g_1.0.0-1.dsc
+
+
+tar -tvzf ../wal-g_5.0.0-1~focal.tar.gz | sort -k3 -nr | head -20

@@ -15,38 +15,7 @@
     USE_LZO: 1
 
   jobs:
-    prepare-source:
-      runs-on: ubuntu-20.04
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Update submodules and vendor
-          run: |
-            git submodule update --init
-            go mod vendor
-
-        - name: Download libsodium archive
-          run: |
-            mkdir -p tmp/libsodium
-            curl --retry 5 --retry-delay 0 -sL "https://github.com/jedisct1/libsodium/releases/download/1.0.20-RELEASE/libsodium-1.0.20.tar.gz" -o tmp/libsodium/libsodium-1.0.20.tar.gz
-
-        - name: Extract version
-          run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-
-        - name: Create source archive
-          run: |
-            VERSION=${GITHUB_REF#refs/tags/v}
-            tar czf wal_g_${VERSION}.tar.gz --exclude=.git .
-
-        - name: Upload source package artifact
-          uses: actions/upload-artifact@v4
-          with:
-            name: wal-g-source
-            path: wal_g_${{ env.VERSION }}.tar.gz
-
     release-ubuntu-amd64:
-      needs: [prepare-source]
       strategy:
         matrix:
           os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04 ]
@@ -78,22 +47,8 @@
         - name: Extract version
           run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
-        - name: Download source package artifact
-          uses: actions/download-artifact@v4
-          with:
-            name: wal-g-source
-            path: source-artifact
-
-        - name: Extract source archive
-          run: |
-            cd source-artifact
-            mkdir -p source-tree
-            tar xzf wal_g_${VERSION}.tar.gz -C source-tree
-            echo "BUILD_DIR=$(pwd)/source-tree" >> $GITHUB_ENV
-
         - name: Patch debian/changelog with tag version
           run: |
-            cd $BUILD_DIR
             VERSION=${GITHUB_REF#refs/tags/v}
             echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
             echo "" >> debian/changelog
@@ -103,12 +58,10 @@
 
         - name: Build DEB packages
           run: |
-            cd $BUILD_DIR
             dpkg-buildpackage -us -uc -b
 
         - name: Move DEBs to staging dir
           run: |
-            cd $BUILD_DIR
             mkdir -p output-debs
             mv ../*.deb output-debs/
 
@@ -130,7 +83,6 @@
 
 
     release-ubuntu-arm64:
-      needs: [prepare-source]
       runs-on: ubuntu-20.04
       env:
         GO_VERSION: "1.22.8"      
@@ -153,22 +105,8 @@
         - name: Extract version
           run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
-        - name: Download source package artifact
-          uses: actions/download-artifact@v4
-          with:
-            name: wal-g-source
-            path: source-artifact
-
-        - name: Extract source archive
-          run: |
-            cd source-artifact
-            mkdir -p source-tree
-            tar xzf wal_g_${VERSION}.tar.gz -C source-tree
-            echo "BUILD_DIR=$(pwd)/source-tree" >> $GITHUB_ENV
-
         - name: Patch debian/changelog with tag version
           run: |
-            cd $BUILD_DIR
             VERSION=${GITHUB_REF#refs/tags/v}
             echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
             echo "" >> debian/changelog
@@ -197,7 +135,6 @@
               export GOPATH=$HOME/go
               export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
               git config --global --add safe.directory "$PWD"
-              cd $BUILD_DIR
               dpkg-buildpackage -us -uc -b
               
               # Move DEBs to staging dir
