@@ -30,7 +30,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build and package WAL-G inside ARM64 container
+      - name: Build and package WAL-G inside ARM64 HI container
         uses: uraimo/run-on-arch-action@v3
         with:
           arch: ${{ matrix.arch }}
