@@ -26,6 +26,35 @@
             git submodule update --init
             go mod vendor
 
+        - name: Debug Check submodules and vendor
+          run: |
+            echo "---- submodules/brotli ----"
+            if [ -d submodules/brotli ]; then
+              echo "brotli exists"
+              ls -lah submodules/brotli | head -20
+            else
+              echo "brotli MISSING"
+            fi
+
+            echo "---- Is it a symlink? ----"
+            if [ -L submodules/brotli ]; then
+              echo "submodules/brotli is a symlink!"
+              ls -l submodules/brotli
+            else
+              echo "submodules/brotli is NOT a symlink"
+            fi
+
+            echo "---- vendor dir exists? ----"
+            if [ -d vendor ]; then
+              echo "vendor exists"
+              ls -lah vendor | head -20
+            else
+              echo "vendor MISSING"
+            fi
+
+            echo "---- grep brotli in vendor ----"
+            find vendor -type f | grep -i brotli || echo "brotli not found in vendor"
+
         - name: Download libsodium archive
           run: |
             mkdir -p tmp/libsodium
