@@ -1,7 +1,6 @@
 #!/bin/sh
-set -e
 
-echo "========== START link_brotli.sh =========="
+set -e
 
 test -d tmp/brotli || mkdir -p tmp/brotli
 
@@ -14,25 +13,12 @@ readonly CWD=$PWD
 
 cd vendor/github.com/google/brotli/go/cbrotli
 
-readonly LIB_DIR=../../dist
+readonly LIB_DIR=../../dist  # dist will contain binaries and it is in the google/brotli/.gitignore
 
-echo "========== BEFORE PATCHING cgo.go =========="
-cat cgo.go
-echo "============================================"
-
-# patch 1
+# patch cgo.go to force usage of static libraries for linking
 sed -i -e "s|#cgo LDFLAGS: -lbrotlicommon|#cgo CFLAGS: -I../../c/include|" cgo.go
-
-# patch 2
 sed -i -e "s|\(#cgo LDFLAGS:\) \(-lbrotli.*\)|\1 -L$LIB_DIR \2-static -lbrotlicommon-static|" cgo.go
-
-# patch 3: this one caused issues
-echo "========== APPLYING -lm PATCH =========="
-sed -i -e "/ -lm$/ n; /brotlienc/ s|$| -lm|" cgo.go
-
-echo "========== AFTER PATCHING cgo.go =========="
-cat cgo.go
-echo "==========================================="
+# sed -i -e "/ -lm$/ n; /brotlienc/ s|$| -lm|" cgo.go
 
 mkdir -p ${LIB_DIR}
 
@@ -41,5 +27,3 @@ cmake ..
 make
 
 cd ${CWD}
-
-echo "=========== END link_brotli.sh ============"
