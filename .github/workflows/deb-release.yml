@@ -111,9 +111,8 @@ jobs:
 
       - name: Move DEBs to staging dir
         run: |
-          cd $BUILD_DIR
-          mkdir -p output-debs
-          mv source-artifact/*.deb output-debs/
+          mkdir -p $BUILD_DIR/output-debs
+          mv $BUILD_DIR/../*.deb $BUILD_DIR/output-debs/
 
       - name: Rename DEBs with Ubuntu version
         run: |
