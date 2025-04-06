@@ -18,7 +18,7 @@ readonly LIB_DIR=../../dist  # dist will contain binaries and it is in the googl
 # patch cgo.go to force usage of static libraries for linking
 sed -i -e "s|#cgo LDFLAGS: -lbrotlicommon|#cgo CFLAGS: -I../../c/include|" cgo.go
 sed -i -e "s|\(#cgo LDFLAGS:\) \(-lbrotli.*\)|\1 -L$LIB_DIR \2-static -lbrotlicommon-static|" cgo.go
-# sed -i -e "/ -lm$/ n; /brotlienc/ s|$| -lm|" cgo.go
+sed -i -e "/ -lm$/ n; /brotlienc/ s|$| -lm|" cgo.go
 
 mkdir -p ${LIB_DIR}
 

@@ -45,3 +45,4 @@ venv/
 
 #Ctags tags file
 tags
+/submodules/
