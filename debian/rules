@@ -15,7 +15,6 @@ export USE_LZO := 1
 	dh $@
 
 override_dh_auto_build:
-	mkdir -p $(GOCACHE)
 	@echo "Go version is:"
 	@go version
 	# deps теперь не создаёт vendor, просто инициализирует submodules
