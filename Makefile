@@ -26,6 +26,18 @@ TOOLS_MOD_DIR := ./internal/tools
 MOCKS_DESTINATION := ./testtools/mocks
 FILE_TO_MOCKS := ./internal/uploader.go .\pkg\storages\memory\folder.go ##перечисление путей до интерфейсов
 
+BUILDINFO_FILE := walg.buildinfo
+
+ifeq ($(wildcard $(BUILDINFO_FILE)),)
+  WALG_BUILD_DATE    := $(shell date -u +%Y.%m.%d_%H:%M:%S)
+  WALG_GIT_REVISION  := $(shell git rev-parse --short HEAD)
+  WALG_VERSION       := $(shell git tag -l --points-at HEAD)
+else
+  WALG_BUILD_DATE    := $(shell grep ^WALG_BUILD_DATE $(BUILDINFO_FILE) | cut -d= -f2)
+  WALG_GIT_REVISION  := $(shell grep ^WALG_GIT_REVISION $(BUILDINFO_FILE) | cut -d= -f2)
+  WALG_VERSION       := $(shell grep ^WALG_VERSION $(BUILDINFO_FILE) | cut -d= -f2)
+endif
+
 BUILD_TAGS:=
 
 ifdef USE_BROTLI
@@ -46,8 +58,16 @@ test: deps unittest pg_build mysql_build redis_build mongo_build gp_build cloudb
 
 pg_test: deps pg_build unlink_brotli pg_integration_test
 
+# pg_build: $(CMD_FILES) $(PKG_FILES)
+# 	(cd $(MAIN_PG_PATH) && go build -mod vendor -tags "$(BUILD_TAGS)" -o wal-g -ldflags "-s -w -X github.com/wal-g/wal-g/cmd/pg.buildDate=`date -u +%Y.%m.%d_%H:%M:%S` -X github.com/wal-g/wal-g/cmd/pg.gitRevision=`git rev-parse --short HEAD` -X github.com/wal-g/wal-g/cmd/pg.walgVersion=`git tag -l --points-at HEAD`")
+
 pg_build: $(CMD_FILES) $(PKG_FILES)
-	(cd $(MAIN_PG_PATH) && go build -mod vendor -tags "$(BUILD_TAGS)" -o wal-g -ldflags "-s -w -X github.com/wal-g/wal-g/cmd/pg.buildDate=`date -u +%Y.%m.%d_%H:%M:%S` -X github.com/wal-g/wal-g/cmd/pg.gitRevision=`git rev-parse --short HEAD` -X github.com/wal-g/wal-g/cmd/pg.walgVersion=`git tag -l --points-at HEAD`")
+	(cd $(MAIN_PG_PATH) && \
+		go build -mod vendor -tags "$(BUILD_TAGS)" -o wal-g \
+		-ldflags "-s -w \
+			-X github.com/wal-g/wal-g/cmd/pg.buildDate=$(WALG_BUILD_DATE) \
+			-X github.com/wal-g/wal-g/cmd/pg.gitRevision=$(WALG_GIT_REVISION) \
+			-X github.com/wal-g/wal-g/cmd/pg.walgVersion=$(WALG_VERSION)")
 
 install_and_build_pg: deps pg_build
 

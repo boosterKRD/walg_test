@@ -35,6 +35,12 @@ jobs:
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
+      - name: Generate buildinfo file
+        run: |
+          echo "WALG_BUILD_DATE=$(date -u +%Y.%m.%d_%H:%M:%S)" > walg.buildinfo
+          echo "WALG_GIT_REVISION=$(git rev-parse --short HEAD)" >> walg.buildinfo
+          echo "WALG_VERSION=$(git tag -l --points-at HEAD)" >> walg.buildinfo
+
       - name: Create source archive
         run: |
           tar --warning=no-file-changed -czf wal_g_${VERSION}.tar.gz --exclude=.git . || true
@@ -107,7 +113,7 @@ jobs:
         run: |
           cd $BUILD_DIR
           mkdir -p output-debs
-          mv ../*.deb output-debs/
+          mv source-artifact/*.deb output-debs/
 
       - name: Rename DEBs with Ubuntu version
         run: |
