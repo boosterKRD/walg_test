@@ -5,16 +5,12 @@ Section: database
 Priority: extra
 Standards-Version: 4.6.0
 Build-Depends:
- brotli,
- cmake,
- curl,
  debhelper-compat (= 12),
- gcc,
- git,
+ curl,
  liblzo2-dev,
+ brotli,
  libsodium-dev,
- golang-1.22-go,
- make
+ git
 Rules-Requires-Root: no
 XS-Go-Import-Path: github.com/wal-g/wal-g
 
