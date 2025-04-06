@@ -4,8 +4,6 @@ export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
 export DH_GOLANG_EXCLUDES := iphlpapi
-export GOMODCACHE := $(CURDIR)/.gomodcache
-export PATH := $(GOROOT)/bin:$(PATH)
 export GOFLAGS := -mod=vendor
 export USE_BROTLI := 1
 export USE_LIBSODIUM := 1
