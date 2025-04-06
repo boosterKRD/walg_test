@@ -5,21 +5,23 @@ export LANG=C.UTF-8
 
 export DH_GOLANG_EXCLUDES := iphlpapi
 export GO111MODULE=on
-export GOFLAGS=-mod=vendor
+export GOFLAGS=-mod=vendor -buildvcs=false
 export GOPROXY=off  # отключить сетевые запросы
+export USE_BROTLI=1
+export USE_LIBSODIUM=1
+export USE_LZO=1
 
 %:
 	dh $@
 
 override_dh_auto_build:
-	# USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make deps
-	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make pg_build
-	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make mysql_build
-	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make mongo_build
-	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make redis_build
-	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make sqlserver_build
-	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make fdb_build
-	USE_BROTLI=1 USE_LIBSODIUM=1 USE_LZO=1 make gp_build	
+	make pg_build
+	make mysql_build
+	make mongo_build
+	make redis_build
+	make sqlserver_build
+	make fdb_build
+	make gp_build	
 
 override_dh_auto_install:
 	dh_auto_install
