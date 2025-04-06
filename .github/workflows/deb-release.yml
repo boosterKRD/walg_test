@@ -36,7 +36,7 @@
 
         - name: Create source archive
           run: |
-            tar --warning=no-file-changed -czf wal_g_${VERSION}.tar.gz --exclude=.git .
+            tar --warning=no-file-changed -czf wal_g_${VERSION}.tar.gz --exclude=.git . || true
 
         - name: Upload source package artifact
           uses: actions/upload-artifact@v4
