@@ -6,7 +6,7 @@
 
   permissions:
     contents: write   # Need for git push     
-    actions: read     # Need for do wnloading artifacts
+    actions: read     # Need fordo wnloading artifacts
 
   env:
     GO_VERSION: "1.22"
