@@ -10,7 +10,7 @@ test -d tmp/libsodium || mkdir -p tmp/libsodium
 
 cd tmp/libsodium
 
-curl --retry 5 --retry-delay 0 -sL https://github.com/jedisct1/libsodium/releases/download/$LIBSODIUM_VERSION-RELEASE/libsodium-$LIBSODIUM_VERSION.tar.gz -o libsodium-$LIBSODIUM_VERSION.tar.gz
+# curl --retry 5 --retry-delay 0 -sL https://github.com/jedisct1/libsodium/releases/download/$LIBSODIUM_VERSION-RELEASE/libsodium-$LIBSODIUM_VERSION.tar.gz -o libsodium-$LIBSODIUM_VERSION.tar.gz
 tar xfz libsodium-$LIBSODIUM_VERSION.tar.gz --strip-components=1
 
 CONFIGURE_ARGS="--prefix ${PWD}"

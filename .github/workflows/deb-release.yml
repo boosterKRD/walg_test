@@ -1,158 +1,129 @@
-  name: Build and Publish DEB Package for AMD64 and ARM64
-  on:
-    push:
-      tags:
-        - 'v*'
+name: Build and Publish DEB Package for AMD64
 
-  permissions:
-    contents: write   # Need for git push     
-    actions: read     # Need fordo wnloading artifacts
+on:
+  push:
+    tags:
+      - 'v*'
 
-  env:
-    GO_VERSION: "1.22"
-    USE_BROTLI: 1
-    USE_LIBSODIUM: 1
-    USE_LZO: 1
+permissions:
+  contents: write
+  actions: read
 
-  jobs:
-    release-ubuntu-amd64:
-      strategy:
-        matrix:
-          os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04 ]
-          deb_arch: [amd64]
-        max-parallel: 6
-        fail-fast: false
-      runs-on: ${{ matrix.os }}
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+env:
+  GO_VERSION: "1.22"
+  USE_BROTLI: 1
+  USE_LIBSODIUM: 1
+  USE_LZO: 1
 
-        - name: Set up Golang
-          uses: actions/setup-go@v5
-          with:
-            go-version: ${{ env.GO_VERSION }}
+jobs:
+  prepare-source:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        - name: Install build dependencies
-          run: |
-            sudo apt-get update
-            sudo apt-get install -y \
-              build-essential \
-              debhelper \
-              dh-golang \
-              liblzo2-dev \
-              brotli \
-              libsodium-dev \
-              git
+      - name: Update submodules and vendor
+        run: |
+          git submodule update --init
+          go mod vendor
 
-        - name: Extract version
-          run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-
-        - name: Patch debian/changelog with tag version
-          run: |
-            VERSION=${GITHUB_REF#refs/tags/v}
-            echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
-            echo "" >> debian/changelog
-            echo "  * Auto-generated release for version $VERSION" >> debian/changelog
-            echo "" >> debian/changelog
-            echo " -- GitHub Actions <ci@example.com>  $(date -R)" >> debian/changelog
-
-        - name: Build DEB packages
-          run: |
-            dpkg-buildpackage -us -uc -b
-
-        - name: Move DEBs to staging dir
-          run: |
-            mkdir -p output-debs
-            mv ../*.deb output-debs/
-
-        - name: Rename DEBs with Ubuntu version
-          run: |
-            for f in output-debs/*.deb; do
-              base=$(basename "$f" .deb)
-              # Пример: ubuntu-22.04 → 22.04
-              ubuntu_version=$(echo "${{ matrix.os }}" | cut -d'-' -f2)
-              mv "$f" "output-debs/${base}_ubuntu-${ubuntu_version}.deb"
-            done
-
-        - name: Upload DEBs
-          uses: actions/upload-artifact@v4
-          with:
-            name: wal-g-debs-${{ matrix.os }}-${{ matrix.deb_arch }}
-            path: output-debs/*.deb
-            if-no-files-found: error
+      - name: Download libsodium archive
+        run: |
+          mkdir -p tmp/libsodium
+          curl --retry 5 --retry-delay 0 -sL "https://github.com/jedisct1/libsodium/releases/download/1.0.20-RELEASE/libsodium-1.0.20.tar.gz" -o tmp/libsodium/libsodium-1.0.20.tar.gz
 
 
-    release-ubuntu-arm64:
-      runs-on: ubuntu-20.04
-      env:
-        GO_VERSION: "1.22.8"      
-      strategy:
-        matrix:
-          include:
-            - arch: aarch64
-              distro: ubuntu22.04
-              label: ubuntu-22.04
-              deb_arch: arm64
-            - arch: aarch64
-              distro: ubuntu20.04
-              label: ubuntu-20.04
-              deb_arch: arm64
-        fail-fast: false
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
-        - name: Extract version
-          run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      - name: Create source archive
+        run: |
+          tar --warning=no-file-changed -czf wal_g_${VERSION}.tar.gz --exclude=.git . || true
 
-        - name: Patch debian/changelog with tag version
-          run: |
-            VERSION=${GITHUB_REF#refs/tags/v}
-            echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
-            echo "" >> debian/changelog
-            echo "  * Auto-generated release for version $VERSION" >> debian/changelog
-            echo "" >> debian/changelog
-            echo " -- GitHub Actions <ci@example.com>  $(date -R)" >> debian/changelog
+      - name: Upload source package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wal-g-source
+          path: wal_g_${{ env.VERSION }}.tar.gz
 
-        - name: Build DEB packages inside ARM64 container
-          uses: uraimo/run-on-arch-action@v3
-          with:
-            arch: ${{ matrix.arch }}
-            distro: ${{ matrix.distro }}
-            shell: /bin/bash
-            env: |
-              VERSION: ${{ env.VERSION }}
-              USE_BROTLI: ${{ env.USE_BROTLI }}
-              USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
-              USE_LZO: ${{ env.USE_LZO }}
-            run: |
-              apt-get update
-              apt-get install -y build-essential cmake debhelper dh-golang \
-                liblzo2-dev brotli libsodium-dev git devscripts dpkg-dev
-              curl -LO https://go.dev/dl/go${{ env.GO_VERSION }}.linux-arm64.tar.gz
-              tar -C /usr/local -xzf go${{ env.GO_VERSION }}.linux-arm64.tar.gz
-              export GOROOT=/usr/local/go
-              export GOPATH=$HOME/go
-              export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
-              git config --global --add safe.directory "$PWD"
-              dpkg-buildpackage -us -uc -b
-              
-              # Move DEBs to staging dir
-              mkdir -p output-debs
-              mv ../*.deb output-debs/
+  release-ubuntu-amd64:
+    needs: [prepare-source]
+    strategy:
+      matrix:
+        os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04 ]
+        deb_arch: [amd64]
+      max-parallel: 6
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Set up Golang
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
 
-              for f in output-debs/*.deb; do
-                base=$(basename "$f" .deb)
-                ver=$(echo "${{ matrix.distro }}" | grep -o '[0-9]\+\.[0-9]\+')
-                mv "$f" "output-debs/${base}_ubuntu-${ver}.deb"
-              done              
-        
-        - name: Upload DEBs
-          uses: actions/upload-artifact@v4
-          with:
-            name: wal-g-debs-${{ matrix.label }}-${{ matrix.deb_arch }}
-            path: output-debs/*.deb
-            if-no-files-found: error
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            debhelper \
+            dh-golang \
+            liblzo2-dev \
+            brotli \
+            libsodium-dev \
+            git
+
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Download source package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wal-g-source
+          path: source-artifact
+
+      - name: Extract source archive
+        run: |
+          cd source-artifact
+          mkdir -p source-tree
+          tar xzf wal_g_${VERSION}.tar.gz -C source-tree
+          echo "BUILD_DIR=$(pwd)/source-tree" >> $GITHUB_ENV
+
+      - name: Patch debian/changelog with tag version
+        run: |
+          cd $BUILD_DIR
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
+          echo "" >> debian/changelog
+          echo "  * Auto-generated release for version $VERSION" >> debian/changelog
+          echo "" >> debian/changelog
+          echo " -- GitHub Actions <ci@example.com>  $(date -R)" >> debian/changelog
+
+      - name: Build DEB packages
+        run: |
+          cd $BUILD_DIR
+          dpkg-buildpackage -us -uc -b
+
+      - name: Move DEBs to staging dir
+        run: |
+          cd $BUILD_DIR
+          mkdir -p output-debs
+          mv ../*.deb output-debs/
+
+      - name: Rename DEBs with Ubuntu version
+        run: |
+          for f in output-debs/*.deb; do
+            base=$(basename "$f" .deb)
+            ubuntu_version=$(echo "${{ matrix.os }}" | cut -d'-' -f2)
+            mv "$f" "output-debs/${base}_ubuntu-${ubuntu_version}.deb"
+          done
+
+      - name: Upload DEBs
+        uses: actions/upload-artifact@v4
+        with:
+          name: wal-g-debs-${{ matrix.os }}-${{ matrix.deb_arch }}
+          path: output-debs/*.deb
+          if-no-files-found: error
 
     deploy-to-gh-pages:
       needs: [release-ubuntu-amd64, release-ubuntu-arm64]
