@@ -15,6 +15,7 @@ export USE_LZO=1
 	dh $@
 
 override_dh_auto_build:
+	make link_external_deps
 	make pg_build
 	make mysql_build
 	make mongo_build

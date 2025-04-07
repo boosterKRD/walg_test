@@ -26,12 +26,12 @@ jobs:
         run: |
           # git submodule update --init
           # go mod vendor
-          make deps
+          make go_deps
 
-      # - name: Download libsodium archive
-      #   run: |
-      #     mkdir -p tmp/libsodium
-      #     curl --retry 5 --retry-delay 0 -sL "https://github.com/jedisct1/libsodium/releases/download/1.0.20-RELEASE/libsodium-1.0.20.tar.gz" -o tmp/libsodium/libsodium-1.0.20.tar.gz
+      - name: Download libsodium archive
+        run: |
+          mkdir -p tmp/libsodium
+          curl --retry 5 --retry-delay 0 -sL "https://github.com/jedisct1/libsodium/releases/download/1.0.20-RELEASE/libsodium-1.0.20.tar.gz" -o tmp/libsodium/libsodium-1.0.20.tar.gz
 
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
