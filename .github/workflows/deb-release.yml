@@ -77,7 +77,10 @@ jobs:
             liblzo2-dev \
             brotli \
             libsodium-dev \
-            git
+            git \
+            golang-any \ 
+            cmake
+
 
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
