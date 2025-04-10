@@ -1,0 +1,5 @@
+wal-g (1.0.0-1) unstable; urgency=medium
+
+  * Initial release with multi-database support (pg, mongo, redis).
+
+ -- mdb <mdb-admin@yandex-team.ru>  Sat, 30 Mar 2025 12:00:00 +0000

@@ -10,14 +10,11 @@ export GOPROXY=off  # отключить сетевые запросы
 export USE_BROTLI=1
 export USE_LIBSODIUM=1
 export USE_LZO=1
-export GOCACHE := $(CURDIR)/.gocache
-export GOMODCACHE := $(CURDIR)/.gomodcache
 
 %:
 	dh $@
 
 override_dh_auto_build:
-	mkdir -p $(GOCACHE) $(GOMODCACHE)
 	make link_external_deps
 	make pg_build
 	make mysql_build
