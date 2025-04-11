@@ -1,0 +1,338 @@
+name: Build and Publish DEB Package for AMD64
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  GO_VERSION: "1.22"
+  USE_BROTLI: 1
+  USE_LIBSODIUM: 1
+  USE_LZO: 1
+
+jobs:
+  prepare-source:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Update dependencies
+        run: |
+          # git submodule update --init
+          # go mod vendor
+          make go_deps
+
+      - name: Download libsodium archive
+        run: |
+          mkdir -p tmp/libsodium
+          curl --retry 5 --retry-delay 0 -sL "https://github.com/jedisct1/libsodium/releases/download/1.0.20-RELEASE/libsodium-1.0.20.tar.gz" -o tmp/libsodium/libsodium-1.0.20.tar.gz
+
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Generate buildinfo file
+        run: |
+          echo "WALG_BUILD_DATE=$(date -u +%Y.%m.%d_%H:%M:%S)" > walg.buildinfo
+          echo "WALG_GIT_REVISION=$(git rev-parse --short HEAD)" >> walg.buildinfo
+          echo "WALG_VERSION=$(git tag -l --points-at HEAD)" >> walg.buildinfo
+
+      - name: Create source archive
+        run: |
+          tar --warning=no-file-changed -czf wal_g_${VERSION}.tar.gz --exclude=.git . || true
+
+      - name: Upload source package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wal-g-source
+          path: wal_g_${{ env.VERSION }}.tar.gz
+
+  release-ubuntu-amd64:
+    needs: [prepare-source]
+    strategy:
+      matrix:
+        os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04 ]
+        deb_arch: [amd64]
+      max-parallel: 6
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Set up Golang
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            debhelper \
+            dh-golang \
+            liblzo2-dev \
+            brotli \
+            libsodium-dev \
+            git \
+            golang-any \
+            cmake
+
+
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Download source package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wal-g-source
+          path: source-artifact
+
+      - name: Extract source archive
+        run: |
+          cd source-artifact
+          mkdir -p source-tree
+          tar xzf wal_g_${VERSION}.tar.gz -C source-tree
+          echo "BUILD_DIR=$(pwd)/source-tree" >> $GITHUB_ENV
+
+      - name: Patch debian/changelog with tag version
+        run: |
+          cd $BUILD_DIR
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
+          echo "" >> debian/changelog
+          echo "  * Auto-generated release for version $VERSION" >> debian/changelog
+          echo "" >> debian/changelog
+          echo " -- GitHub Actions <ci@example.com>  $(date -R)" >> debian/changelog
+
+      - name: Build DEB packages
+        run: |
+          cd $BUILD_DIR
+          dpkg-buildpackage -us -uc -b
+
+      - name: Move DEBs to staging dir
+        run: |
+          echo "PWD (before move): $(pwd)"
+          ls -l $BUILD_DIR/..
+          mkdir -p $BUILD_DIR/output-debs
+          mv $BUILD_DIR/../*.deb $BUILD_DIR/output-debs/
+          echo "After move:"
+          ls -l $BUILD_DIR/output-debs
+
+      - name: Rename DEBs with Ubuntu version
+        run: |
+          echo "PWD (before rename): $(pwd)"
+          ls -l $BUILD_DIR/output-debs
+          for f in $BUILD_DIR/output-debs/*.deb; do
+            base=$(basename "$f" .deb)
+            ubuntu_version=$(echo "${{ matrix.os }}" | cut -d'-' -f2)
+            mv "$f" "$BUILD_DIR/output-debs/${base}_ubuntu-${ubuntu_version}.deb"
+          done
+          echo "After rename:"
+          ls -l $BUILD_DIR/output-debs
+
+      - name: Upload DEBs
+        uses: actions/upload-artifact@v4
+        with:
+          name: wal-g-debs-${{ matrix.os }}-${{ matrix.deb_arch }}
+          path: ${{ env.BUILD_DIR }}/output-debs/*.deb
+          if-no-files-found: error
+          
+  release-ubuntu-arm64:
+    needs: [prepare-source]
+    runs-on: ubuntu-20.04
+    env:
+      GO_VERSION: "1.22.8"
+    strategy:
+      matrix:
+        include:
+          - arch: aarch64
+            distro: ubuntu22.04
+            label: ubuntu-22.04
+            deb_arch: arm64
+          - arch: aarch64
+            distro: ubuntu20.04
+            label: ubuntu-20.04
+            deb_arch: arm64
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Download source package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wal-g-source
+          path: source-artifact
+
+      - name: Extract source archive
+        run: |
+          cd source-artifact
+          mkdir -p source-tree
+          tar xzf wal_g_${VERSION}.tar.gz -C source-tree
+          echo "BUILD_DIR=$(pwd)/source-tree" >> $GITHUB_ENV
+
+      - name: Patch debian/changelog with tag version
+        run: |
+          cd $BUILD_DIR
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
+          echo "" >> debian/changelog
+          echo "  * Auto-generated release for version $VERSION" >> debian/changelog
+          echo "" >> debian/changelog
+          echo " -- GitHub Actions <ci@example.com>  $(date -R)" >> debian/changelog
+
+      - name: Build DEB packages inside ARM64 container
+        uses: uraimo/run-on-arch-action@v3
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          shell: /bin/bash
+          env: |
+            BUILD_DIR: ${{ env.BUILD_DIR }} 
+            VERSION: ${{ env.VERSION }}
+            USE_BROTLI: ${{ env.USE_BROTLI }}
+            USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
+            USE_LZO: ${{ env.USE_LZO }}
+          run: |
+            apt-get update
+            apt-get install -y build-essential cmake debhelper golang-any dh-golang \
+              liblzo2-dev brotli libsodium-dev git devscripts dpkg-dev curl
+            curl -LO https://go.dev/dl/go${{ env.GO_VERSION }}.linux-arm64.tar.gz
+            tar -C /usr/local -xzf go${{ env.GO_VERSION }}.linux-arm64.tar.gz
+            export PATH=/usr/local/go/bin:$PATH
+
+            # git config --global --add safe.directory "$PWD"
+            cd $BUILD_DIR
+            dpkg-buildpackage -us -uc -b
+
+            mkdir -p output-debs
+            mv ../*.deb output-debs/
+
+            for f in output-debs/*.deb; do
+              base=$(basename "$f" .deb)
+              ver=$(echo "${{ matrix.distro }}" | grep -o '[0-9]\+\.[0-9]\+')
+              mv "$f" "output-debs/${base}_ubuntu-${ver}.deb"
+            done
+
+      - name: Upload DEBs
+        uses: actions/upload-artifact@v4
+        with:
+          name: wal-g-debs-${{ matrix.label }}-${{ matrix.deb_arch }}
+          path: ${{ env.BUILD_DIR }}/output-debs/*.deb
+          if-no-files-found: error
+
+  deploy-to-gh-pages:
+    needs: [release-ubuntu-amd64, release-ubuntu-arm64]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout gh-pages branch
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
+          cd repo-pages
+          for attempt in {1..5}; do
+            git pull --rebase origin gh-pages && break
+            echo "Retrying git pull ($attempt/5)..."
+            sleep $(shuf -i 1-10 -n 1)
+          done
+
+      - name: Download all DEB packages
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          merge-multiple: true
+
+      - name: Debug artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          ls -l ./artifacts
+
+      - name: Copy DEB files to APT repo (without public/)
+        run: |
+          cd repo-pages
+          for deb_file in ../artifacts/*.deb; do
+            echo "Processing file: $deb_file"
+            if [[ "$deb_file" =~ ubuntu-([0-9]{2}\.[0-9]{2}) ]]; then
+              VERSION="${BASH_REMATCH[1]}"
+            else
+              echo "Could not determine Ubuntu version for $deb_file"
+              exit 1
+            fi
+            if [[ "$deb_file" =~ _amd64_ ]]; then
+              ARCH="amd64"
+            elif [[ "$deb_file" =~ _arm64_ ]]; then
+              ARCH="arm64"
+            else
+              echo "Could not determine architecture for $deb_file"
+              exit 1
+            fi
+            case "$VERSION" in
+              "24.04") CODENAME="noble" ;;
+              "22.04") CODENAME="jammy" ;;
+              "20.04") CODENAME="focal" ;;
+              *) echo "Unsupported Ubuntu version: $VERSION" && exit 1 ;;
+            esac
+            mkdir -p dists/$CODENAME/main/binary-arm64
+            mkdir -p dists/$CODENAME/main/binary-amd64
+            TARGET_DIR="dists/$CODENAME/main/binary-$ARCH"
+            cp "$deb_file" "$TARGET_DIR/"
+            echo "Placed $deb_file in $TARGET_DIR"
+          done
+
+      - name: Generate APT Repository Metadata
+        run: |
+          cd repo-pages
+          for CODENAME in noble jammy focal; do
+            for ARCH in amd64 arm64; do
+              PACKAGE_PATH="dists/$CODENAME/main/binary-$ARCH"
+              if [[ -d "$PACKAGE_PATH" && $(ls -A "$PACKAGE_PATH"/*.deb 2>/dev/null) ]]; then
+                echo "Generating Packages for $CODENAME ($ARCH)"
+                apt-ftparchive packages "$PACKAGE_PATH" > "$PACKAGE_PATH/Packages"
+                gzip -kf "$PACKAGE_PATH/Packages"
+              else
+                echo "No packages found for $CODENAME ($ARCH), skipping..."
+              fi
+            done
+
+            if [[ -d "dists/$CODENAME" ]]; then
+              echo "Generating Release file for $CODENAME"
+              apt-ftparchive \
+                -o APT::FTPArchive::Release::Codename="$CODENAME" \
+                -o APT::FTPArchive::Release::Origin="WAL-G Repo" \
+                -o APT::FTPArchive::Release::Label="WAL-G APT Repository" \
+                -o APT::FTPArchive::Release::Architectures="amd64 arm64" \
+                -o APT::FTPArchive::Release::Components="main" \
+                release "dists/$CODENAME" > "dists/$CODENAME/Release"
+            fi
+          done
+
+      - name: Sign APT Repository Metadata
+        run: |
+          cd repo-pages
+          export GNUPGHOME=$(mktemp -d)
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          for CODENAME in noble jammy focal; do
+            echo "Signing Release file for $CODENAME..."
+            gpg --batch --yes --default-key "WAL-G Repository" -abs -o dists/$CODENAME/Release.gpg dists/$CODENAME/Release
+            gpg --batch --yes --default-key "WAL-G Repository" --clearsign -o dists/$CODENAME/InRelease dists/$CODENAME/Release
+          done
+
+      - name: Commit and Push Changes to gh-pages
+        run: |
+          cd repo-pages
+          git add .
+          git commit -m "Update APT repository with new packages"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          for attempt in {1..5}; do
+            git push origin gh-pages && break
+            echo "Retrying git push ($attempt/5)..."
+            sleep $(shuf -i 1-10 -n 1)
+          done

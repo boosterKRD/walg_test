@@ -24,9 +24,13 @@ jobs:
 
       - name: Update dependencies
         run: |
-          # git submodule update --init
-          # go mod vendor
           make go_deps
+
+      - name: Download Golang archives
+        run: |
+          mkdir -p build
+          wget https://go.dev/dl/go1.22.1.linux-amd64.tar.gz -O build/golang-amd64.tar.gz
+          wget https://go.dev/dl/go1.22.1.linux-arm64.tar.gz -O build/golang-arm64.tar.gz
 
       - name: Download libsodium archive
         run: |
@@ -62,10 +66,10 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Set up Golang
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
+      # - name: Set up Golang
+      #   uses: actions/setup-go@v5
+      #   with:
+      #     go-version: ${{ env.GO_VERSION }}
 
       - name: Install build dependencies
         run: |
@@ -78,7 +82,6 @@ jobs:
             brotli \
             libsodium-dev \
             git \
-            golang-any \
             cmake
 
 
@@ -202,11 +205,11 @@ jobs:
             USE_LZO: ${{ env.USE_LZO }}
           run: |
             apt-get update
-            apt-get install -y build-essential cmake debhelper golang-any dh-golang \
+            apt-get install -y build-essential cmake debhelper dh-golang \
               liblzo2-dev brotli libsodium-dev git devscripts dpkg-dev curl
-            curl -LO https://go.dev/dl/go${{ env.GO_VERSION }}.linux-arm64.tar.gz
-            tar -C /usr/local -xzf go${{ env.GO_VERSION }}.linux-arm64.tar.gz
-            export PATH=/usr/local/go/bin:$PATH
+            # curl -LO https://go.dev/dl/go${{ env.GO_VERSION }}.linux-arm64.tar.gz
+            # tar -C /usr/local -xzf go${{ env.GO_VERSION }}.linux-arm64.tar.gz
+            # export PATH=/usr/local/go/bin:$PATH
 
             # git config --global --add safe.directory "$PWD"
             cd $BUILD_DIR
