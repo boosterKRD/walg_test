@@ -411,7 +411,7 @@ jobs:
           file wal-g_*.dsc || echo "file command failed"
           file wal-g_*.changes || echo "file command failed"          
 
-      - name: Sign .dsc and .changes manually
+      - name: Sign .dsc and .changes properly
         env:
           GNUPGHOME: ${{ env.GNUPGHOME }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -426,10 +426,12 @@ jobs:
           for file in *.dsc *.changes; do
             echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback \
               --passphrase-fd 0 --default-key "$GPG_KEY_ID" \
-              --clearsign --output "$file.asc" "$file"
-            mv "$file.asc" "$file"
+              --output "$file.sig" --detach-sign "$file"
           done
 
+          for file in *.dsc *.changes; do
+            debsign --re-sign -k"$GPG_KEY_ID" "$file"
+          done
 
       - name: Upload to Launchpad
         run: |
