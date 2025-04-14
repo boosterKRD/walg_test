@@ -397,7 +397,7 @@ jobs:
       - name: Build source package
         run: |
           cd $BUILD_DIR
-          dpkg-buildpackage -S --no-sign
+          dpkg-buildpackage -S -d --no-sign
 
       - name: Sign .dsc and .changes manually
         env:
