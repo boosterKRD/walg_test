@@ -369,6 +369,7 @@ jobs:
           mkdir source-tree
           tar xzf source-artifact/wal_g_${VERSION}.tar.gz -C source-tree
           echo "BUILD_DIR=$(pwd)/source-tree" >> $GITHUB_ENV
+
       - name: Import GPG key
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY_LUNCHPAD }}
@@ -377,6 +378,7 @@ jobs:
           echo "$GPG_PRIVATE_KEY" | gpg --batch --import
           echo "GNUPGHOME=$GNUPGHOME" >> $GITHUB_ENV
           gpg --list-secret-keys
+
       - name: Patch changelog for ${{ matrix.codename }}
         run: |
           cd $BUILD_DIR
@@ -385,10 +387,12 @@ jobs:
           echo "  * Initial release for ${{ matrix.pretty }}" >> debian/changelog
           echo "" >> debian/changelog
           echo " -- boosterykt <booster.ykt@gmail.com>  $(date -R)" >> debian/changelog
+
       - name: Build source package
         run: |
           cd $BUILD_DIR
           dpkg-buildpackage -S -d --no-sign
+
       - name: Sign with debsign
         env:
           GNUPGHOME: ${{ env.GNUPGHOME }}
@@ -398,10 +402,12 @@ jobs:
           export GPG_TTY=$(tty)
           echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg.conf
           echo "pinentry-mode loopback" >> $GNUPGHOME/gpg.conf
+          # Если возникают проблемы с вводом passphrase, можно предварительно разблокировать ключ, например так:
+          # echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 -s <<< "unlock"
           echo "$GPG_PASSPHRASE" | debsign --re-sign *.changes
-          
+
       - name: Upload to Launchpad
         run: |
           cd $BUILD_DIR/..
           dput ppa:boosterykt/wal-g wal-g_*source.changes
-    
+      
