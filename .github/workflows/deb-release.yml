@@ -410,7 +410,7 @@ jobs:
           ls -l *.dsc || echo "No .dsc found"
           file wal-g_*.dsc || echo "file command failed"
           file wal-g_*.changes || echo "file command failed"          
-          
+
       - name: Sign with debsign
         env:
           GNUPGHOME: ${{ env.GNUPGHOME }}
@@ -419,9 +419,11 @@ jobs:
         run: |
           cd $BUILD_DIR/..
           export GPG_TTY=$(tty)
+          echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg-agent.conf
+          echo "pinentry-mode loopback" >> $GNUPGHOME/gpg-agent.conf
           gpgconf --kill gpg-agent
-          echo "$GPG_PASSPHRASE" | debsign --re-sign -k"$GPG_KEY_ID" wal-g_*source.changes
-    
+          echo "$GPG_PASSPHRASE" | debsign -k"$GPG_KEY_ID" --no-re-sign *.changes
+          
       - name: Upload to Launchpad
         run: |
           cd $BUILD_DIR/..
