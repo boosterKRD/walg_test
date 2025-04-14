@@ -25,18 +25,15 @@ jobs:
       - name: Update dependencies
         run: |
           make go_deps
-
       - name: Download Golang archives
         run: |
           mkdir -p build
           wget https://go.dev/dl/go1.22.1.linux-amd64.tar.gz -O build/golang-amd64.tar.gz
           wget https://go.dev/dl/go1.22.1.linux-arm64.tar.gz -O build/golang-arm64.tar.gz
-
       - name: Download libsodium archive
         run: |
           mkdir -p tmp/libsodium
           curl --retry 5 --retry-delay 0 -sL "https://github.com/jedisct1/libsodium/releases/download/1.0.20-RELEASE/libsodium-1.0.20.tar.gz" -o tmp/libsodium/libsodium-1.0.20.tar.gz
-
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
@@ -45,11 +42,9 @@ jobs:
           echo "WALG_BUILD_DATE=$(date -u +%Y.%m.%d_%H:%M:%S)" > walg.buildinfo
           echo "WALG_GIT_REVISION=$(git rev-parse --short HEAD)" >> walg.buildinfo
           echo "WALG_VERSION=$(git tag -l --points-at HEAD)" >> walg.buildinfo
-
       - name: Create source archive
         run: |
           tar --warning=no-file-changed -czf wal_g_${VERSION}.tar.gz --exclude=.git . || true
-
       - name: Upload source package artifact
         uses: actions/upload-artifact@v4
         with:
@@ -339,6 +334,7 @@ jobs:
   #           echo "Retrying git push ($attempt/5)..."
   #           sleep $(shuf -i 1-10 -n 1)
   #         done
+
   upload-to-launchpad:
     needs: [prepare-source]
     runs-on: ubuntu-22.04
@@ -358,8 +354,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends devscripts debhelper dput dpkg-dev gnupg curl
-
+          sudo apt-get install -y devscripts debhelper dput dpkg-dev gnupg curl
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
@@ -374,20 +369,14 @@ jobs:
           mkdir source-tree
           tar xzf source-artifact/wal_g_${VERSION}.tar.gz -C source-tree
           echo "BUILD_DIR=$(pwd)/source-tree" >> $GITHUB_ENV
-
-      - name: Import GPG key and extract KEY_ID
+      - name: Import GPG key
         env:
-          GPG_PRIVATE_KEY_LUNCHPAD: ${{ secrets.GPG_PRIVATE_KEY_LUNCHPAD }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY_LUNCHPAD }}
         run: |
           export GNUPGHOME=$(mktemp -d)
-          echo "$GPG_PRIVATE_KEY_LUNCHPAD" | gpg --batch --import
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
           echo "GNUPGHOME=$GNUPGHOME" >> $GITHUB_ENV
-          GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d':' -f5)
-          echo "GPG_KEY_ID=$GPG_KEY_ID" >> $GITHUB_ENV
-          echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg.conf
-          echo "pinentry-mode loopback" >> $GNUPGHOME/gpg.conf
-          echo "Using GPG key: $GPG_KEY_ID"
-
+          gpg --list-secret-keys
       - name: Patch changelog for ${{ matrix.codename }}
         run: |
           cd $BUILD_DIR
@@ -396,20 +385,26 @@ jobs:
           echo "  * Initial release for ${{ matrix.pretty }}" >> debian/changelog
           echo "" >> debian/changelog
           echo " -- boosterykt <booster.ykt@gmail.com>  $(date -R)" >> debian/changelog
+      - name: Build source package
+        run: |
+          cd $BUILD_DIR
+          dpkg-buildpackage -S -d --no-sign
 
-      - name: Build signed source package
+      - name: Sign with debsign
         env:
-          GPG_KEY_ID: ${{ env.GPG_KEY_ID }}
           GNUPGHOME: ${{ env.GNUPGHOME }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          cd $BUILD_DIR
+          cd $BUILD_DIR/..
           export GPG_TTY=$(tty)
-          echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 true
-          dpkg-buildpackage -S -d -k"$GPG_KEY_ID"
+          echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg.conf
+          echo "pinentry-mode loopback" >> $GNUPGHOME/gpg.conf
+          DSC=$(ls *.dsc)
+          CHANGES=$(ls *.changes)
+          echo "$GPG_PASSPHRASE" | debsign --re-sign -k"${{ env.GPG_KEY_ID }}" --no-re-sign-changes --no-re-sign-dsc --passphrase-fd 0 "$CHANGES"
 
       - name: Upload to Launchpad
         run: |
           cd $BUILD_DIR/..
-          dput ppa:boosterykt/wal-g wal-g_*source.changes  
-  
+          dput ppa:boosterykt/wal-g wal-g_*source.changes
+    
