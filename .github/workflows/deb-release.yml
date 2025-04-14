@@ -335,6 +335,7 @@ jobs:
   #           sleep $(shuf -i 1-10 -n 1)
   #         done
 
+
   upload-to-launchpad:
     needs: [prepare-source]
     runs-on: ubuntu-22.04
@@ -355,6 +356,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y devscripts debhelper dput dpkg-dev gnupg curl
+
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
@@ -393,21 +395,21 @@ jobs:
           cd $BUILD_DIR
           dpkg-buildpackage -S -d --no-sign
 
-      - name: Sign with debsign
+      - name: Sign archive manually
         env:
           GNUPGHOME: ${{ env.GNUPGHOME }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           cd $BUILD_DIR/..
-          export GPG_TTY=$(tty)
           echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg.conf
           echo "pinentry-mode loopback" >> $GNUPGHOME/gpg.conf
-          # Если возникают проблемы с вводом passphrase, можно предварительно разблокировать ключ, например так:
-          # echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 -s <<< "unlock"
-          echo "$GPG_PASSPHRASE" | debsign --re-sign *.changes
+          for file in *.dsc *.changes; do
+            echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+              --output "$file.gpg" --detach-sign "$file"
+          done
 
       - name: Upload to Launchpad
         run: |
           cd $BUILD_DIR/..
           dput ppa:boosterykt/wal-g wal-g_*source.changes
-      
+ 
