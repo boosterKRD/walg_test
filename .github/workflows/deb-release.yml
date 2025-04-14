@@ -398,6 +398,19 @@ jobs:
           cd $BUILD_DIR
           dpkg-buildpackage -S -d --no-sign
 
+      - name: Debug .changes and .dsc files
+        run: |
+          cd $BUILD_DIR/..
+          echo "Current directory: $(pwd)"
+          echo "Contents:"
+          ls -lah
+          echo "Looking for .changes:"
+          ls -l *.changes || echo "No .changes found"
+          echo "Looking for .dsc:"
+          ls -l *.dsc || echo "No .dsc found"
+          file wal-g_*.dsc || echo "file command failed"
+          file wal-g_*.changes || echo "file command failed"          
+          
       - name: Sign with debsign
         env:
           GNUPGHOME: ${{ env.GNUPGHOME }}
