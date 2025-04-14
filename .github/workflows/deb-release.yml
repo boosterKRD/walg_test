@@ -411,7 +411,7 @@ jobs:
           file wal-g_*.dsc || echo "file command failed"
           file wal-g_*.changes || echo "file command failed"          
 
-      - name: Sign with debsign
+      - name: Sign .dsc and .changes manually
         env:
           GNUPGHOME: ${{ env.GNUPGHOME }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -422,8 +422,18 @@ jobs:
           echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg-agent.conf
           echo "pinentry-mode loopback" >> $GNUPGHOME/gpg-agent.conf
           gpgconf --kill gpg-agent
-          echo "$GPG_PASSPHRASE" | debsign -k"$GPG_KEY_ID" --no-re-sign *.changes
-          
+
+          for file in *.dsc *.changes; do
+            echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback \
+              --passphrase-fd 0 --default-key "$GPG_KEY_ID" \
+              --output "$file.sig" --detach-sign "$file"
+          done
+
+          # attach signatures to files
+          for file in *.dsc *.changes; do
+            cat "$file.sig" >> "$file"
+            rm "$file.sig"
+          done
       - name: Upload to Launchpad
         run: |
           cd $BUILD_DIR/..
