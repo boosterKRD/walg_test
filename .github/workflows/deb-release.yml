@@ -395,19 +395,19 @@ jobs:
           cd $BUILD_DIR
           dpkg-buildpackage -S -d --no-sign
 
-      - name: Sign archive manually
+      - name: Sign source package using debsign
         env:
           GNUPGHOME: ${{ env.GNUPGHOME }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_KEY_ID: ${{ env.GPG_KEY_ID }}
         run: |
           cd $BUILD_DIR/..
-          echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg.conf
-          echo "pinentry-mode loopback" >> $GNUPGHOME/gpg.conf
-          for file in *.dsc *.changes; do
-            echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
-              --output "$file.gpg" --detach-sign "$file"
-          done
-
+          echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg-agent.conf
+          echo "pinentry-mode loopback" >> $GNUPGHOME/gpg-agent.conf
+          export GPG_TTY=$(tty)
+          gpgconf --kill gpg-agent
+          echo "$GPG_PASSPHRASE" | debsign --re-sign -k"$GPG_KEY_ID" *.changes
+          
       - name: Upload to Launchpad
         run: |
           cd $BUILD_DIR/..
