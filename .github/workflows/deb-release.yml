@@ -379,8 +379,11 @@ jobs:
           export GNUPGHOME=$(mktemp -d)
           echo "$GPG_PRIVATE_KEY" | gpg --batch --import
           echo "GNUPGHOME=$GNUPGHOME" >> $GITHUB_ENV
-          gpg --list-secret-keys
-
+          GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d':' -f5)
+          echo "GPG_KEY_ID=$GPG_KEY_ID" >> $GITHUB_ENV
+          echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg-agent.conf
+          echo "pinentry-mode loopback" >> $GNUPGHOME/gpg-agent.conf
+          
       - name: Patch changelog for ${{ matrix.codename }}
         run: |
           cd $BUILD_DIR
@@ -395,19 +398,17 @@ jobs:
           cd $BUILD_DIR
           dpkg-buildpackage -S -d --no-sign
 
-      - name: Sign source package using debsign
+      - name: Sign with debsign
         env:
           GNUPGHOME: ${{ env.GNUPGHOME }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_KEY_ID: ${{ env.GPG_KEY_ID }}
         run: |
           cd $BUILD_DIR/..
-          echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg-agent.conf
-          echo "pinentry-mode loopback" >> $GNUPGHOME/gpg-agent.conf
           export GPG_TTY=$(tty)
           gpgconf --kill gpg-agent
-          echo "$GPG_PASSPHRASE" | debsign --re-sign -k"$GPG_KEY_ID" *.changes
-          
+          echo "$GPG_PASSPHRASE" | debsign --re-sign -k"$GPG_KEY_ID" wal-g_*source.changes
+    
       - name: Upload to Launchpad
         run: |
           cd $BUILD_DIR/..
