@@ -339,7 +339,6 @@ jobs:
   #           echo "Retrying git push ($attempt/5)..."
   #           sleep $(shuf -i 1-10 -n 1)
   #         done
-  
   upload-to-launchpad:
     needs: [prepare-source]
     runs-on: ubuntu-22.04
@@ -385,6 +384,8 @@ jobs:
           echo "GNUPGHOME=$GNUPGHOME" >> $GITHUB_ENV
           GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d':' -f5)
           echo "GPG_KEY_ID=$GPG_KEY_ID" >> $GITHUB_ENV
+          echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg.conf
+          echo "pinentry-mode loopback" >> $GNUPGHOME/gpg.conf
           echo "Using GPG key: $GPG_KEY_ID"
 
       - name: Patch changelog for ${{ matrix.codename }}
@@ -400,12 +401,15 @@ jobs:
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_KEY_ID: ${{ env.GPG_KEY_ID }}
+          GNUPGHOME: ${{ env.GNUPGHOME }}
         run: |
           cd $BUILD_DIR
-          echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
-            dpkg-buildpackage -S -d -k"$GPG_KEY_ID"
+          export GPG_TTY=$(tty)
+          dpkg-buildpackage -S -d -k"$GPG_KEY_ID" \
+            --sign-key "$GPG_KEY_ID"
 
       - name: Upload to Launchpad
         run: |
           cd $BUILD_DIR/..
           dput ppa:boosterykt/wal-g wal-g_*source.changes  
+  
