@@ -339,7 +339,7 @@ jobs:
   #           echo "Retrying git push ($attempt/5)..."
   #           sleep $(shuf -i 1-10 -n 1)
   #         done
-
+  
   upload-to-launchpad:
     needs: [prepare-source]
     runs-on: ubuntu-22.04
@@ -359,7 +359,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y devscripts debhelper dput dpkg-dev gnupg curl
+          sudo apt-get install -y --no-install-recommends devscripts debhelper dput dpkg-dev gnupg curl
 
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
@@ -376,14 +376,16 @@ jobs:
           tar xzf source-artifact/wal_g_${VERSION}.tar.gz -C source-tree
           echo "BUILD_DIR=$(pwd)/source-tree" >> $GITHUB_ENV
 
-      - name: Import GPG key
+      - name: Import GPG key and extract KEY_ID
         env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY_LUNCHPAD }}
+          GPG_PRIVATE_KEY_LUNCHPAD: ${{ secrets.GPG_PRIVATE_KEY_LUNCHPAD }}
         run: |
           export GNUPGHOME=$(mktemp -d)
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          echo "$GPG_PRIVATE_KEY_LUNCHPAD" | gpg --batch --import
           echo "GNUPGHOME=$GNUPGHOME" >> $GITHUB_ENV
-          gpg --list-secret-keys
+          GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d':' -f5)
+          echo "GPG_KEY_ID=$GPG_KEY_ID" >> $GITHUB_ENV
+          echo "Using GPG key: $GPG_KEY_ID"
 
       - name: Patch changelog for ${{ matrix.codename }}
         run: |
@@ -394,23 +396,16 @@ jobs:
           echo "" >> debian/changelog
           echo " -- boosterykt <booster.ykt@gmail.com>  $(date -R)" >> debian/changelog
 
-      - name: Build source package
-        run: |
-          cd $BUILD_DIR
-          dpkg-buildpackage -S -d --no-sign
-
-      - name: Sign .dsc and .changes manually
+      - name: Build signed source package
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_KEY_ID: ${{ env.GPG_KEY_ID }}
         run: |
-          cd $BUILD_DIR/..
-          DSC=$(ls *.dsc)
-          CHANGES=$(ls *.changes)
-          echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 -abs -o "$DSC.asc" "$DSC"
-          echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 -abs -o "$CHANGES.asc" "$CHANGES"
+          cd $BUILD_DIR
+          echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+            dpkg-buildpackage -S -d -k"$GPG_KEY_ID"
 
       - name: Upload to Launchpad
         run: |
           cd $BUILD_DIR/..
-          dput ppa:boosterykt/wal-g wal-g_*source.changes
-    
+          dput ppa:boosterykt/wal-g wal-g_*source.changes  
