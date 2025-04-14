@@ -46,14 +46,13 @@ jobs:
         run: |
           tar --warning=no-file-changed -czf wal_g_${VERSION}.tar.gz --exclude=.git . || true
 
-      - name: Debug tar.gz top-level sizes
+      - name: Debug tar.gz top-level sizes (fast)
         run: |
           echo "Top-level size breakdown in wal_g_${VERSION}.tar.gz:"
-          tar -tzf wal_g_${VERSION}.tar.gz | cut -d/ -f1 | sort | uniq | while read entry; do
-            size=$(tar -tzf wal_g_${VERSION}.tar.gz | grep "^$entry/" | xargs -I{} tar -xOf wal_g_${VERSION}.tar.gz "{}" 2>/dev/null | wc -c)
-            printf "%10d  %s\n" "$size" "$entry"
-          done | sort -nr
-                    
+          tar -tvf wal_g_${VERSION}.tar.gz \
+            | awk '{size[$6 ~ /^([^\/]*)\//, d = gensub("/.*", "", 1, $6)] += $3} END {for (d in size) printf "%.1f MB  %s\n", size[d]/1024/1024, d}' \
+            | sort -nr
+
       - name: Upload source package artifact
         uses: actions/upload-artifact@v4
         with:
