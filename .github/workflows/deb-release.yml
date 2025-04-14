@@ -389,7 +389,6 @@ jobs:
         run: |
           cd $BUILD_DIR
           dpkg-buildpackage -S -d --no-sign
-
       - name: Sign with debsign
         env:
           GNUPGHOME: ${{ env.GNUPGHOME }}
@@ -399,10 +398,8 @@ jobs:
           export GPG_TTY=$(tty)
           echo "allow-loopback-pinentry" >> $GNUPGHOME/gpg.conf
           echo "pinentry-mode loopback" >> $GNUPGHOME/gpg.conf
-          DSC=$(ls *.dsc)
-          CHANGES=$(ls *.changes)
-          echo "$GPG_PASSPHRASE" | debsign --re-sign -k"${{ env.GPG_KEY_ID }}" --no-re-sign-changes --no-re-sign-dsc --passphrase-fd 0 "$CHANGES"
-
+          echo "$GPG_PASSPHRASE" | debsign --re-sign *.changes
+          
       - name: Upload to Launchpad
         run: |
           cd $BUILD_DIR/..
