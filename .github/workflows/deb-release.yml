@@ -399,14 +399,14 @@ jobs:
 
       - name: Build signed source package
         env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_KEY_ID: ${{ env.GPG_KEY_ID }}
           GNUPGHOME: ${{ env.GNUPGHOME }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           cd $BUILD_DIR
           export GPG_TTY=$(tty)
-          dpkg-buildpackage -S -d -k"$GPG_KEY_ID" \
-            --sign-key "$GPG_KEY_ID"
+          echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 true
+          dpkg-buildpackage -S -d -k"$GPG_KEY_ID"
 
       - name: Upload to Launchpad
         run: |
