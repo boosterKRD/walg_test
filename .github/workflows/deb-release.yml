@@ -430,11 +430,6 @@ jobs:
             mv "$file.asc" "$file"
           done
 
-          # attach signatures to files
-          for file in *.dsc *.changes; do
-            cat "$file.sig" >> "$file"
-            rm "$file.sig"
-          done
 
       - name: Upload to Launchpad
         run: |
