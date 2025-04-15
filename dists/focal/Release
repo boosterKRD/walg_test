@@ -1,0 +1,22 @@
+Architectures: amd64 arm64
+Codename: focal
+Components: main
+Date: Tue, 15 Apr 2025 20:22:34 +0000
+Label: WAL-G APT Repository
+Origin: WAL-G Repo
+MD5Sum:
+ 7fee0290b7acacdc858d437302ac8448              145 Release
+ 5fecefd38a4215aab4c130480b79f0d7             5199 main/binary-arm64/Packages
+ b83bf84d6dbce2b856aec56ab29e93fb             1880 main/binary-arm64/Packages.gz
+SHA1:
+ d9ce90e17c6b1380b656c69f8c8bee9c0141b6ec              145 Release
+ be0e7e3005b78e6b6563e6f53246d626c527ff83             5199 main/binary-arm64/Packages
+ 8e72bd19dc45bae4fe54482044ed50aeacded6f1             1880 main/binary-arm64/Packages.gz
+SHA256:
+ 1ae342001ac29d94d57381bdc7c374a2c70f380de9f04ae90ac910dc321b09e2              145 Release
+ 47bc87e5a7e6d195357885949cded79a08071700dc0ee5c3fe96f95453b2b4fe             5199 main/binary-arm64/Packages
+ a9166e167fdb0cac48998fb5f1e65b9ae8ba43a32bae486e2df91f5877b778e5             1880 main/binary-arm64/Packages.gz
+SHA512:
+ 74dcdd1762bea159f2a63d38f5ac142e7d3c3b436d3677388ecd7bbf6b9cd06b9c6006b70dc1f9c054c5d5a6e343f75cf185839d706ad244dddb3b1b62182de8              145 Release
+ 97b82ed210654afd985ce92a84818d677a610d348e299a2dc6ebbf19842c395ce736426b2229e4e40e7480d080f44b465c09de237ed2baa9d2f7dbb7e383461e             5199 main/binary-arm64/Packages
+ cab4ac704d8a584ee0415a98c33c3b0bcd48a8f755684cb36ecab4762c471a3b691a60767d94a42c0a21265133540df8e5bcde3c00696e1d519014a88b8b9eda             1880 main/binary-arm64/Packages.gz
