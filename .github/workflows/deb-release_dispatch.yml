@@ -1,5 +1,5 @@
 name: Manual Build and Publish DEB Packages
-
+run-name: Manual DEB Build for ref ${{ inputs.ref || github.ref_name }}
 on:
   workflow_dispatch:
     inputs:
@@ -31,17 +31,24 @@ jobs:
       - name: Update dependencies
         run: |
           make go_deps
+
       - name: Download Golang archives
         run: |
           mkdir -p build
           wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -O build/golang-amd64.tar.gz
           wget https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz -O build/golang-arm64.tar.gz
+      
       - name: Download libsodium archive
         run: |
           mkdir -p tmp/libsodium
           curl --retry 5 --retry-delay 0 -sL "https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VERSION}-RELEASE/libsodium-${LIBSODIUM_VERSION}.tar.gz" -o tmp/libsodium/libsodium-${LIBSODIUM_VERSION}.tar.gz
+      
+      # - name: Extract version
+      #   run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
       - name: Extract version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+        run: |
+          echo "VERSION=${{ inputs.ref#v }}" >> $GITHUB_ENV
 
       - name: Generate buildinfo file
         run: |
