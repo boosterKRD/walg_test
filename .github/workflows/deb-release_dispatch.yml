@@ -1,5 +1,6 @@
-name: Manual Build and Publish DEB Packages
-run-name: Manual DEB Build for ref ${{ inputs.ref || github.ref_name }}
+name: Manual Build and Publish DEBs Package
+run-name: Manual Build and Publish DEBs (${{ inputs.ref || github.ref_name }})
+
 on:
   workflow_dispatch:
     inputs:
@@ -48,8 +49,10 @@ jobs:
 
       - name: Extract version
         run: |
-          echo "VERSION=${{ inputs.ref#v }}" >> $GITHUB_ENV
-
+          VERSION="${{ inputs.ref }}"
+          VERSION="${VERSION#v}" 
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+        
       - name: Generate buildinfo file
         run: |
           echo "WALG_BUILD_DATE=$(date -u +%Y.%m.%d_%H:%M:%S)" > walg.buildinfo
