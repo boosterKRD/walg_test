@@ -9,15 +9,21 @@ on:
         required: true
         type: string
       gh_pages:
-        description: 'Deploy to GitHub Pages (true/false)'
+        description: 'Deploy to GitHub Pages'
         required: true
         default: 'true'
-        type: string
+        type: choice
+        options:
+          - 'true'
+          - 'false'
       launchpad:
-        description: 'Upload to Launchpad (true/false)'
+        description: 'Upload to Launchpad'
         required: true
         default: 'true'
-        type: string
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 permissions:
   contents: write
@@ -409,7 +415,7 @@ jobs:
       - name: Build source package
         run: |
           cd $BUILD_DIR
-          dpkg-buildpackage -S -d --no-sign
+          DEB_COMPRESS=xz DEB_COMPRESS_ARGS="-9" dpkg-buildpackage -S -d --no-sign
 
       - name: Sign .dsc and .changes properly
         env:
