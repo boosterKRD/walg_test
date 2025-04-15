@@ -46,11 +46,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
-
+      # We download/prepare and include  source dependencies explicitly
+      # because Launchpad builds run in an isolated environment without internet access,
+      # so it cannot fetch anything during the build.   
       - name: Update dependencies
         run: |
           make go_deps
 
+      # We are forced to bundle prebuilt Go archives in the package because Launchpad
+      # for Ubuntu 20.04 and 22.04 provides an outdated Go version (< 1.22), while
+      # our project requires Go 1.22 or higher.   
       - name: Download Golang archives
         run: |
           mkdir -p build
@@ -252,6 +257,18 @@ jobs:
     if: ${{ inputs.gh_pages == 'true' }}
     runs-on: ubuntu-22.04
     steps:
+      # We've never had issues with `git pull`, but just in case — retry up to 5 times
+      - name: Checkout gh-pages branch
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
+          cd repo-pages
+          for attempt in {1..5}; do
+            git pull --rebase origin gh-pages && break
+            echo "Retrying git pull ($attempt/5)..."
+            sleep $(shuf -i 10-60 -n 1)
+          done
       - name: Checkout gh-pages branch
         run: |
           git config --global user.name "github-actions"
@@ -369,7 +386,7 @@ jobs:
           - codename: noble
             version: 24.04
             pretty: "Ubuntu 24.04"
-      max-parallel: 1
+      max-parallel: 3
     steps:
       - name: Install dependencies
         run: |
@@ -415,7 +432,7 @@ jobs:
       - name: Build source package
         run: |
           cd $BUILD_DIR
-          DEB_COMPRESS=xz DEB_COMPRESS_ARGS="-9" dpkg-buildpackage -S -d --no-sign
+          dpkg-buildpackage -S -d --no-sign
 
       - name: Sign .dsc and .changes properly
         env:
@@ -439,6 +456,8 @@ jobs:
             debsign --re-sign -k"$GPG_KEY_ID" "$file"
           done
 
+      # Launchpad can be flaky sometimes (e.g. timeouts or 500 errors),
+      # so we retry the upload up to 3 times with a delay in between.
       - name: Upload to Launchpad (with retries)
         run: |
           cd $BUILD_DIR/..
@@ -446,5 +465,5 @@ jobs:
             echo "Attempt $i to upload..."
             dput ppa:boosterykt/wal-g2 wal-g_*source.changes && break
             echo "Upload failed. Retrying in 60 seconds..."
-            sleep 60
+            sleep $(shuf -i 60-120 -n 1)
           done
