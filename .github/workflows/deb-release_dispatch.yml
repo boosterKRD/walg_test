@@ -63,6 +63,11 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
+      # - name: Set up Golang
+      #   uses: actions/setup-go@v5
+      #   with:
+      #     go-version: ${{ env.GO_VERSION }}
+
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -73,7 +78,9 @@ jobs:
             liblzo2-dev \
             brotli \
             libsodium-dev \
+            git \
             cmake
+
 
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
@@ -152,8 +159,8 @@ jobs:
             deb_arch: arm64
       fail-fast: false
     steps:
-      # - name: Checkout code
-      #   uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
@@ -196,7 +203,7 @@ jobs:
           run: |
             apt-get update
             apt-get install -y build-essential cmake debhelper dh-golang \
-              liblzo2-dev brotli libsodium-dev devscripts dpkg-dev
+              liblzo2-dev brotli libsodium-dev git devscripts dpkg-dev
 
             # git config --global --add safe.directory "$PWD"
             cd $BUILD_DIR
