@@ -1,16 +1,20 @@
-name: Build and Publish DEB Package for AMD64
+name: Manual Build and Publish DEB Packages
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git tag or branch to build from'
+        required: true
+        type: string
 
 permissions:
   contents: write
   actions: read
 
 env:
-  GO_VERSION: "1.22"
+  GO_VERSION: "1.22.1"
+  LIBSODIUM_VERSION: "1.0.20"
   USE_BROTLI: 1
   USE_LIBSODIUM: 1
   USE_LZO: 1
@@ -19,8 +23,10 @@ jobs:
   prepare-source:
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout code
+      - name: Checkout code from input ref
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Update dependencies
         run: |
@@ -28,13 +34,12 @@ jobs:
       - name: Download Golang archives
         run: |
           mkdir -p build
-          wget https://go.dev/dl/go1.22.1.linux-amd64.tar.gz -O build/golang-amd64.tar.gz
-          wget https://go.dev/dl/go1.22.1.linux-arm64.tar.gz -O build/golang-arm64.tar.gz
+          wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -O build/golang-amd64.tar.gz
+          wget https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz -O build/golang-arm64.tar.gz
       - name: Download libsodium archive
         run: |
           mkdir -p tmp/libsodium
-          curl --retry 5 --retry-delay 0 -sL "https://github.com/jedisct1/libsodium/releases/download/1.0.20-RELEASE/libsodium-1.0.20.tar.gz" -o tmp/libsodium/libsodium-1.0.20.tar.gz
-      
+          curl --retry 5 --retry-delay 0 -sL "https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VERSION}-RELEASE/libsodium-${LIBSODIUM_VERSION}.tar.gz" -o tmp/libsodium/libsodium-${LIBSODIUM_VERSION}.tar.gz
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
@@ -43,6 +48,7 @@ jobs:
           echo "WALG_BUILD_DATE=$(date -u +%Y.%m.%d_%H:%M:%S)" > walg.buildinfo
           echo "WALG_GIT_REVISION=$(git rev-parse --short HEAD)" >> walg.buildinfo
           echo "WALG_VERSION=$(git tag -l --points-at HEAD)" >> walg.buildinfo
+      
       - name: Create source archive
         run: |
           tar --warning=no-file-changed -czf wal_g_${VERSION}.tar.gz --exclude=.git . || true
@@ -63,11 +69,6 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
-      # - name: Set up Golang
-      #   uses: actions/setup-go@v5
-      #   with:
-      #     go-version: ${{ env.GO_VERSION }}
-
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -78,9 +79,7 @@ jobs:
             liblzo2-dev \
             brotli \
             libsodium-dev \
-            git \
             cmake
-
 
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
@@ -144,8 +143,7 @@ jobs:
   release-ubuntu-arm64:
     needs: [prepare-source]
     runs-on: ubuntu-20.04
-    env:
-      GO_VERSION: "1.22.8"
+
     strategy:
       matrix:
         include:
@@ -159,8 +157,8 @@ jobs:
             deb_arch: arm64
       fail-fast: false
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # - name: Checkout code
+      #   uses: actions/checkout@v4
 
       - name: Extract version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
@@ -203,7 +201,7 @@ jobs:
           run: |
             apt-get update
             apt-get install -y build-essential cmake debhelper dh-golang \
-              liblzo2-dev brotli libsodium-dev git devscripts dpkg-dev
+              liblzo2-dev brotli libsodium-dev devscripts dpkg-dev
 
             # git config --global --add safe.directory "$PWD"
             cd $BUILD_DIR
