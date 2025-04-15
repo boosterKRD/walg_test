@@ -341,7 +341,7 @@ jobs:
           - codename: noble
             version: 24.04
             pretty: "Ubuntu 24.04"
-      max-parallel: 3         
+      max-parallel: 1         
     steps:
       - name: Install dependencies
         run: |
