@@ -92,8 +92,11 @@ jobs:
             cmake
 
       - name: Extract version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-
+        run: |
+          VERSION="${{ inputs.ref }}"
+          VERSION="${VERSION#v}" 
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+        
       - name: Download source package artifact
         uses: actions/download-artifact@v4
         with:
@@ -167,12 +170,12 @@ jobs:
             deb_arch: arm64
       fail-fast: false
     steps:
-      # - name: Checkout code
-      #   uses: actions/checkout@v4
-
       - name: Extract version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-
+        run: |
+          VERSION="${{ inputs.ref }}"
+          VERSION="${VERSION#v}" 
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+        
       - name: Download source package artifact
         uses: actions/download-artifact@v4
         with:
