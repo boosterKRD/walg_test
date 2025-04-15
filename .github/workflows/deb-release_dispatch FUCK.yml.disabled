@@ -9,6 +9,16 @@ on:
         description: 'Git tag or branch to build from'
         required: true
         type: string
+      gh_pages:
+        description: 'Enable gh-pages deploy (true/false)'
+        required: false
+        default: 'false'
+        type: string
+      launchpad:
+        description: 'Enable Launchpad upload (true/false)'
+        required: false
+        default: 'false'
+        type: string        
 
   push:
     tags:
@@ -160,92 +170,93 @@ jobs:
           path: ${{ env.BUILD_DIR }}/output-debs/*.deb
           if-no-files-found: error
           
-  release-ubuntu-arm64:
-    needs: [prepare-source]
-    runs-on: ubuntu-22.04
+  # release-ubuntu-arm64:
+  #   needs: [prepare-source]
+  #   runs-on: ubuntu-22.04
 
-    strategy:
-      matrix:
-        include:
-          - arch: aarch64
-            distro: ubuntu22.04
-            label: ubuntu-22.04
-            deb_arch: arm64
-          # - arch: aarch64
-          #   distro: ubuntu20.04
-          #   label: ubuntu-20.04
-          #   deb_arch: arm64
-      fail-fast: false
-    steps:
-      - name: Extract version
-        run: |
-          RAW_REF="${{ inputs.ref || github.ref }}"
-          RAW_REF="${RAW_REF#refs/tags/}"
-          RAW_REF="${RAW_REF#v}"
-          echo "VERSION=$RAW_REF" >> $GITHUB_ENV
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - arch: aarch64
+  #           distro: ubuntu22.04
+  #           label: ubuntu-22.04
+  #           deb_arch: arm64
+  #         - arch: aarch64
+  #           distro: ubuntu20.04
+  #           label: ubuntu-20.04
+  #           deb_arch: arm64
+  #     fail-fast: false
+  #   steps:
+  #     - name: Extract version
+  #       run: |
+  #         RAW_REF="${{ inputs.ref || github.ref }}"
+  #         RAW_REF="${RAW_REF#refs/tags/}"
+  #         RAW_REF="${RAW_REF#v}"
+  #         echo "VERSION=$RAW_REF" >> $GITHUB_ENV
                   
-      - name: Download source package artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: wal-g-source
-          path: source-artifact
+  #     - name: Download source package artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: wal-g-source
+  #         path: source-artifact
 
-      - name: Extract source archive
-        run: |
-          cd source-artifact
-          mkdir -p source-tree
-          tar xzf wal_g_${VERSION}.tar.gz -C source-tree
-          echo "BUILD_DIR=$(pwd)/source-tree" >> $GITHUB_ENV
+  #     - name: Extract source archive
+  #       run: |
+  #         cd source-artifact
+  #         mkdir -p source-tree
+  #         tar xzf wal_g_${VERSION}.tar.gz -C source-tree
+  #         echo "BUILD_DIR=$(pwd)/source-tree" >> $GITHUB_ENV
 
-      - name: Patch debian/changelog with tag version
-        run: |
-          cd $BUILD_DIR
-          # VERSION=${GITHUB_REF#refs/tags/v}
-          echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
-          echo "" >> debian/changelog
-          echo "  * Auto-generated release for version $VERSION" >> debian/changelog
-          echo "" >> debian/changelog
-          echo " -- GitHub Actions <ci@example.com>  $(date -R)" >> debian/changelog
+  #     - name: Patch debian/changelog with tag version
+  #       run: |
+  #         cd $BUILD_DIR
+  #         # VERSION=${GITHUB_REF#refs/tags/v}
+  #         echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
+  #         echo "" >> debian/changelog
+  #         echo "  * Auto-generated release for version $VERSION" >> debian/changelog
+  #         echo "" >> debian/changelog
+  #         echo " -- GitHub Actions <ci@example.com>  $(date -R)" >> debian/changelog
 
-      - name: Build DEB packages inside ARM64 container
-        uses: uraimo/run-on-arch-action@v3
-        with:
-          arch: ${{ matrix.arch }}
-          distro: ${{ matrix.distro }}
-          shell: /bin/bash
-          env: |
-            BUILD_DIR: ${{ env.BUILD_DIR }} 
-            VERSION: ${{ env.VERSION }}
-            USE_BROTLI: ${{ env.USE_BROTLI }}
-            USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
-            USE_LZO: ${{ env.USE_LZO }}
-          run: |
-            apt-get update
-            apt-get install -y build-essential cmake debhelper dh-golang \
-              liblzo2-dev brotli libsodium-dev devscripts dpkg-dev
+  #     - name: Build DEB packages inside ARM64 container
+  #       uses: uraimo/run-on-arch-action@v3
+  #       with:
+  #         arch: ${{ matrix.arch }}
+  #         distro: ${{ matrix.distro }}
+  #         shell: /bin/bash
+  #         env: |
+  #           BUILD_DIR: ${{ env.BUILD_DIR }} 
+  #           VERSION: ${{ env.VERSION }}
+  #           USE_BROTLI: ${{ env.USE_BROTLI }}
+  #           USE_LIBSODIUM: ${{ env.USE_LIBSODIUM }}
+  #           USE_LZO: ${{ env.USE_LZO }}
+  #         run: |
+  #           apt-get update
+  #           apt-get install -y build-essential cmake debhelper dh-golang \
+  #             liblzo2-dev brotli libsodium-dev devscripts dpkg-dev
 
-            # git config --global --add safe.directory "$PWD"
-            cd $BUILD_DIR
-            dpkg-buildpackage -us -uc -b
+  #           # git config --global --add safe.directory "$PWD"
+  #           cd $BUILD_DIR
+  #           dpkg-buildpackage -us -uc -b
 
-            mkdir -p output-debs
-            mv ../*.deb output-debs/
+  #           mkdir -p output-debs
+  #           mv ../*.deb output-debs/
 
-            for f in output-debs/*.deb; do
-              base=$(basename "$f" .deb)
-              ver=$(echo "${{ matrix.distro }}" | grep -o '[0-9]\+\.[0-9]\+')
-              mv "$f" "output-debs/${base}_ubuntu-${ver}.deb"
-            done
+  #           for f in output-debs/*.deb; do
+  #             base=$(basename "$f" .deb)
+  #             ver=$(echo "${{ matrix.distro }}" | grep -o '[0-9]\+\.[0-9]\+')
+  #             mv "$f" "output-debs/${base}_ubuntu-${ver}.deb"
+  #           done
 
-      - name: Upload DEBs
-        uses: actions/upload-artifact@v4
-        with:
-          name: wal-g-debs-${{ matrix.label }}-${{ matrix.deb_arch }}
-          path: ${{ env.BUILD_DIR }}/output-debs/*.deb
-          if-no-files-found: error
+  #     - name: Upload DEBs
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: wal-g-debs-${{ matrix.label }}-${{ matrix.deb_arch }}
+  #         path: ${{ env.BUILD_DIR }}/output-debs/*.deb
+  #         if-no-files-found: error
 
   deploy-to-gh-pages:
-    needs: [release-ubuntu-amd64, release-ubuntu-arm64]
+    # needs: [release-ubuntu-amd64, release-ubuntu-arm64]
+    needs: [release-ubuntu-amd64]
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout gh-pages branch
