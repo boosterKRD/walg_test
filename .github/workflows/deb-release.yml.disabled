@@ -18,7 +18,7 @@ env:
 
 jobs:
   prepare-source:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -61,7 +61,7 @@ jobs:
     needs: [prepare-source]
     strategy:
       matrix:
-        os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04 ]
+        os: [ ubuntu-22.04, ubuntu-24.04 ]
         deb_arch: [amd64]
       max-parallel: 6
       fail-fast: false
@@ -140,7 +140,7 @@ jobs:
           
   release-ubuntu-arm64:
     needs: [prepare-source]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
@@ -149,10 +149,10 @@ jobs:
             distro: ubuntu22.04
             label: ubuntu-22.04
             deb_arch: arm64
-          - arch: aarch64
-            distro: ubuntu20.04
-            label: ubuntu-20.04
-            deb_arch: arm64
+          # - arch: aarch64
+          #   distro: ubuntu20.04
+          #   label: ubuntu-20.04
+          #   deb_arch: arm64
       fail-fast: false
     steps:
       # - name: Checkout code
@@ -223,7 +223,7 @@ jobs:
 
   deploy-to-gh-pages:
     needs: [release-ubuntu-amd64, release-ubuntu-arm64]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout gh-pages branch
         run: |
