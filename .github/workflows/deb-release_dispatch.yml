@@ -113,7 +113,6 @@ jobs:
       - name: Patch debian/changelog with tag version
         run: |
           cd $BUILD_DIR
-          VERSION=${GITHUB_REF#refs/tags/v}
           echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
           echo "" >> debian/changelog
           echo "  * Auto-generated release for version $VERSION" >> debian/changelog
@@ -192,7 +191,7 @@ jobs:
       - name: Patch debian/changelog with tag version
         run: |
           cd $BUILD_DIR
-          VERSION=${GITHUB_REF#refs/tags/v}
+          # VERSION=${GITHUB_REF#refs/tags/v}
           echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
           echo "" >> debian/changelog
           echo "  * Auto-generated release for version $VERSION" >> debian/changelog
@@ -363,9 +362,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y devscripts debhelper dput dpkg-dev gnupg curl
 
-      - name: Extract version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      # - name: Extract version
+      #   run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
+      - name: Extract version
+        run: |
+          VERSION="${{ inputs.ref }}"
+          VERSION="${VERSION#v}" 
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+        
       - name: Download source package artifact
         uses: actions/download-artifact@v4
         with:

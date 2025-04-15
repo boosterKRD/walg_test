@@ -32,7 +32,7 @@ jobs:
           mkdir -p build
           wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -O build/golang-amd64.tar.gz
           wget https://go.dev/dl/go${GO_VERSION}.linux-arm64.tar.gz -O build/golang-arm64.tar.gz
-          
+
       - name: Download libsodium archive
         run: |
           mkdir -p tmp/libsodium
@@ -98,7 +98,7 @@ jobs:
       - name: Patch debian/changelog with tag version
         run: |
           cd $BUILD_DIR
-          VERSION=${GITHUB_REF#refs/tags/v}
+          # VERSION=${GITHUB_REF#refs/tags/v}
           echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
           echo "" >> debian/changelog
           echo "  * Auto-generated release for version $VERSION" >> debian/changelog
