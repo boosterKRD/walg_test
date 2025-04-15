@@ -1,12 +1,12 @@
 git add .  
-git commit -m "v18.0.0"
-git tag -a v18.0.0 -m "Release v18.0.0"
+git commit -m "v19.0.0"
+git tag -a v19.0.0 -m "Release v19.0.0"
 
 git push origin main  
-git push origin v18.0.0
+git push origin v19.0.0
 
 
-
+https://launchpad.net/~boosterykt/+archive/ubuntu/wal-g/+delete-packages?series_filter=focal
 
 The Ubuntu 20.04 Actions runner image will begin deprecation on 2025-02-01 and will be fully unsupported by 2025-04-15 #11101
 
