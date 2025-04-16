@@ -21,7 +21,7 @@ jobs:
       - name: Install base tools
         run: |
           apt-get update
-          apt-get install -y curl git tar ca-certificates build-essential    
+          apt-get install -y curl git tar ca-certificates build-essential cmake    
 
       - name: Install deps
         run: apt-get update && apt-get install -y liblzo2-dev curl git
