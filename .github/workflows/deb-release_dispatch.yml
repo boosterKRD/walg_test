@@ -81,14 +81,6 @@ jobs:
           echo "WALG_GIT_REVISION=$(git rev-parse --short HEAD)" >> walg.buildinfo
           echo "WALG_VERSION=$(git tag -l --points-at HEAD)" >> walg.buildinfo
       
-      - name: Compress vendor and brotli folders
-        run: |
-          tar -czf vendor.tar.gz vendor
-          rm -rf vendor
-
-          tar -czf submodules/brotli.tar.gz submodules/brotli
-          rm -rf submodules/brotli
-                
       - name: Create source archive
         run: |
           tar --warning=no-file-changed -czf wal_g_${VERSION}.tar.gz --exclude=.git . || true
