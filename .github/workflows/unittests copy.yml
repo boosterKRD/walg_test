@@ -29,6 +29,9 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v4
 
+      - name: Mark repo as safe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        
       - name: Set up Go 1.x
         uses: actions/setup-go@v5
         with:
