@@ -337,9 +337,15 @@ st_integration_test: load_docker_common
 	docker compose up --exit-code-from st_tests st_tests
 
 unittest:
+unittest:
 	go list ./... | grep -Ev 'vendor|submodules|tmp' | xargs go vet
-	go test -mod vendor -v $(TEST_MODIFIER) -tags "$(BUILD_TAGS)" ./internal/...
-	go test -mod vendor -v $(TEST_MODIFIER) -tags "$(BUILD_TAGS)" ./pkg/...
+	go test -mod vendor -v $(TEST_MODIFIER) -tags "$(BUILD_TAGS)" ./internal/... || exit 1
+	go test -mod vendor -v $(TEST_MODIFIER) -tags "$(BUILD_TAGS)" ./pkg/... || exit 1
+	go test -mod vendor -v $(TEST_MODIFIER) -tags "$(BUILD_TAGS)" ./utility/... || exit 1
+
+	# go list ./... | grep -Ev 'vendor|submodules|tmp' | xargs go vet
+	# go test -mod vendor -v $(TEST_MODIFIER) -tags "$(BUILD_TAGS)" ./internal/...
+	# go test -mod vendor -v $(TEST_MODIFIER) -tags "$(BUILD_TAGS)" ./pkg/...
 	# go test -mod vendor -v $(TEST_MODIFIER) -tags "$(BUILD_TAGS)" ./utility/...
 
 coverage:

@@ -20,6 +20,7 @@ jobs:
     steps:
       - name: Install base tools
         run: |
+          export DEBIAN_FRONTEND=noninteractive
           apt-get update
           apt-get install -y curl git tar ca-certificates build-essential cmake    
 
