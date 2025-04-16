@@ -1,22 +1,22 @@
 Architectures: amd64 arm64
 Codename: focal
 Components: main
-Date: Wed, 16 Apr 2025 10:45:09 +0000
+Date: Wed, 16 Apr 2025 12:26:09 +0000
 Label: WAL-G APT Repository
 Origin: WAL-G Repo
 MD5Sum:
- 33fbd37cc6418b12de1d8d863baf6a22              145 Release
- 93f49a8c9d87dcc335878351d10acd76            15597 main/binary-arm64/Packages
- a9c7184585938b73a090e4993d593a17             4532 main/binary-arm64/Packages.gz
+ a3cfdfed3aff821d874c2a351e43dca2              145 Release
+ f298395190847cdc4994871264078c1f            20796 main/binary-arm64/Packages
+ ce335dd653b53c1d0d6d526bf1ac77f6             5810 main/binary-arm64/Packages.gz
 SHA1:
- 48802e1e41b980a9df26b46c1559b62891542a1a              145 Release
- ec5d060c6c08395545486b199908b9627a5d4b54            15597 main/binary-arm64/Packages
- 0844ee7cc4528d87f1f3159f7ef1d0df370edf9e             4532 main/binary-arm64/Packages.gz
+ b837a051fee906dea1f6d81a050955f2178d6aac              145 Release
+ 9b86596d85187c691e9b330c111c14dc6ba0d731            20796 main/binary-arm64/Packages
+ 2f389aa1f354f3b92c91d6508255866d85cce902             5810 main/binary-arm64/Packages.gz
 SHA256:
- 1deb704d32f5bfc4f853f86050284751fd0af8e3a90ec146993a8a1d511cc70f              145 Release
- 78f3f186f6219013dda5fa34517003d1ac6e70159d88b25bd771e188d51bb98d            15597 main/binary-arm64/Packages
- cad017a2d064432a278d58b3430b99980d824ba78ce022de853fa2185d7f0e77             4532 main/binary-arm64/Packages.gz
+ 11cebe05d8afb8a3fa26310545f8d4cb030a639023319255c2fc89bbb0206640              145 Release
+ 56ef18589aa8ef580a5fba74d2453eba679fb328da4976fcc254216744c14ebe            20796 main/binary-arm64/Packages
+ 8f7112671c0e69082c2f445740202e0e98205c79a0517c8c6f8e4508eb928889             5810 main/binary-arm64/Packages.gz
 SHA512:
- 8a3bee547aed7589f6a82711f3fe8e26c6cf60ecec18b5ae7ce5e2a1d2d67327ab0183e111efd443f4ef1c152632aa0fbd636e0602bee98fc04ffff4e6815563              145 Release
- 423a3d5581db4d272c00b320edbcb8103fc9e358dc4422d8b11c67053a0592e7e661d15dd8d7ac79a6065d9e74ff5ad0f5888f5b5f67c0326a28296e06bd490f            15597 main/binary-arm64/Packages
- 40da96944e2b418c6b6e1ef763119cd180c47303de8dcdca677d48cf5466a53a5e5efcdec6d27b7eef784d07b8e2654225a152ba410a6f4b36c6b03d51d0355d             4532 main/binary-arm64/Packages.gz
+ eaa2305c4806e4977d582712ae05adc86e2df9fcf2ef84170cb83e63666b607695f2d9a9150ee3946d429f9e4d36e7353541fcaeb30da425916b7b948a02cbce              145 Release
+ f193fe1590d0e211101ce494275550785bd1dbbb755f48567c8f7967c45a4db17a7050239137404264ac1b7fa82b0d46cd6602ec432aec2618812b2fb1f650df            20796 main/binary-arm64/Packages
+ 3f71d6c5ef2acb5c43ae4309ffd53404f417f5d0a390324aae4df657a06ff0b86eb670ff3c4433226f9ea076fd9e1d73b469f2a7732fa6fd74c3a129ab948d2c             5810 main/binary-arm64/Packages.gz
