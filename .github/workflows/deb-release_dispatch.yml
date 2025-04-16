@@ -1,5 +1,6 @@
 name: Manual Build and Publish DEBs Package
-run-name: Manual Build and Publish DEBs (${{ inputs.ref || github.ref_name }})
+# run-name: Manual Build and Publish DEBs (${{ inputs.ref || github.ref_name }})
+run-name: Manual Build and Publish DEBs (${{ (inputs.gh_pages == 'true' && inputs.launchpad == 'true' && 'gh_pages|launchpad ' || inputs.gh_pages == 'true' && 'gh_pages ' || inputs.launchpad == 'true' && 'launchpad ' || '') }}${{ inputs.ref }})
 
 on:
   workflow_dispatch:
