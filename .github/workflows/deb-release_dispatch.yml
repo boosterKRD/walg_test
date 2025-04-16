@@ -81,6 +81,14 @@ jobs:
           echo "WALG_GIT_REVISION=$(git rev-parse --short HEAD)" >> walg.buildinfo
           echo "WALG_VERSION=$(git tag -l --points-at HEAD)" >> walg.buildinfo
       
+      - name: Compress vendor and brotli folders
+        run: |
+          tar -czf vendor.tar.gz vendor
+          rm -rf vendor
+
+          tar -czf submodules/brotli.tar.gz submodules/brotli
+          rm -rf submodules/brotli
+                
       - name: Create source archive
         run: |
           tar --warning=no-file-changed -czf wal_g_${VERSION}.tar.gz --exclude=.git . || true
@@ -268,17 +276,6 @@ jobs:
             git pull --rebase origin gh-pages && break
             echo "Retrying git pull ($attempt/5)..."
             sleep $(shuf -i 10-60 -n 1)
-          done
-      - name: Checkout gh-pages branch
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git clone --depth=1 --branch=gh-pages https://github.com/${{ github.repository }}.git repo-pages
-          cd repo-pages
-          for attempt in {1..5}; do
-            git pull --rebase origin gh-pages && break
-            echo "Retrying git pull ($attempt/5)..."
-            sleep $(shuf -i 1-10 -n 1)
           done
 
       - name: Download all DEB packages

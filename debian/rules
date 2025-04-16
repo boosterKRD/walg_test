@@ -38,6 +38,16 @@ override_dh_auto_build:
 		exit 1; \
 	fi
 
+	if [ -f vendor.tar.gz ]; then \
+		echo "Extracting vendor.tar.gz..."; \
+		tar -xzf vendor.tar.gz -C ./; \
+	fi
+	if [ -f brotli.tar.gz ]; then \
+		echo "Extracting brotli.tar.gz..."; \
+		mkdir -p submodules/brotli; \
+		tar -xzf brotli.tar.gz -C submodules/brotli --strip-components=1; \
+	fi
+
 	make link_external_deps
 	make pg_build
 	make mysql_build
