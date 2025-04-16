@@ -1,0 +1,52 @@
+name: Unit tests2
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+env:
+  GO_VERSION: "1.22"
+  USE_BROTLI: 1
+
+jobs:
+  unittest:
+    name: Unit tests (${{ matrix.ubuntu_version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ubuntu_version: [20.04, 22.04, 24.04]
+
+    container:
+      image: ubuntu:${{ matrix.ubuntu_version }}
+
+    steps:
+      - name: Install base tools
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata curl git tar ca-certificates build-essential cmake liblzo2-dev
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v4
+
+      - name: Mark repo as safe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+        id: go
+
+      - name: Get dependencies
+        run: go get -v -t -d ./...
+
+      - name: Run unit tests
+        run: make all_unittests
+        env:
+          USE_BROTLI: 1
+          USE_LIBSODIUM: 1
+          USE_LZO: 1
+          TEST_MODIFIER: -race
