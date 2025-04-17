@@ -91,7 +91,7 @@ jobs:
         with:
           name: wal-g-source
           path: wal_g_${{ env.VERSION }}.tar.gz
-          
+
   release-ubuntu-amd64:
     needs: [prepare-source]
     if: ${{ inputs.gh_pages == 'true' }}
@@ -530,9 +530,18 @@ jobs:
       - name: Upload to Launchpad (with retries)
         run: |
           cd $BUILD_DIR/..
+          success=0
           for i in {1..3}; do
             echo "Attempt $i to upload..."
-            dput ppa:boosterykt/wal-g2 wal-g_*source.changes && break
-            echo "Upload failed. Retrying in 60 seconds..."
+            if dput ppa:boosterykt/wal-g2 wal-g_*source.changes; then
+              success=1
+              break
+            fi            
+            echo "Upload failed. Retrying within 60-120 seconds..."
             sleep $(shuf -i 60-120 -n 1)
           done
+          
+          if [ "$success" -ne 1 ]; then
+            echo "All upload attempts failed. Exiting with error."
+            exit 1
+          fi          
