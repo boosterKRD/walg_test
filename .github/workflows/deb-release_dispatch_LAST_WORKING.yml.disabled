@@ -91,40 +91,33 @@ jobs:
         with:
           name: wal-g-source
           path: wal_g_${{ env.VERSION }}.tar.gz
-          
+
   release-ubuntu-amd64:
     needs: [prepare-source]
     if: ${{ inputs.gh_pages == 'true' }}
     strategy:
       matrix:
-        os: [20.04, 22.04, 24.04]
+        os: [ ubuntu-22.04, ubuntu-24.04 ]
         deb_arch: [amd64]
       max-parallel: 6
       fail-fast: false
-    runs-on: ubuntu-latest
-    container:
-      image: ubuntu:${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Install build dependencies
         run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+          sudo apt-get update
+          sudo apt-get install -y \
             build-essential \
             debhelper \
             dh-golang \
             liblzo2-dev \
             brotli \
             libsodium-dev \
-            cmake \
-            tar \
-            gzip \
-            ca-certificates \
-            curl \
-            git \
-            lsb-release
+            cmake
+
       - name: Extract version
         run: echo "VERSION=${{ needs.prepare-source.outputs.VERSION }}" >> $GITHUB_ENV
-
+              
       - name: Download source package artifact
         uses: actions/download-artifact@v4
         with:
@@ -154,15 +147,24 @@ jobs:
 
       - name: Move DEBs to staging dir
         run: |
+          echo "PWD (before move): $(pwd)"
+          ls -l $BUILD_DIR/..
           mkdir -p $BUILD_DIR/output-debs
           mv $BUILD_DIR/../*.deb $BUILD_DIR/output-debs/
+          echo "After move:"
+          ls -l $BUILD_DIR/output-debs
 
       - name: Rename DEBs with Ubuntu version
         run: |
+          echo "PWD (before rename): $(pwd)"
+          ls -l $BUILD_DIR/output-debs
           for f in $BUILD_DIR/output-debs/*.deb; do
             base=$(basename "$f" .deb)
-            mv "$f" "$BUILD_DIR/output-debs/${base}_ubuntu-${{ matrix.os }}.deb"
+            ubuntu_version=$(echo "${{ matrix.os }}" | cut -d'-' -f2)
+            mv "$f" "$BUILD_DIR/output-debs/${base}_ubuntu-${ubuntu_version}.deb"
           done
+          echo "After rename:"
+          ls -l $BUILD_DIR/output-debs
 
       - name: Upload DEBs
         uses: actions/upload-artifact@v4
@@ -170,87 +172,6 @@ jobs:
           name: wal-g-debs-${{ matrix.os }}-${{ matrix.deb_arch }}
           path: ${{ env.BUILD_DIR }}/output-debs/*.deb
           if-no-files-found: error
-          
-  # release-ubuntu-amd64:
-  #   needs: [prepare-source]
-  #   if: ${{ inputs.gh_pages == 'true' }}
-  #   strategy:
-  #     matrix:
-  #       os: [ ubuntu-22.04, ubuntu-24.04 ]
-  #       deb_arch: [amd64]
-  #     max-parallel: 6
-  #     fail-fast: false
-  #   runs-on: ${{ matrix.os }}
-  #   steps:
-  #     - name: Install build dependencies
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install -y \
-  #           build-essential \
-  #           debhelper \
-  #           dh-golang \
-  #           liblzo2-dev \
-  #           brotli \
-  #           libsodium-dev \
-  #           cmake
-
-  #     - name: Extract version
-  #       run: echo "VERSION=${{ needs.prepare-source.outputs.VERSION }}" >> $GITHUB_ENV
-              
-  #     - name: Download source package artifact
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: wal-g-source
-  #         path: source-artifact
-
-  #     - name: Extract source archive
-  #       run: |
-  #         cd source-artifact
-  #         mkdir -p source-tree
-  #         tar xzf wal_g_${VERSION}.tar.gz -C source-tree
-  #         echo "BUILD_DIR=$(pwd)/source-tree" >> $GITHUB_ENV
-
-  #     - name: Patch debian/changelog with tag version
-  #       run: |
-  #         cd $BUILD_DIR
-  #         echo "wal-g ($VERSION-1) unstable; urgency=medium" > debian/changelog
-  #         echo "" >> debian/changelog
-  #         echo "  * Auto-generated release for version $VERSION" >> debian/changelog
-  #         echo "" >> debian/changelog
-  #         echo " -- GitHub Actions <ci@example.com>  $(date -R)" >> debian/changelog
-
-  #     - name: Build DEB packages
-  #       run: |
-  #         cd $BUILD_DIR
-  #         dpkg-buildpackage -us -uc -b
-
-  #     - name: Move DEBs to staging dir
-  #       run: |
-  #         echo "PWD (before move): $(pwd)"
-  #         ls -l $BUILD_DIR/..
-  #         mkdir -p $BUILD_DIR/output-debs
-  #         mv $BUILD_DIR/../*.deb $BUILD_DIR/output-debs/
-  #         echo "After move:"
-  #         ls -l $BUILD_DIR/output-debs
-
-  #     - name: Rename DEBs with Ubuntu version
-  #       run: |
-  #         echo "PWD (before rename): $(pwd)"
-  #         ls -l $BUILD_DIR/output-debs
-  #         for f in $BUILD_DIR/output-debs/*.deb; do
-  #           base=$(basename "$f" .deb)
-  #           ubuntu_version=$(echo "${{ matrix.os }}" | cut -d'-' -f2)
-  #           mv "$f" "$BUILD_DIR/output-debs/${base}_ubuntu-${ubuntu_version}.deb"
-  #         done
-  #         echo "After rename:"
-  #         ls -l $BUILD_DIR/output-debs
-
-  #     - name: Upload DEBs
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: wal-g-debs-${{ matrix.os }}-${{ matrix.deb_arch }}
-  #         path: ${{ env.BUILD_DIR }}/output-debs/*.deb
-  #         if-no-files-found: error
           
   release-ubuntu-arm64:
     needs: [prepare-source]
