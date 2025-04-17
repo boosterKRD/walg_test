@@ -357,11 +357,10 @@ jobs:
             sleep $(shuf -i 1-10 -n 1)
           done
 
-
   upload-to-launchpad:
     needs: [prepare-source]
     if: ${{ inputs.launchpad == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         include:
