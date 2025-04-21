@@ -9,7 +9,7 @@ env:
   USE_BROTLI: 1
   USE_LIBSODIUM: 1
   USE_LZO: 1
-  DEBIAN_FRONTEND=noninteractive
+  DEBIAN_FRONTEND: noninteractive
 
 jobs:
   # Prevents race conditions by creating the release only once before uploads.
