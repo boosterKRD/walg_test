@@ -1,9 +1,9 @@
 git add .  
-git commit -m "v20.10.8"
-git tag -a v20.10.8 -m "Release v20.10.8"
+git commit -m "v20.10.9"
+git tag -a v20.10.9 -m "Release v20.10.9"
 
 git push origin main  
-git push origin v20.10.8
+git push origin v20.10.9
 
 
 https://launchpad.net/~boosterykt/+archive/ubuntu/wal-g/+delete-packages?series_filter=focal
