@@ -22,8 +22,8 @@ jobs:
     container:
       image: ubuntu:${{ matrix.os }}
     steps:
-      - name: Install deps
-        run: apt-get update && apt-get install -y liblzo2-dev brotli libsodium-dev curl git cmake build-essential
+      - name: Install build dependencies
+        run: DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y liblzo2-dev brotli libsodium-dev curl git cmake build-essential
 
       - name: Checkout code
         uses: actions/checkout@v4
