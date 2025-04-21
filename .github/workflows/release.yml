@@ -122,9 +122,9 @@ jobs:
             
             go get -v -t -d ./...
             
-            git config --global --add safe.directory /home/runner/work/wal-g/wal-g
-            git config --global --add safe.directory /home/runner/work/wal-g/wal-g/submodules/brotli
-            
+            git config --global --add safe.directory $GITHUB_WORKSPACE
+            git config --global --add safe.directory $GITHUB_WORKSPACE/submodules/brotli
+                      
             make deps
             
             make ${{ matrix.db }}_build
