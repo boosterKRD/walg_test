@@ -36,8 +36,10 @@ jobs:
       image: ubuntu:${{ matrix.os }}
     steps:
       - name: Install build dependencies
-        run: DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y liblzo2-dev brotli libsodium-dev curl git cmake build-essential
-
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y liblzo2-dev brotli libsodium-dev curl git cmake build-essential tzdata
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -111,6 +113,7 @@ jobs:
             USE_LZO: ${{ env.USE_LZO }}
           shell: /bin/bash
           run: |            
+            export DEBIAN_FRONTEND=noninteractive
             apt-get update
             apt-get install -y build-essential curl git cmake liblzo2-dev brotli libsodium-dev
             
