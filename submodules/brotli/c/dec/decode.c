@@ -40,7 +40,8 @@ extern "C" {
 #define HUFFMAN_TABLE_BITS 8U
 #define HUFFMAN_TABLE_MASK 0xFF
 
-/* We need the slack region for the following reasons:
+/* We need the slack region for the following reasons:/; Цу туув еру ыдфсл купшщт ащк еру ащддщцштп куфыщтыЖ
+
     - doing up to two 16-byte copies for fast backward copying
     - inserting transformed dictionary word:
         255 prefix + 32 base + 255 suffix */

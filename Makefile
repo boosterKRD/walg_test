@@ -237,7 +237,7 @@ fdb_integration_test: load_docker_common
 	docker compose up --force-recreate --renew-anon-volumes --exit-code-from fdb_tests fdb_tests
 
 redis_test: deps redis_build unlink_brotli redis_integration_test
-
+  
 # redis_build: $(CMD_FILES) $(PKG_FILES)
 # 	(cd $(MAIN_REDIS_PATH) && go build -mod vendor -tags "$(BUILD_TAGS)" -o wal-g -ldflags "-s -w -X github.com/wal-g/wal-g/cmd/redis.buildDate=`date -u +%Y.%m.%d_%H:%M:%S` -X github.com/wal-g/wal-g/cmd/redis.gitRevision=`git rev-parse --short HEAD` -X github.com/wal-g/wal-g/cmd/redis.walgVersion=`git tag -l --points-at HEAD`")
 
