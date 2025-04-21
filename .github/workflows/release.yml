@@ -1,9 +1,8 @@
 name: Release workflow for tagged versions
 on:
   push:
-    # Sequence of patterns matched against refs/tags
     tags:
-      - 'v*' # Push events to matching v*, i.e. v0.2.19, v0.2.14a
+      - 'v*'
 
 env:
   GO_VERSION: "1.22"
@@ -12,6 +11,7 @@ env:
   USE_LZO: 1
 
 jobs:
+  # Prevents race conditions by creating the release only once before uploads.
   create-release:
     runs-on: ubuntu-latest
     steps:
@@ -40,6 +40,7 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
           apt-get update
           apt-get install -y liblzo2-dev brotli libsodium-dev curl git cmake build-essential tzdata
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -51,7 +52,6 @@ jobs:
 
       - name: Get dependencies
         run: go get -v -t -d ./...
-
 
       - name: Mark repo and submodule as safe
         run: |
@@ -89,7 +89,7 @@ jobs:
 
   release-ubuntu-arm:
     needs: create-release
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         os: [ { distro: ubuntu20.04, label: ubuntu-20.04 }, { distro: ubuntu22.04, label: ubuntu-22.04 } ]
@@ -131,6 +131,7 @@ jobs:
             make deps
             
             make ${{ matrix.db }}_build
+            
       - name: Rename WAL-G binary
         run: mv main/${{ matrix.db }}/wal-g wal-g-${{ matrix.db }}-${{ matrix.os.label }}-${{ matrix.arch }}
 
