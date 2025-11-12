@@ -9,11 +9,11 @@ Switchover plan step by step
 5. Promote the replica
 6. [Convert the old primary to a replica](#6-convert-the-old-primary-to-a-replica)
 
-[Convert the old primary to a replica](#6-convert-the-old-primary-to-a-replica)
+[Convert the old primary to a replica](#check-cluster-state)
 
 
 
-<a id="check-cluster-state"></a>
+
 ## 1. Check clutser state 
 Before procces to switchover we must check the cluster state and if it it satisfises all requerments start the process:
 - All members in clusters must be reachable (Primary and Replica)
@@ -101,6 +101,7 @@ sudo -u postgres psql -d testdb -c "SELECT pg_switch_wal();"
 ```
 
 ---
+<a id="check-cluster-state"></a>
 
 ## 6. Convert the old primary to a replica
 
